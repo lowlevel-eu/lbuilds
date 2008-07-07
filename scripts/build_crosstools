@@ -1,0 +1,38 @@
+#!/bin/bash
+PREFIX=`pwd`/env
+TARGET=i386-pc-lost
+PATCHES=`pwd`/patches
+TMP=`pwd`/tmp
+MAKEOPTS=-j3
+
+mkdir -p ${TMP}/cross-binutils/build
+mkdir -p ${TMP}/cross-gcc/build
+
+cd ${TMP}/cross-binutils
+echo "[binutils] Herunterladen..."
+wget -q http://ftp.gnu.org/gnu/binutils/binutils-2.18.tar.bz2 || exit -1
+echo "[binutils] Entpacken..."
+tar -xjf binutils-2.18.tar.bz2 || exit -1
+echo "[binutils] Patch anwenden..."
+patch -p0 -d binutils-2.18/ < ${PATCHES}/binutils/2.18/binutils-2.18.patch
+cd build
+../binutils-2.18/configure --prefix="${PREFIX}" --with-sysroot=${PREFIX} --target=${TARGET} --disable-nls || exit -1
+make ${MAKEOPTS} || exit -1
+make install ${MAKEOPTS} || exit -1
+
+cd ${TMP}/cross-gcc
+echo "[gcc] Herunterladen..."
+wget -q http://ftp.gnu.org/gnu/gcc/gcc-4.2.2/gcc-core-4.2.2.tar.bz2 || exit -1
+echo "[gcc] Entpacken..."
+tar -xjf gcc-core-4.2.2.tar.bz2
+echo "[gcc] Patch anwenden..."
+patch -p0 -d gcc-4.2.2/ < ${PATCHES}/gcc/4.2.2/gcc-4.2.2.patch
+cd build
+../gcc-4.2.2/configure --prefix="${PREFIX}" --target=${TARGET} --disable-nls --enable-languages=c --disable-shared --disable-libssp || exit -1
+make all-gcc ${MAKEOPTS} || exit -1
+make install-gcc ${MAKEOPTS} || exit -1
+
+
+
+rm -rf ${TMP}/cross-binutils
+rm -rf ${TMP}/cross-gcc

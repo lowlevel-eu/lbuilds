@@ -1,0 +1,160 @@
+diff -ur ../nano-2.0.6/config.sub ./config.sub
+--- ../nano-2.0.6/config.sub	2006-02-06 20:26:36.000000000 +0100
++++ ./config.sub	2008-07-06 15:00:47.000000000 +0200
+@@ -1188,7 +1188,7 @@
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku*)
++	      | -skyos* | -haiku* | -lost*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+diff -ur ../nano-2.0.6/src/files.c ./src/files.c
+--- ../nano-2.0.6/src/files.c	2007-04-21 22:33:56.000000000 +0200
++++ ./src/files.c	2008-07-06 15:00:47.000000000 +0200
+@@ -1119,7 +1119,7 @@
+     original_umask = umask(0);
+     umask(S_IRWXG | S_IRWXO);
+ 
+-    fd = mkstemp(full_tempdir);
++    fd = open(full_tempdir, O_RDWR | O_CREAT | O_EXCL);
+ 
+     if (fd != -1)
+ 	*f = fdopen(fd, "r+b");
+@@ -2011,11 +2011,11 @@
+ 	    tilde_dir = mallocstrncpy(NULL, buf, i + 1);
+ 	    tilde_dir[i] = '\0';
+ 
+-	    do {
++	    /*do {
+ 		userdata = getpwent();
+ 	    } while (userdata != NULL && strcmp(userdata->pw_name,
+ 		tilde_dir + 1) != 0);
+-	    endpwent();
++	    endpwent();*/
+ 	    if (userdata != NULL)
+ 		tilde_dir = mallocstrcpy(tilde_dir, userdata->pw_dir);
+ 	}
+diff -ur ../nano-2.0.6/src/nano.c ./src/nano.c
+--- ../nano-2.0.6/src/nano.c	2007-01-12 03:58:12.000000000 +0100
++++ ./src/nano.c	2008-07-06 15:00:47.000000000 +0200
+@@ -31,7 +31,7 @@
+ #include <fcntl.h>
+ #include <errno.h>
+ #include <ctype.h>
+-#include <locale.h>
++//#include <locale.h>
+ #include <termios.h>
+ #ifdef HAVE_GETOPT_H
+ #include <getopt.h>
+@@ -967,6 +967,7 @@
+ /* Initialize the signal handlers. */
+ void signal_init(void)
+ {
++#if 0
+     /* Trap SIGINT and SIGQUIT because we want them to do useful
+      * things. */
+     memset(&act, 0, sizeof(struct sigaction));
+@@ -1001,6 +1002,7 @@
+ 	act.sa_handler = do_continue;
+ 	sigaction(SIGCONT, &act, NULL);
+     }
++#endif
+ }
+ 
+ /* Handler for SIGHUP (hangup) and SIGTERM (terminate). */
+@@ -1012,6 +1014,7 @@
+ /* Handler for SIGTSTP (suspend). */
+ RETSIGTYPE do_suspend(int signal)
+ {
++#if 0
+ #ifndef DISABLE_MOUSE
+     /* Turn mouse support off. */
+     disable_mouse_support();
+@@ -1038,6 +1041,7 @@
+ 
+     /* Do what mutt does: send ourselves a SIGSTOP. */
+     kill(0, SIGSTOP);
++#endif
+ }
+ 
+ /* Handler for SIGCONT (continue after suspend). */
+@@ -1740,7 +1744,7 @@
+ 	}
+     }
+ #else
+-    setlocale(LC_ALL, "");
++    //setlocale(LC_ALL, "");
+ #endif
+ 
+ #ifdef ENABLE_NLS
+@@ -1755,6 +1759,7 @@
+ 	SET(NO_WRAP);
+ #endif
+ 
++#if 0
+     while ((optchr =
+ #ifdef HAVE_GETOPT_LONG
+ 	getopt_long(argc, argv,
+@@ -1836,11 +1841,11 @@
+ 		break;
+ #endif
+ 	    case 'T':
+-		if (!parse_num(optarg, &tabsize) || tabsize <= 0) {
++		/*if (!parse_num(optarg, &tabsize) || tabsize <= 0) {
+ 		    fprintf(stderr, _("Requested tab size \"%s\" is invalid"), optarg);
+ 		    fprintf(stderr, "\n");
+ 		    exit(1);
+-		}
++		}*/
+ 		break;
+ #ifndef NANO_TINY
+ 	    case 'U':
+@@ -1926,6 +1931,7 @@
+ 		usage();
+ 	}
+     }
++#endif
+ 
+     /* If the executable filename starts with 'r', enable restricted
+      * mode. */
+@@ -2157,10 +2163,10 @@
+     /* If there's a +LINE or +LINE,COLUMN flag here, it is the first
+      * non-option argument, and it is followed by at least one other
+      * argument, the filename it applies to. */
+-    if (0 < optind && optind < argc - 1 && argv[optind][0] == '+') {
++    /*if (0 < optind && optind < argc - 1 && argv[optind][0] == '+') {
+ 	parse_line_column(&argv[optind][1], &startline, &startcol);
+ 	optind++;
+-    }
++    }*/
+ 
+ #ifdef ENABLE_MULTIBUFFER
+     old_multibuffer = ISSET(MULTIBUFFER);
+@@ -2196,8 +2202,8 @@
+     /* Read the first file on the command line into either the current
+      * buffer or a new buffer, depending on whether multibuffer mode is
+      * enabled. */
+-    if (optind < argc)
+-	open_buffer(argv[optind]);
++    /*if (optind < argc)
++	open_buffer(argv[optind]);*/
+ 
+     /* We didn't open any files if all the command line arguments were
+      * invalid files like directories or if there were no command line
+diff -ur ../nano-2.0.6/src/utils.c ./src/utils.c
+--- ../nano-2.0.6/src/utils.c	2007-01-01 06:15:32.000000000 +0100
++++ ./src/utils.c	2008-07-06 15:00:47.000000000 +0200
+@@ -53,10 +53,7 @@
+ 	const char *homenv = getenv("HOME");
+ 
+ 	if (homenv == NULL) {
+-	    const struct passwd *userage = getpwuid(geteuid());
+-
+-	    if (userage != NULL)
+-		homenv = userage->pw_dir;
++        homenv = "/";
+ 	}
+ 	homedir = mallocstrcpy(NULL, homenv);
+     }

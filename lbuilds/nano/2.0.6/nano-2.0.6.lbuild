@@ -1,0 +1,41 @@
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/nano"
+SRC_URI="http://ftp.gnu.org/gnu/nano/${P}.tar.gz"
+
+LICENSE="GPL-2"
+
+RUN_DEPEND=""
+BUILD_DEPEND="=ncurses-5.6"
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+	unpack ${P}.tar.gz
+	cd ${MY_S} && lpatch ${F}/${P}.patch || die "patching failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+	
+	./configure \
+		CC=`tc-cc` \
+		CFLAGS="-I `tc-incdir`/ncurses -I `tc-incdir`" \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+		--enable-debug \
+		--enable-tiny \
+		|| die "configure failed"
+	
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+
+	# Sonst gibts Fehler
+	mkdir -p "${D}${R}/bin"
+	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+}

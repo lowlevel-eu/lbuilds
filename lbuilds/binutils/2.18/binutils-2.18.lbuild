@@ -1,0 +1,38 @@
+DESCRIPTION="Tools necessary to build programs"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Binutils"
+SRC_URI="http://ftp.gnu.org/gnu/binutils/binutils-${PV}.tar.bz2"
+
+LICENSE="GPL-2"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+
+src_unpack() {
+	unpack binutils-${PV}.tar.bz2
+	cd ${S} && lpatch ${F}/binutils-${PV}.patch || die "patching failed"
+}
+
+src_compile() {
+	mkdir build
+	cd build
+	
+	../configure \
+		--build=`tc-build` \
+		--host=`tc-host` \
+		--target=`tc-host` \
+		--prefix=${R} \
+		--disable-nls \
+		|| die "configure failed"
+	
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd build
+	lmake DESTDIR="${D}" install || die "make install failed"
+
+	# Die Manpages brauchen wir nicht im Paket
+	rm -r ${D}/${R}/man
+}

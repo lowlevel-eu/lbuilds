@@ -1,0 +1,41 @@
+#!/bin/bash
+LOST_SRC=$1
+ARCH=i386
+ENV=`pwd`/env
+
+if [ ! -d $LOST_SRC ]; then
+	echo "Aufruf: scripts/update_env <Pfad zum LOST Source>"
+	exit -1
+fi
+
+# Verzeichnisstruktur anlegen
+mkdir -p ${ENV}/bin
+mkdir -p ${ENV}/lib
+mkdir -p ${ENV}/lib64
+mkdir -p ${ENV}/include
+
+mkdir -p ${ENV}/system/links
+
+rm -f ${ENV}/system/links/bin
+ln -s -f ${ENV}/bin ${ENV}/system/links/bin
+rm -f ${ENV}/system/links/lib
+ln -s -f ${ENV}/lib ${ENV}/system/links/lib
+rm -f ${ENV}/system/links/lib64
+ln -s -f ${ENV}/lib64 ${ENV}/system/links/lib64
+rm -f ${ENV}/system/links/include
+ln -s -f ${ENV}/include ${ENV}/system/links/include
+
+cp ${LOST_SRC}/src/modules/crt.o ${ENV}/lib/crtlost.o
+
+# Header verlinken
+for h in ${LOST_SRC}/src/include/* ${LOST_SRC}/src/include/arch/${ARCH}/* ${LOST_SRC}/src/modules/include/* ${LOST_SRC}/src/modules/include/arch/${ARCH}/*; do
+    echo $h
+    cp -rLf $h ${ENV}/include/
+done
+
+# Libc erstellen
+rm -f ${ENV}/lib/libc.a
+ar rs ${ENV}/lib/libc.a `find ${LOST_SRC}/src/lib -name '*.o'` `find ${LOST_SRC}/src/modules/lib -name '*.o'` > /dev/null
+ar rs ${ENV}/lib/libm.a  ${LOST_SRC}/src/modules/lib/stdlibc/math.o
+ln -s -f ${ENV}/lib/libc.a ${ENV}/lib/libg.a
+

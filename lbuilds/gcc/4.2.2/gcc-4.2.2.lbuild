@@ -1,0 +1,44 @@
+DESCRIPTION="GNU C-Compiler"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/GCC"
+SRC_URI="http://ftp.gnu.org/gnu/gcc/gcc-${PV}/gcc-core-${PV}.tar.bz2"
+
+LICENSE="GPL-2"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+
+PREFIX="/usr"
+src_unpack() {
+	unpack gcc-core-${PV}.tar.bz2
+	cd ${S} && lpatch ${F}/gcc-${PV}.patch || die "patching failed"
+}
+
+src_compile() {
+	mkdir build
+	cd build
+	
+	../configure \
+		--build=`tc-build` \
+		--host=`tc-host` \
+		--target=`tc-host` \
+		--prefix=${R} \
+		--disable-nls \
+		--enable-languages=c \
+		--disable-shared \
+		--without-headers \
+		--disable-libssp \
+		|| die "configure failed"
+		
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd build
+	lmake DESTDIR="${D}" install || die "make install failed"
+	
+	rm -r ${D}${R}/libexec/gcc/`tc-host`/${PV}/install-tools ${D}${R}/info ${D}${R}/man
+	rm ${D}${R}/bin/gccbug
+	lstrip ${D}${R}/bin/* ${D}${R}/libexec/gcc/`tc-host`/${PV}/*
+}

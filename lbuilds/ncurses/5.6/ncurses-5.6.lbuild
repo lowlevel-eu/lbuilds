@@ -1,0 +1,45 @@
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/ncurses"
+SRC_URI="http://ftp.gnu.org/gnu/ncurses/${P}.tar.gz"
+
+LICENSE="GPL-2"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+	unpack ${P}.tar.gz
+	cd ${MY_S} && lpatch ${F}/${P}.patch ${F}/${P}-tclock.patch ${F}/${P}-tests.patch ${F}/${P}-terminfo.patch ${F}/${P}-getch.patch|| die "patching failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+	
+	./configure \
+		CC=`tc-cc` \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+		--enable-debug \
+		--with-trace \
+		--with-fallbacks=lost \
+		--without-progs \
+		|| die "configure failed"
+
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+
+	# Sonst gibts Fehler
+	mkdir -p "${D}${R}/bin"
+	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+
+	# Noch ein Bisschen Speicher sparen
+	rm -rf "${D}${R}/share/terminfo"
+}
