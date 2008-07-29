@@ -3,10 +3,13 @@ LOST_SRC=$1
 ARCH=i386
 ENV=`pwd`/env
 
-if [ ! -d $LOST_SRC ]; then
+show_usage() {
 	echo "Aufruf: scripts/update_env <Pfad zum LOST Source>"
 	exit -1
-fi
+}
+
+[ $# -ne 1 ] && show_usage
+[ ! -d $LOST_SRC ] && show_usage
 
 # Verzeichnisstruktur anlegen
 mkdir -p ${ENV}/bin
@@ -25,7 +28,7 @@ ln -s -f ${ENV}/lib64 ${ENV}/system/links/lib64
 rm -f ${ENV}/system/links/include
 ln -s -f ${ENV}/include ${ENV}/system/links/include
 
-cp ${LOST_SRC}/src/modules/crt.o ${ENV}/lib/crtlost.o
+cp ${LOST_SRC}/src/modules/lib/crt0.o ${ENV}/lib/crtlost.o
 
 # Header verlinken
 for h in ${LOST_SRC}/src/include/* ${LOST_SRC}/src/include/arch/${ARCH}/* ${LOST_SRC}/src/modules/include/* ${LOST_SRC}/src/modules/include/arch/${ARCH}/*; do
