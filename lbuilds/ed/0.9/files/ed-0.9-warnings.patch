@@ -1,0 +1,28 @@
+diff -ur ../ed-0.9.old/io.c ./io.c
+--- ../ed-0.9.old/io.c	2008-07-28 11:24:48.000000000 +0200
++++ ./io.c	2008-07-28 11:49:18.000000000 +0200
+@@ -18,9 +18,11 @@
+ */
+ 
+ #include <errno.h>
++#include <stdlib.h>
+ #include <stdio.h>
+ #include <string.h>
+ #include <readline/readline.h>
++#include <readline/history.h>
+ #include "ed.h"
+ 
+ 
+diff -ur ../ed-0.9.old/signal.c ./signal.c
+--- ../ed-0.9.old/signal.c	2008-07-28 11:24:48.000000000 +0200
++++ ./signal.c	2008-07-28 11:50:46.000000000 +0200
+@@ -98,7 +98,8 @@
+   }
+ 
+ 
+-int set_signal( int signum, void (*handler )( int ) )
++int set_signal( int signum __attribute__ ((unused)) , void (*handler )( int )
++    __attribute__ ((unused)) )
+   {
+     return 0;
+   }

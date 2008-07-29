@@ -1,0 +1,71 @@
+diff -ur ../ed-0.9.old/buf.c ./buf.c
+--- ../ed-0.9.old/buf.c	2008-07-28 11:24:48.000000000 +0200
++++ ./buf.c	2008-07-28 11:41:32.000000000 +0200
+@@ -294,9 +294,10 @@
+      hello, world
+      EOF */
+   setvbuf( stdin, 0, _IONBF, 0 );
+-  if( !open_sbuf() ) return 0;
++  if( !open_sbuf() ) { puts(".....2"); return 0;}
+   link_nodes( &buffer_head, &buffer_head );
+   link_nodes( &yank_buffer_head, &yank_buffer_head );
++  puts("....1");
+   return 1;
+   }
+ 
+diff -ur ../ed-0.9.old/main.c ./main.c
+--- ../ed-0.9.old/main.c	2008-07-28 11:24:48.000000000 +0200
++++ ./main.c	2008-07-28 11:33:54.000000000 +0200
+@@ -146,14 +146,14 @@
+     {   0, 0,                   ap_no } };
+   Arg_parser parser;
+   int argind;
+-
++puts("1");
+   if( !ap_init( &parser, argc, argv, options, 0 ) )
+     { show_error( "Memory exhausted", 0, 0 ); return 1; }
+   if( ap_error( &parser ) )				/* bad option */
+     { show_error( ap_error( &parser ), 0, 1 ); return 1; }
+   invocation_name = argv[0];
+   _restricted = ( n > 2 && argv[0][n-3] == 'r' );
+-
++puts("2");
+   for( argind = 0; argind < ap_arguments( &parser ); ++argind )
+     {
+     const int code = ap_code( &parser, argind );
+@@ -171,27 +171,32 @@
+       default: show_error( "internal_error: uncaught option", 0, 0 ); return 3;
+       }
+     }
++puts("3");
+   //setlocale( LC_ALL, "" );
+-  if( !init_buffers() ) return 1;
++  if( !init_buffers() ) { puts("...5"); return 1;}
+   while( argind < ap_arguments( &parser ) )
+     {
+     const char * arg = ap_argument( &parser, argind );
+     if( !strcmp( arg, "-" ) ) { _scripted = 1; ++argind; continue; }
+     if( is_valid_filename( arg ) )
+       {
+-      if( read_file( arg, 0 ) < 0 && is_regular_file( 0 ) )
++      if( read_file( arg, 0 ) < 0 && is_regular_file( 0 ) ) {
++          puts("..1");
+         return 2;
++
++      }
+       else if( arg[0] != '!' ) set_def_filename( arg );
+       }
+     else
+       {
+       fputs( "?\n", stderr );
+       if( arg[0] ) set_error_msg( "Invalid filename" );
+-      if( is_regular_file( 0 ) ) return 2;
++      if( is_regular_file( 0 ) ) { puts("..2"); return 2; }
+       }
+     break;
+     }
+   ap_free( &parser );
+ 
++puts("4");
+   return main_loop( loose );
+   }

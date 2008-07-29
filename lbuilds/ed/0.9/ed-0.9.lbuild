@@ -1,0 +1,38 @@
+DESCRIPTION="Your basic line editor"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/ED"
+SRC_URI="http://ftp.gnu.org/gnu/ed/ed-0.9.tar.bz2"
+
+LICENSE="GPL-2"
+IUSE=""
+
+DEPEND=""
+RDEPEND=""
+
+src_unpack() {
+	unpack ${P}.tar.bz2
+	cd ${S}/${P} && lpatch ${F}/${P}.patch ${F}/${P}-warnings.patch || die "patching failed"
+}
+
+src_compile() {
+	cd ${S}/${P}
+	./configure \
+		CC=`tc-cc` \
+		--prefix="${D}${R}" \
+		|| die "configure failed"
+		
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${S}/${P}
+	lmake install || die "make install failed"
+	
+	rm -r ${D}${R}/share
+	rm ${D}${R}/bin/red
+	lstrip ${D}${R}/bin/*
+
+	# Post-Installskript erstellen
+	echo "#!file:/apps/sh" > ${D}${R}/postinstall-bin
+	echo "lpt cfg-addbin file:/packages/${PN}/${PV}/bin/${PN} ${PN}" >> ${D}${R}/postinstall-bin
+}
