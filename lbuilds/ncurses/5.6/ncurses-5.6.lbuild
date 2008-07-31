@@ -27,6 +27,8 @@ src_compile() {
 		--with-trace \
 		--with-fallbacks=lost \
 		--without-progs \
+		--without-cxx \
+		--without-cxx-binding \
 		|| die "configure failed"
 
 	lmake || die "make failed"
