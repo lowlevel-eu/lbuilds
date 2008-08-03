@@ -1,6 +1,11 @@
 #!/bin/bash
 
+# Target des Host-GCCs suchen
+HOST_GCC_TARGET="`LC_ALL=C gcc -v 2>&1 | grep Target: | awk '{print $2}'`"
+
 source lbuild.conf
+
+
 # Verzeichnis mit heruntergeladenen Dateien
 export DISTDIR="`pwd`/distfiles"
 
@@ -52,15 +57,22 @@ init_env() {
     # Das Verzeichnis mit Dateien zu diesem Paket
     export F="`dirname ${PACKAGE_PATH}`/files"
 
+
+    export ENVDIR="${WORKDIR}/env"
+    export PATH="${WORKDIR}/env/bin:$PATH"
+    export LDFLAGS="-L${WORKDIR}/env/lib"
+    export CPPFLAGS="-I${WORKDIR}/env/include"
+
     source $PACKAGE_PATH
 }
 
 
 # Kopiert env/ in das Arbeitsverzeichnis
 internal_prepare_env() {
-    export ENVDIR="${WORKDIR}/env"
     cp -rL env ${WORKDIR}/env
-    export PATH="${WORKDIR}/env/bin:$PATH"
+    if [ "${BUILD_DEPEND}" == "" ]; then
+        return
+    fi
 
     # Buildtime-Dependencies abarbeiten
     for dep in ${BUILD_DEPEND}; do
@@ -105,16 +117,16 @@ call_if_exists() {
 
 # Build ausfindig machen
 tc-build() {
-    echo $CBUILD
+    echo $HOST_GCC_TARGET
 }
 
 # Host ausfindig machen
 tc-host() {
-    echo $CHOST
+    echo $TARGET_GCC_TARGET
 }
 
 tc-cc() {
-    echo $CHOST-gcc
+    echo `tc-host`-gcc
 }
 
 # Verzeichnis mit libs
@@ -125,6 +137,21 @@ tc-libdir() {
 # Verzeichnis mit includes
 tc-incdir() {
     echo ${ENVDIR}/include
+}
+
+# Statusmeldung anzeigen
+lstatus() {
+    echo -e "\033[01;32m  * $*\033[01;37m"
+}
+
+# Warnung anzeigen
+lwarn() {
+    echo -e "\033[01;33m !* $*\033[01;37m"
+}
+
+# Fehlermeldung anzeigen
+lerror() {
+    echo -e "\033[01;31m!!* $*\033[01;37m"
 }
 
 
@@ -142,11 +169,12 @@ lmake() {
 
 # Angegebenen Patch anwenden
 lpatch() {
+    lstatus "Wende Patches an:"
     while [ "$1" != "" ]; do
-        echo Wende Patch $1 an
+        lstatus "    $1"
 
         if [ -f $1 ]; then
-            patch -p0 < $1 || return -1
+            patch -s -p0 < $1 || return -1
         else
             echo Patch nicht gefunden
             return -1
@@ -207,12 +235,15 @@ internal_pkg_clean() {
 # Alle Dateien fuer ein Paket herunterladen
 internal_pkg_fetch_files() {
     local u
+    lstatus "Lade Dateien herunter:"
     for u in $SRC_URI; do
         local fn="${DISTDIR}/`basename ${u}`"
         # Wenn die Datei schon exisitert, muss sie nicht erneut geladen werden
         if [ -f "${fn}" ]; then
             continue
         fi
+
+        lstatus "    ${u}"
 
         wget -O ${fn} ${u}
         if [ $? -ne 0 ]; then
@@ -225,24 +256,28 @@ internal_pkg_fetch_files() {
 # Quellcode entpacken
 internal_src_unpack() {
     cd ${S}
+    lstatus "Entpacke Quelldateien..."
     call_if_exists src_unpack src_unpack_default
 }
 
 # Quellcode kompilieren
 internal_src_compile() {
     cd ${S}
+    lstatus "Kompiliere Quellcode..."
     call_if_exists src_compile
 }
 
 # Quellcode in virtuellen Root installieren
 internal_src_install() {
     cd ${S}
+    lstatus "Bereite Paketinhalt vor"
     call_if_exists src_install
 }
 
 # Paket erstellen
 internal_pack() {
     cd ${D}
+    lstatus "Erstelle Paket..."
     tar -cf "${PACKSDIR}/${P}.tar" *
 }
 
