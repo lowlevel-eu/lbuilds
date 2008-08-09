@@ -10,14 +10,14 @@ RUN_DEPEND=""
 
 src_unpack() {
 	unpack binutils-${PV}.tar.bz2
-	cd ${S} && lpatch ${F}/binutils-${PV}.patch || die "patching failed"
+	cd ${S}/${P} && lpatch ${F}/binutils-${PV}.patch ${F}/${P}-prototype.patch || die "patching failed"
 }
 
 src_compile() {
 	mkdir build
 	cd build
 	
-	../configure \
+	../${P}/configure \
 		--build=`tc-build` \
 		--host=`tc-host` \
 		--target=`tc-host` \
@@ -34,5 +34,10 @@ src_install() {
 	lmake DESTDIR="${D}" install || die "make install failed"
 
 	# Die Manpages brauchen wir nicht im Paket
-	rm -r ${D}/${R}/man
+	rm -r ${D}/${R}/man ${D}/${R}/info ${D}/${R}/lib ${D}/${R}/include \
+		${D}/${R}/`tc-host`
+
+	# Das Paket noch ein bisschen kleiner machen
+	cd "${D}/${R}/bin"
+	rm addr2line c++filt gprof nm objcopy ranlib readelf size strings
 }

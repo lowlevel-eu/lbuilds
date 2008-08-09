@@ -67,7 +67,7 @@ diff -uNr ../binutils-2.18/ld/configure.tgt ./ld/configure.tgt
    ;;
  
 +*-*-lost*)
-+  NATIVE_LIB_DIRS='/system/links/lib'
++  NATIVE_LIB_DIRS='file:/system/lib'
 +  ;;
  *-*-freebsd* | *-*-dragonfly*)
    ;;
