@@ -1,6 +1,6 @@
-diff -urN ../gcc-4.2.2/config.sub ./config.sub
---- ../gcc-4.2.2/config.sub	2006-10-16 05:27:17.000000000 +0200
-+++ ./config.sub	2008-01-27 09:42:49.000000000 +0100
+diff -urN ../gcc-4.2.2.orig/config.sub ./config.sub
+--- ../gcc-4.2.2.orig/config.sub	2008-08-03 11:53:48.000000000 +0200
++++ ./config.sub	2008-08-03 11:59:39.000000000 +0200
 @@ -121,8 +121,8 @@
  maybe_os=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\2/'`
  case $maybe_os in
@@ -22,9 +22,9 @@ diff -urN ../gcc-4.2.2/config.sub ./config.sub
  	-sunos5*)
  		os=`echo $os | sed -e 's|sunos5|solaris2|'`
  		;;
-diff -urN ../gcc-4.2.2/gcc/config/i386/lost.h ./gcc/config/i386/lost.h
---- ../gcc-4.2.2/gcc/config/i386/lost.h	1970-01-01 01:00:00.000000000 +0100
-+++ ./gcc/config/i386/lost.h	2008-01-27 09:42:49.000000000 +0100
+diff -urN ../gcc-4.2.2.orig/gcc/config/i386/lost.h ./gcc/config/i386/lost.h
+--- ../gcc-4.2.2.orig/gcc/config/i386/lost.h	1970-01-01 01:00:00.000000000 +0100
++++ ./gcc/config/i386/lost.h	2008-08-03 11:59:39.000000000 +0200
 @@ -0,0 +1,56 @@
 +/* Definitions for Intel 386 running Linux-based GNU systems with ELF format.
 +   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2001, 2002, 2004, 2005,
@@ -82,10 +82,10 @@ diff -urN ../gcc-4.2.2/gcc/config/i386/lost.h ./gcc/config/i386/lost.h
 +    }						\
 +  while (0)
 +
-diff -urN ../gcc-4.2.2/gcc/config/lost.h ./gcc/config/lost.h
---- ../gcc-4.2.2/gcc/config/lost.h	1970-01-01 01:00:00.000000000 +0100
-+++ ./gcc/config/lost.h	2008-02-10 17:17:37.000000000 +0100
-@@ -0,0 +1,59 @@
+diff -urN ../gcc-4.2.2.orig/gcc/config/lost.h ./gcc/config/lost.h
+--- ../gcc-4.2.2.orig/gcc/config/lost.h	1970-01-01 01:00:00.000000000 +0100
++++ ./gcc/config/lost.h	2008-08-05 23:06:02.000000000 +0200
+@@ -0,0 +1,61 @@
 +/* Definitions for Linux-based GNU systems with ELF format
 +   Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2003, 2004, 2005, 2006,
 +   2007 Free Software Foundation, Inc.
@@ -144,23 +144,26 @@ diff -urN ../gcc-4.2.2/gcc/config/lost.h ./gcc/config/lost.h
 +#undef	LINK_SPEC
 +#define LINK_SPEC " %D %{shared:-shared}"
 +
++#undef STANDARD_INCLUDE_DIR
++#define  STANDARD_INCLUDE_DIR "file:/system/include"
 +
-diff -urN ../gcc-4.2.2/gcc/config/t-lost ./gcc/config/t-lost
---- ../gcc-4.2.2/gcc/config/t-lost	1970-01-01 01:00:00.000000000 +0100
-+++ ./gcc/config/t-lost	2008-02-07 23:15:57.000000000 +0100
-@@ -0,0 +1,9 @@
+diff -urN ../gcc-4.2.2.orig/gcc/config/t-lost ./gcc/config/t-lost
+--- ../gcc-4.2.2.orig/gcc/config/t-lost	1970-01-01 01:00:00.000000000 +0100
++++ ./gcc/config/t-lost	2008-08-05 22:44:06.000000000 +0200
+@@ -0,0 +1,10 @@
 +# Compile crtbeginS.o and crtendS.o with pic.
 +CRTSTUFF_T_CFLAGS_S = -fPIC
 +
 +# Compile libgcc.a with pic.
 +TARGET_LIBGCC2_CFLAGS += -fPIC
 +
-+SYSTEM_HEADER_DIR = $(prefix)/system/links/include
-+CROSS_SYSTEM_HEADER_DIR = $(prefix)/system/links/include
++SYSTEM_HEADER_DIR = file:/system/include
++NATIVE_SYSTEM_HEADER_DIR = file:/system/include
++CROSS_SYSTEM_HEADER_DIR = $(prefix)/system/include
 +inhibit_libc='true'
-diff -urN ../gcc-4.2.2/gcc/config.gcc ./gcc/config.gcc
---- ../gcc-4.2.2/gcc/config.gcc	2007-09-01 17:28:30.000000000 +0200
-+++ ./gcc/config.gcc	2008-02-03 14:38:18.000000000 +0100
+diff -urN ../gcc-4.2.2.orig/gcc/config.gcc ./gcc/config.gcc
+--- ../gcc-4.2.2.orig/gcc/config.gcc	2008-08-03 11:53:47.000000000 +0200
++++ ./gcc/config.gcc	2008-08-03 11:59:39.000000000 +0200
 @@ -500,6 +500,13 @@
    # Assume that glibc is being used and so __cxa_atexit is provided.
    default_use_cxa_atexit=yes
@@ -188,9 +191,9 @@ diff -urN ../gcc-4.2.2/gcc/config.gcc ./gcc/config.gcc
  i[34567]86-*-lynxos*)
  	xm_defines=POSIX
  	tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h i386/lynx.h lynx.h"
-diff -urN ../gcc-4.2.2/gcc/c-opts.c ./gcc/c-opts.c
---- ../gcc-4.2.2/gcc/c-opts.c	2007-09-01 17:28:30.000000000 +0200
-+++ ./gcc/c-opts.c	2008-01-27 09:42:49.000000000 +0100
+diff -urN ../gcc-4.2.2.orig/gcc/c-opts.c ./gcc/c-opts.c
+--- ../gcc-4.2.2.orig/gcc/c-opts.c	2008-08-03 11:53:47.000000000 +0200
++++ ./gcc/c-opts.c	2008-08-03 11:59:39.000000000 +0200
 @@ -326,7 +326,7 @@
  	    error ("-I- specified twice");
  	  quote_chain_split = true;
@@ -200,9 +203,9 @@ diff -urN ../gcc-4.2.2/gcc/c-opts.c ./gcc/c-opts.c
  	}
        break;
  
-diff -urN ../gcc-4.2.2/libiberty/configure ./libiberty/configure
---- ../gcc-4.2.2/libiberty/configure	2006-08-30 15:46:50.000000000 +0200
-+++ ./libiberty/configure	2008-01-27 09:42:50.000000000 +0100
+diff -urN ../gcc-4.2.2.orig/libiberty/configure ./libiberty/configure
+--- ../gcc-4.2.2.orig/libiberty/configure	2008-08-03 11:53:48.000000000 +0200
++++ ./libiberty/configure	2008-08-03 11:59:39.000000000 +0200
 @@ -8403,6 +8403,7 @@
       *-*-mingw* | *-*-winnt*)	pexecute=./pex-win32.o  ;;
       *-*-msdosdjgpp*)		pexecute=./pex-djgpp.o  ;;
@@ -211,9 +214,9 @@ diff -urN ../gcc-4.2.2/libiberty/configure ./libiberty/configure
       *)				pexecute=./pex-unix.o   ;;
  esac
  
-diff -urN ../gcc-4.2.2/libiberty/configure.ac ./libiberty/configure.ac
---- ../gcc-4.2.2/libiberty/configure.ac	2006-08-30 15:46:50.000000000 +0200
-+++ ./libiberty/configure.ac	2008-01-27 09:42:50.000000000 +0100
+diff -urN ../gcc-4.2.2.orig/libiberty/configure.ac ./libiberty/configure.ac
+--- ../gcc-4.2.2.orig/libiberty/configure.ac	2008-08-03 11:53:48.000000000 +0200
++++ ./libiberty/configure.ac	2008-08-03 11:59:39.000000000 +0200
 @@ -663,6 +663,7 @@
       *-*-mingw* | *-*-winnt*)	pexecute=./pex-win32.o  ;;
       *-*-msdosdjgpp*)		pexecute=./pex-djgpp.o  ;;
@@ -222,9 +225,9 @@ diff -urN ../gcc-4.2.2/libiberty/configure.ac ./libiberty/configure.ac
       *)				pexecute=./pex-unix.o   ;;
  esac
  AC_SUBST(pexecute)
-diff -urN ../gcc-4.2.2/libiberty/Makefile.in ./libiberty/Makefile.in
---- ../gcc-4.2.2/libiberty/Makefile.in	2007-03-03 20:29:51.000000000 +0100
-+++ ./libiberty/Makefile.in	2008-01-27 09:42:50.000000000 +0100
+diff -urN ../gcc-4.2.2.orig/libiberty/Makefile.in ./libiberty/Makefile.in
+--- ../gcc-4.2.2.orig/libiberty/Makefile.in	2008-08-03 11:53:48.000000000 +0200
++++ ./libiberty/Makefile.in	2008-08-03 11:59:39.000000000 +0200
 @@ -145,7 +145,7 @@
  	objalloc.c obstack.c						\
  	partition.c pexecute.c						\
@@ -248,9 +251,9 @@ diff -urN ../gcc-4.2.2/libiberty/Makefile.in ./libiberty/Makefile.in
  ./pex-msdos.o: $(srcdir)/pex-msdos.c config.h $(INCDIR)/ansidecl.h \
  	$(INCDIR)/libiberty.h $(srcdir)/pex-common.h \
  	$(INCDIR)/safe-ctype.h
-diff -urN ../gcc-4.2.2/libiberty/pex-lost.c ./libiberty/pex-lost.c
---- ../gcc-4.2.2/libiberty/pex-lost.c	1970-01-01 01:00:00.000000000 +0100
-+++ ./libiberty/pex-lost.c	2008-02-10 16:39:24.000000000 +0100
+diff -urN ../gcc-4.2.2.orig/libiberty/pex-lost.c ./libiberty/pex-lost.c
+--- ../gcc-4.2.2.orig/libiberty/pex-lost.c	1970-01-01 01:00:00.000000000 +0100
++++ ./libiberty/pex-lost.c	2008-08-03 11:59:39.000000000 +0200
 @@ -0,0 +1,200 @@
 +/* Utilities to execute a program in a subprocess (possibly linked by pipes
 +   with other subprocesses), and wait for it.  Generic Unix version

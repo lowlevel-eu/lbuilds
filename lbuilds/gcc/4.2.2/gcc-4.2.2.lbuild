@@ -9,15 +9,24 @@ RUN_DEPEND=""
 
 
 PREFIX="/usr"
+
+MY_S="${S}/${P}"
+
 src_unpack() {
 	unpack gcc-core-${PV}.tar.bz2
-	cd ${S} && lpatch ${F}/gcc-${PV}.patch || die "patching failed"
+	cd ${MY_S} && lpatch ${F}/gcc-${PV}.patch || die "patching failed"
 }
 
 src_compile() {
+	cd ${MY_S}
 	mkdir build
 	cd build
-	
+
+	# Sonst benutzt der gcc unsere CFlags auch fuer Tools die fuer den Host bestimmt sind
+	export CFLAGS_FOR_TARGET="$CFLAGS $CPPFLAGS"
+	export CFLAGS=""
+	export CPPFLAGS=""
+
 	../configure \
 		--build=`tc-build` \
 		--host=`tc-host` \
@@ -35,10 +44,10 @@ src_compile() {
 }
 
 src_install() {
-	cd build
+	cd ${MY_S}/build
 	lmake DESTDIR="${D}" install || die "make install failed"
 	
 	rm -r ${D}${R}/libexec/gcc/`tc-host`/${PV}/install-tools ${D}${R}/info ${D}${R}/man
 	rm ${D}${R}/bin/gccbug
-	lstrip ${D}${R}/bin/* ${D}${R}/libexec/gcc/`tc-host`/${PV}/*
+	#lstrip ${D}${R}/bin/* ${D}${R}/libexec/gcc/`tc-host`/${PV}/*
 }
