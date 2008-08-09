@@ -19,12 +19,11 @@ src_compile() {
 	
 	./configure \
 		CC=`tc-cc` \
-		CFLAGS="-I `tc-incdir`/ncurses -I `tc-incdir`" \
+		CFLAGS="-I `tc-incdir`/ncurses -I `tc-incdir` -L `tc-libdir` -lncurses" \
 		--build=`tc-build` \
 		--target=`tc-host` \
 		--host=`tc-host` \
 		--prefix="${R}" \
-		--enable-debug \
 		--enable-tiny \
 		|| die "configure failed"
 	
@@ -38,4 +37,8 @@ src_install() {
 	# Sonst gibts Fehler
 	mkdir -p "${D}${R}/bin"
 	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+
+	cd "${D}${R}/bin"
+	rm -r rnano
+	mv `tc-host`-nano nano
 }

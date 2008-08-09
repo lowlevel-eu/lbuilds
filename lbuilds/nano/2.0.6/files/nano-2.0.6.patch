@@ -1,6 +1,6 @@
-diff -ur ../nano-2.0.6/config.sub ./config.sub
---- ../nano-2.0.6/config.sub	2006-02-06 20:26:36.000000000 +0100
-+++ ./config.sub	2008-07-06 15:00:47.000000000 +0200
+diff -ur ../nano-2.0.6.orig/config.sub ./config.sub
+--- ../nano-2.0.6.orig/config.sub	2008-07-07 21:41:30.000000000 +0200
++++ ./config.sub	2008-07-09 18:27:23.000000000 +0200
 @@ -1188,7 +1188,7 @@
  	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
  	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
@@ -10,9 +10,18 @@ diff -ur ../nano-2.0.6/config.sub ./config.sub
  	# Remember, each alternative MUST END IN *, to match a version number.
  		;;
  	-qnx*)
-diff -ur ../nano-2.0.6/src/files.c ./src/files.c
---- ../nano-2.0.6/src/files.c	2007-04-21 22:33:56.000000000 +0200
-+++ ./src/files.c	2008-07-06 15:00:47.000000000 +0200
+diff -ur ../nano-2.0.6.orig/src/files.c ./src/files.c
+--- ../nano-2.0.6.orig/src/files.c	2008-07-07 21:41:30.000000000 +0200
++++ ./src/files.c	2008-07-09 18:35:33.000000000 +0200
+@@ -30,7 +30,7 @@
+ #include <fcntl.h>
+ #include <errno.h>
+ #include <ctype.h>
+-#include <pwd.h>
++//#include <pwd.h>
+ 
+ /* Add an entry to the openfile openfilestruct.  This should only be
+  * called from open_buffer(). */
 @@ -1119,7 +1119,7 @@
      original_umask = umask(0);
      umask(S_IRWXG | S_IRWXO);
@@ -22,7 +31,7 @@ diff -ur ../nano-2.0.6/src/files.c ./src/files.c
  
      if (fd != -1)
  	*f = fdopen(fd, "r+b");
-@@ -2011,11 +2011,11 @@
+@@ -2011,13 +2011,13 @@
  	    tilde_dir = mallocstrncpy(NULL, buf, i + 1);
  	    tilde_dir[i] = '\0';
  
@@ -31,14 +40,16 @@ diff -ur ../nano-2.0.6/src/files.c ./src/files.c
  		userdata = getpwent();
  	    } while (userdata != NULL && strcmp(userdata->pw_name,
  		tilde_dir + 1) != 0);
--	    endpwent();
-+	    endpwent();*/
+ 	    endpwent();
  	    if (userdata != NULL)
- 		tilde_dir = mallocstrcpy(tilde_dir, userdata->pw_dir);
+-		tilde_dir = mallocstrcpy(tilde_dir, userdata->pw_dir);
++		tilde_dir = mallocstrcpy(tilde_dir, userdata->pw_dir);*/
  	}
-diff -ur ../nano-2.0.6/src/nano.c ./src/nano.c
---- ../nano-2.0.6/src/nano.c	2007-01-12 03:58:12.000000000 +0100
-+++ ./src/nano.c	2008-07-06 15:00:47.000000000 +0200
+ 
+ 	retval = charalloc(strlen(tilde_dir) + strlen(buf + i) + 1);
+diff -ur ../nano-2.0.6.orig/src/nano.c ./src/nano.c
+--- ../nano-2.0.6.orig/src/nano.c	2008-07-07 21:41:30.000000000 +0200
++++ ./src/nano.c	2008-07-09 18:57:01.000000000 +0200
 @@ -31,7 +31,7 @@
  #include <fcntl.h>
  #include <errno.h>
@@ -48,6 +59,15 @@ diff -ur ../nano-2.0.6/src/nano.c ./src/nano.c
  #include <termios.h>
  #ifdef HAVE_GETOPT_H
  #include <getopt.h>
+@@ -46,7 +46,7 @@
+ #endif
+ static struct termios oldterm;
+ 	/* The user's original terminal settings. */
+-static struct sigaction act;
++//static struct sigaction act;
+ 	/* Used to set up all our fun signal handlers. */
+ 
+ /* Create a new filestruct node.  Note that we do not set prevnode->next
 @@ -967,6 +967,7 @@
  /* Initialize the signal handlers. */
  void signal_init(void)
@@ -119,33 +139,18 @@ diff -ur ../nano-2.0.6/src/nano.c ./src/nano.c
  
      /* If the executable filename starts with 'r', enable restricted
       * mode. */
-@@ -2157,10 +2163,10 @@
-     /* If there's a +LINE or +LINE,COLUMN flag here, it is the first
-      * non-option argument, and it is followed by at least one other
-      * argument, the filename it applies to. */
--    if (0 < optind && optind < argc - 1 && argv[optind][0] == '+') {
-+    /*if (0 < optind && optind < argc - 1 && argv[optind][0] == '+') {
- 	parse_line_column(&argv[optind][1], &startline, &startcol);
- 	optind++;
--    }
-+    }*/
+diff -ur ../nano-2.0.6.orig/src/utils.c ./src/utils.c
+--- ../nano-2.0.6.orig/src/utils.c	2008-07-07 21:41:30.000000000 +0200
++++ ./src/utils.c	2008-07-09 18:27:56.000000000 +0200
+@@ -26,7 +26,7 @@
+ #include <string.h>
+ #include <stdio.h>
+ #include <unistd.h>
+-#include <pwd.h>
++//#include <pwd.h>
+ #include <ctype.h>
+ #include <errno.h>
  
- #ifdef ENABLE_MULTIBUFFER
-     old_multibuffer = ISSET(MULTIBUFFER);
-@@ -2196,8 +2202,8 @@
-     /* Read the first file on the command line into either the current
-      * buffer or a new buffer, depending on whether multibuffer mode is
-      * enabled. */
--    if (optind < argc)
--	open_buffer(argv[optind]);
-+    /*if (optind < argc)
-+	open_buffer(argv[optind]);*/
- 
-     /* We didn't open any files if all the command line arguments were
-      * invalid files like directories or if there were no command line
-diff -ur ../nano-2.0.6/src/utils.c ./src/utils.c
---- ../nano-2.0.6/src/utils.c	2007-01-01 06:15:32.000000000 +0100
-+++ ./src/utils.c	2008-07-06 15:00:47.000000000 +0200
 @@ -53,10 +53,7 @@
  	const char *homenv = getenv("HOME");
  
@@ -158,3 +163,24 @@ diff -ur ../nano-2.0.6/src/utils.c ./src/utils.c
  	}
  	homedir = mallocstrcpy(NULL, homenv);
      }
+diff -ur ../nano-2.0.6.orig/src/winio.c ./src/winio.c
+--- ../nano-2.0.6.orig/src/winio.c	2008-07-07 21:41:30.000000000 +0200
++++ ./src/winio.c	2008-07-09 21:47:43.000000000 +0200
+@@ -512,6 +512,8 @@
+ 		retval = NANO_HOME_KEY;
+ 		break;
+ #endif
++        // FIXME:
++        case 8:
+ 	    case KEY_BACKSPACE:
+ 		retval = NANO_BACKSPACE_KEY;
+ 		break;
+@@ -528,6 +530,8 @@
+ 	    case KEY_PPAGE:
+ 		retval = NANO_PREVPAGE_KEY;
+ 		break;
++        // FIXME: Wir sollten eher ncurses beibringen, dass \n == KEY_ENTER
++        case '\n':
+ 	    case KEY_ENTER:
+ 		retval = NANO_ENTER_KEY;
+ 		break;
