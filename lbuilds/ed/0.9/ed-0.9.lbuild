@@ -9,7 +9,7 @@ DEPEND=""
 RDEPEND=""
 
 src_unpack() {
-	unpack ${P}.tar.bz2
+	lunpack ${P}.tar.bz2
 	cd ${S}/${P} && lpatch ${F}/${P}.patch ${F}/${P}-warnings.patch || die "patching failed"
 }
 

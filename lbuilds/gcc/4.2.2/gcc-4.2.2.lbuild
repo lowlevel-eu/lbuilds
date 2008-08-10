@@ -13,7 +13,7 @@ PREFIX="/usr"
 MY_S="${S}/${P}"
 
 src_unpack() {
-	unpack gcc-core-${PV}.tar.bz2
+	lunpack gcc-core-${PV}.tar.bz2
 	cd ${MY_S} && lpatch ${F}/gcc-${PV}.patch || die "patching failed"
 }
 

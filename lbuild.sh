@@ -110,6 +110,14 @@ call_if_exists() {
     return 0
 }
 
+# Prueft ob das angegebene Feature aktiviert ist
+has_feature() {
+    if echo ${FEATURES} | grep -s $1 > /dev/null; then
+        return 0
+    fi
+
+    return 1
+}
 
 #
 # Globale Hilfsfunktionen
@@ -190,7 +198,7 @@ lstrip() {
 }
 
 # Archiv entpacken
-unpack() {
+lunpack() {
     local fn=${DISTDIR}/$1
     case $fn in
         *.tar)
@@ -272,6 +280,40 @@ internal_src_install() {
     cd ${S}
     lstatus "Bereite Paketinhalt vor"
     call_if_exists src_install
+
+    lstatus "Erstelle oder erweitere postinstall-Skript"
+    PIS="${D}/${R}/postinstall-bin"
+    test -f "$PIS" || echo "#!file:/apps/sh" >> "$PIS"
+    for b in ${D}/${R}/bin/*; do
+        test -f "$b" || continue
+        bin="`basename $b`"
+        echo "lpt cfg-addbin file:/packages/${PN}/${PV}/bin/$bin $bin" >> "$PIS"
+        lstatus "    addbin $bin"
+    done
+    for l in ${D}/${R}/lib/*; do
+        test -f "$l" || continue
+        lib="`basename $l`"
+        echo "lpt cfg-addlib file:/packages/${PN}/${PV}/lib/$lib $lib" >> "$PIS"
+        lstatus "    addlib $lib"
+    done
+    for i in ${D}/${R}/include/*; do
+        test -e "$i" || continue
+        hdr="`basename $i`"
+        echo "lpt cfg-addinc file:/packages/${PN}/${PV}/include/$hdr $hdr" \
+            >> "$PIS"
+        lstatus "    addinc $hdr"
+    done
+
+    if has_feature "nostrip"; then
+        lstatus "Ueberspringe das Strippen der Binaries"
+    else
+        lstatus "Strippe Binaries:"
+        for b in ${D}/${R}/bin/*; do
+            test -f "$b" || break
+            lstatus "    strip $b"
+            lstrip "$b"
+        done
+    fi
 }
 
 # Paket erstellen

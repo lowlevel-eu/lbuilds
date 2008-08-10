@@ -10,7 +10,7 @@ RUN_DEPEND=""
 MY_S="${S}/${P}"
 
 src_unpack() {
-	unpack ${P}.tar.gz
+	lunpack ${P}.tar.gz
 }
 
 src_compile() {

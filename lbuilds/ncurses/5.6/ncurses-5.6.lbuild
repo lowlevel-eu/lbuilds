@@ -10,8 +10,8 @@ RUN_DEPEND=""
 MY_S="${S}/${P}"
 
 src_unpack() {
-	unpack ${P}.tar.gz
-	cd ${MY_S} && lpatch ${F}/${P}.patch ${F}/${P}-tclock.patch ${F}/${P}-tests.patch ${F}/${P}-terminfo.patch ${F}/${P}-getch.patch|| die "patching failed"
+	lunpack ${P}.tar.gz
+	cd ${MY_S} && lpatch ${F}/${P}.patch || die "patching failed"
 }
 
 src_compile() {
@@ -43,5 +43,5 @@ src_install() {
 	lmake -j1 DESTDIR="${D}" install || die "make install failed"
 
 	# Noch ein Bisschen Speicher sparen
-	rm -rf "${D}${R}/share/terminfo"
+	rm -rf "${D}${R}/share/terminfo" "${D}${R}/bin"
 }

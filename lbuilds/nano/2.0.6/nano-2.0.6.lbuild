@@ -10,7 +10,7 @@ BUILD_DEPEND="=ncurses-5.6"
 MY_S="${S}/${P}"
 
 src_unpack() {
-	unpack ${P}.tar.gz
+	lunpack ${P}.tar.gz
 	cd ${MY_S} && lpatch ${F}/${P}.patch || die "patching failed"
 }
 

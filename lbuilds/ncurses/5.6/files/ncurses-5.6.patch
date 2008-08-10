@@ -1,6 +1,6 @@
-diff -ur ../ncurses-5.6/config.sub ./config.sub
---- ../ncurses-5.6/config.sub	2006-08-14 18:00:00.000000000 +0200
-+++ ./config.sub	2008-07-06 14:48:31.000000000 +0200
+diff -ur ../ncurses-5.6.orig/config.sub ./config.sub
+--- ../ncurses-5.6.orig/config.sub	2008-08-10 21:22:50.000000000 +0200
++++ ./config.sub	2008-08-10 21:23:20.000000000 +0200
 @@ -1218,7 +1218,7 @@
  	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
  	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
@@ -10,42 +10,56 @@ diff -ur ../ncurses-5.6/config.sub ./config.sub
  	# Remember, each alternative MUST END IN *, to match a version number.
  		;;
  	-qnx*)
-diff -ur ../ncurses-5.6/misc/terminfo.src ./misc/terminfo.src
---- ../ncurses-5.6/misc/terminfo.src	2006-10-07 19:52:03.000000000 +0200
-+++ ./misc/terminfo.src	2008-07-06 14:48:34.000000000 +0200
-@@ -19545,6 +19545,28 @@
+diff -ur ../ncurses-5.6.orig/misc/terminfo.src ./misc/terminfo.src
+--- ../ncurses-5.6.orig/misc/terminfo.src	2008-08-10 21:22:51.000000000 +0200
++++ ./misc/terminfo.src	2008-08-10 21:23:34.000000000 +0200
+@@ -19545,6 +19545,42 @@
  	kf8=\E[OR, kf9=\E[OS, khome=\E[H, ri=\EM, rmam=\E[?7l,
  	rmir=\E[4l, rmkx=\E>, rmso=\E[m, rmul=\E[m, sgr0=\E[m,
  	smam=\E[?7h, smir=\E[4h, smkx=\E=, smso=\E[7m, smul=\E[4m,
 +
 +lost|LOST Terminal(allmost vt100),
-+	OTbs, am, mc5i, msgr, xon,
-+	cols#80, it#8, lines#25, vt#3,
-+	acsc=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
-+	bel=^G, blink=\E[5m$<2>, bold=\E[1m$<2>,
-+	clear=\E[H\E[J$<50>, cr=^M, csr=\E[%i%p1%d;%p2%dr,
-+	cub=\E[%p1%dD, cub1=^H, cud=\E[%p1%dB, cud1=^J,
-+	cuf=\E[%p1%dC, cuf1=\E[C$<2>,
-+	cup=\E[%i%p1%d;%p2%dH$<5>, cuu=\E[%p1%dA,
-+	cuu1=\E[A$<2>, ed=\E[J$<50>, el=\E[K$<3>, el1=\E[1K$<3>,
-+	enacs=\E(B\E)0, home=\E[H, ht=^I, hts=\EH, ind=^J, kbs=^H,
-+	kcub1=\EOD, kcud1=\EOB, kcuf1=\EOC, kcuu1=\EOA, lf1=pf1,
-+	lf2=pf2, lf3=pf3, lf4=pf4, mc0=\E[0i, mc4=\E[4i, mc5=\E[5i,
-+	rc=\E8, rev=\E[7m$<2>, ri=\EM$<5>, rmacs=^O, rmam=\E[?7l,
-+	rmkx=\E[?1l\E>, rmso=\E[m$<2>, rmul=\E[m$<2>,
-+	rs2=\E>\E[?3l\E[?4l\E[?5l\E[?7h\E[?8h, sc=\E7,
-+	sgr=\E[0%?%p1%p6%|%t;1%;%?%p2%t;4%;%?%p1%p3%|%t;7%;%?%p4%t;5%;m%?%p9%t\016%e\017%;$<2>,
-+	sgr0=\E[m\017$<2>, smacs=^N, smam=\E[?7h, smkx=\E[?1h\E=,
-+	smso=\E[7m$<2>, smul=\E[4m$<2>, tbc=\E[3g,
++	OTbs, am,
++	cols#80, lines#25,
++	clear=\E[H\E[J$<50>,
++	ed=\E[J,
++	cuf1=\E[C,
++	cub1=\E[D,
++	cud1=\E[B,
++	cuu1=\E[A,
++ 	cuf=\E[%p1%dC,
++	cud=\E[%p1%dB,
++	cuu=\E[%p1%dA,
++	cup=\E[%i%p1%d;%p2%dH,
++	sc=\E[s,
++	rc=\E[u,
++	ht=^I,
++	cr=^M,
++	ind=^J,
++	rev=\E[7m,
++	smso=\E[7m,
++	rmso=\E[0m,
++	smul=\E[4m,
++	rmul=\E[0m,
++	sgr0=\E[0m,
++	kbs=^H,
 +	kent=^J,
++	kcuf1=\E[C,
++	kcub1=\E[D,
++	kcud1=\E[B,
++	kcuu1=\E[A,
++
++
++# Vermutlich unnoetig: home=\E[H, lf1=pf1,
++
 +
  ######## ICH/ICH1 VERSUS RMIR/SMIR
  #
  # Some non-curses applications get confused if both ich/ich1 and rmir/smir
-diff -ur ../ncurses-5.6/ncurses/base/lib_getch.c ./ncurses/base/lib_getch.c
---- ../ncurses-5.6/ncurses/base/lib_getch.c	2006-03-04 21:06:09.000000000 +0100
-+++ ./ncurses/base/lib_getch.c	2008-07-06 14:48:34.000000000 +0200
-@@ -169,10 +168,12 @@
+diff -ur ../ncurses-5.6.orig/ncurses/base/lib_getch.c ./ncurses/base/lib_getch.c
+--- ../ncurses-5.6.orig/ncurses/base/lib_getch.c	2008-08-10 21:22:51.000000000 +0200
++++ ./ncurses/base/lib_getch.c	2008-08-10 21:23:20.000000000 +0200
+@@ -169,10 +169,12 @@
  #endif
      {				/* Can block... */
  	unsigned char c2 = 0;
@@ -61,3 +75,115 @@ diff -ur ../ncurses-5.6/ncurses/base/lib_getch.c ./ncurses/base/lib_getch.c
  #ifdef HIDE_EINTR
      /*
       * Under System V curses with non-restarting signals, getch() returns
+diff -ur ../ncurses-5.6.orig/ncurses/tty/lib_twait.c ./ncurses/tty/lib_twait.c
+--- ../ncurses-5.6.orig/ncurses/tty/lib_twait.c	2008-08-10 21:22:51.000000000 +0200
++++ ./ncurses/tty/lib_twait.c	2008-08-10 21:23:40.000000000 +0200
+@@ -48,6 +48,11 @@
+ #include <OS.h>
+ #endif
+ 
++#ifdef __LOST__
++#include <stdint.h>
++extern uint64_t get_tick_count();
++#endif
++
+ #if USE_FUNC_POLL
+ # if HAVE_SYS_TIME_H
+ #  include <sys/time.h>
+@@ -360,6 +365,29 @@
+     }
+ #endif
+ 
++#elif defined(__LOST__)
++    int ch;
++    uint64_t timeout = 0;
++    uint64_t time;
++
++    if (milliseconds > 0) {
++        timeout = get_tick_count() + milliseconds * 1000;
++    }
++
++    result = 0;
++    do {
++        if ((mode & 1)) {
++            if (read(SP->_ifd, &ch, 1)) {
++                ungetc(ch, stdin);
++                result = 1;
++            }
++        }
++    } while ((timeout > (time = get_tick_count())) && !result);
++
++    if (time < timeout) {
++        milliseconds = (timeout - time) / 1000;
++    }
++
+ #endif /* USE_FUNC_POLL, etc */
+ 
+     returntime = _nc_gettime(FALSE);
+@@ -424,6 +452,8 @@
+ 	    }
+ #elif defined(__BEOS__)
+ 	    result = 1;		/* redundant, but simple */
++#elif defined(__LOST__)
++	    result = 1;		/* redundant, but simple */
+ #elif HAVE_SELECT
+ 	    if ((mode & 2)
+ 		&& (fd = SP->_mouse_fd) >= 0
+diff -ur ../ncurses-5.6.orig/test/bs.c ./test/bs.c
+--- ../ncurses-5.6.orig/test/bs.c	2008-08-10 21:22:51.000000000 +0200
++++ ./test/bs.c	2008-08-10 21:50:38.000000000 +0200
+@@ -220,7 +220,7 @@
+ 
+     CATCHALL(uninitgame);
+ 
+-    if ((tmpname = getlogin()) != 0) {
++    if ((tmpname = "lost") != 0) {
+ 	(void) strcpy(name, tmpname);
+ 	name[0] = toupper(name[0]);
+     } else
+diff -ur ../ncurses-5.6.orig/test/cardfile.c ./test/cardfile.c
+--- ../ncurses-5.6.orig/test/cardfile.c	2008-08-10 21:22:51.000000000 +0200
++++ ./test/cardfile.c	2008-08-10 21:50:38.000000000 +0200
+@@ -36,7 +36,7 @@
+ 
+ #include <test.priv.h>
+ 
+-#if USE_LIBFORM && USE_LIBPANEL
++#if 0
+ 
+ #include <form.h>
+ #include <panel.h>
+diff -ur ../ncurses-5.6.orig/test/configure ./test/configure
+--- ../ncurses-5.6.orig/test/configure	2008-08-10 21:22:51.000000000 +0200
++++ ./test/configure	2008-08-10 21:50:38.000000000 +0200
+@@ -6,7 +6,7 @@
+ #
+ # This configure script is free software; the Free Software Foundation
+ # gives unlimited permission to copy, distribute and modify it.
+-
++exit 0
+ # Defaults:
+ ac_help=
+ ac_default_prefix=/usr/local
+diff -ur ../ncurses-5.6.orig/test/tclock.c ./test/tclock.c
+--- ../ncurses-5.6.orig/test/tclock.c	2008-08-10 21:22:51.000000000 +0200
++++ ./test/tclock.c	2008-08-10 21:23:26.000000000 +0200
+@@ -1,7 +1,7 @@
+ /* $Id: tclock.c,v 1.25 2005/04/16 16:39:27 tom Exp $ */
+-
+ #include <test.priv.h>
+ 
++#if 0
+ #include <math.h>
+ 
+ #if TIME_WITH_SYS_TIME
+@@ -256,3 +256,9 @@
+     endwin();
+     ExitProgram(EXIT_SUCCESS);
+ }
++#endif
++int main(int argc, char* argv[])
++{
++    ExitProgram(EXIT_SUCCESS);
++}
++

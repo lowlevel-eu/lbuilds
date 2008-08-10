@@ -10,7 +10,7 @@ RUN_DEPEND=""
 MY_S="${S}/${P}"
 
 src_unpack() {
-	unpack binutils-${PV}.tar.bz2
+	lunpack binutils-${PV}.tar.bz2
 	cd ${MY_S} && lpatch ${F}/${P}.patch || die "patching failed"
 }
 
