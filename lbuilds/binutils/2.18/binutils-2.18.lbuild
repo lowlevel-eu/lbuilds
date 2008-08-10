@@ -1,16 +1,17 @@
 DESCRIPTION="Tools necessary to build programs"
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Binutils"
-SRC_URI="http://ftp.gnu.org/gnu/binutils/binutils-${PV}.tar.bz2"
+SRC_URI="http://ftp.gnu.org/gnu/binutils/${P}.tar.bz2"
 
 LICENSE="GPL-2"
 
 BUILD_DEPEND=""
 RUN_DEPEND=""
 
+MY_S="${S}/${P}"
 
 src_unpack() {
 	unpack binutils-${PV}.tar.bz2
-	cd ${S}/${P} && lpatch ${F}/binutils-${PV}.patch ${F}/${P}-prototype.patch || die "patching failed"
+	cd ${MY_S} && lpatch ${F}/${P}.patch || die "patching failed"
 }
 
 src_compile() {
