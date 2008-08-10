@@ -1,0 +1,25 @@
+DESCRIPTION="Brainfuck interpreter"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/BFF"
+SRC_URI="http://swapped.cc/bf/files/${P}.tar.gz"
+
+LICENSE="BSD"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+src_unpack() {
+	unpack ${P}.tar.gz
+	cd ${S}/${P} && lpatch ${F}/${P}.patch || die "patching failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+	`tc-cc` $CFLAGS $CPPFLAGS $LDFLAGS -Wall -o bff bff.c || die "compiling failed"
+}
+
+src_install() {
+	cd ${MY_S}
+	mkdir -p "${D}/${R}/bin"
+	cp bff "${D}/${R}/bin"
+}
