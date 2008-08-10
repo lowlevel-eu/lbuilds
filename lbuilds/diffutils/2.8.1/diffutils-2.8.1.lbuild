@@ -1,0 +1,37 @@
+DESCRIPTION="Tools necessary to build programs"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Binutils"
+SRC_URI="http://ftp.gnu.org/gnu/diffutils/${P}.tar.gz"
+
+LICENSE="GPL-2"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+	unpack ${P}.tar.gz
+	cd ${MY_S} && lpatch ${F}/${P}.patch  || die "patching failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+	./configure \
+		--build=`tc-build` \
+		--host=`tc-host` \
+		--prefix=${R} \
+		|| die "configure failed"
+	
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake DESTDIR="${D}" install || die "make install failed"
+
+	cd "${D}/${R}"
+
+	# Sonst merkt noch jemand, dass die nicht funktionieren
+	rm bin/diff3 bin/sdiff
+}

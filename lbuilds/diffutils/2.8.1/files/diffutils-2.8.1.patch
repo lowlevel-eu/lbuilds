@@ -1,0 +1,85 @@
+diff -ur ../diffutils-2.8.1.orig/config/config.sub ./config/config.sub
+--- ../diffutils-2.8.1.orig/config/config.sub	2002-03-07 13:00:05.000000000 +0100
++++ ./config/config.sub	2008-08-10 14:44:44.000000000 +0200
+@@ -1090,7 +1090,7 @@
+ 	      | -openstep* | -oskit* | -conix* | -pw32* | -nonstopux* \
+ 	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+-	      | -morphos* | -superux* | -rtmk* | -rtmk-nova*)
++	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -lost*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+diff -ur ../diffutils-2.8.1.orig/lib/strftime.c ./lib/strftime.c
+--- ../diffutils-2.8.1.orig/lib/strftime.c	2001-12-12 01:51:38.000000000 +0100
++++ ./lib/strftime.c	2008-08-10 15:11:22.000000000 +0200
+@@ -1117,7 +1117,7 @@
+ 	    time_t t;
+ 
+ 	    ltm = *tp;
+-	    t = mktime (&ltm);
++	    t = 0; //mktime (&ltm);
+ 
+ 	    /* Generate string value for T using time_t arithmetic;
+ 	       this works even if sizeof (long) < sizeof (time_t).  */
+@@ -1328,7 +1328,7 @@
+ 		time_t lt;
+ 
+ 		ltm = *tp;
+-		lt = mktime (&ltm);
++		lt = 0; //mktime (&ltm);
+ 
+ 		if (lt == (time_t) -1)
+ 		  {
+diff -ur ../diffutils-2.8.1.orig/src/diff.c ./src/diff.c
+--- ../diffutils-2.8.1.orig/src/diff.c	2002-03-24 08:35:28.000000000 +0100
++++ ./src/diff.c	2008-08-10 14:57:11.000000000 +0200
+@@ -606,9 +606,9 @@
+ 	specify_style (OUTPUT_NORMAL);
+     }
+ 
+-  if (output_style != OUTPUT_CONTEXT || hard_locale (LC_TIME))
++  /*if (output_style != OUTPUT_CONTEXT || hard_locale (LC_TIME))
+     time_format = "%Y-%m-%d %H:%M:%S.%N %z";
+-  else
++  else*/
+     {
+       /* See POSIX 1003.1-2001 for this format.  */
+       time_format = "%a %b %e %T %Y";
+diff -ur ../diffutils-2.8.1.orig/src/sdiff.c ./src/sdiff.c
+--- ../diffutils-2.8.1.orig/src/sdiff.c	2002-03-11 09:00:47.000000000 +0100
++++ ./src/sdiff.c	2008-08-10 15:16:55.000000000 +0200
+@@ -1209,12 +1209,12 @@
+   sprintf (buf, "%s/sdiffXXXXXX", dir);
+   sigemptyset (&blocked);
+   sigaddset (&blocked, SIGINT);
+-  sigprocmask (SIG_BLOCK, &blocked, &procmask);
++  //sigprocmask (SIG_BLOCK, &blocked, &procmask);
+   fd = mkstemp (buf);
+   e = errno;
+   if (0 <= fd)
+     tmpname = buf;
+-  sigprocmask (SIG_SETMASK, &procmask, 0);
++  //sigprocmask (SIG_SETMASK, &procmask, 0);
+   errno = e;
+   return fd;
+ }
+diff -ur ../diffutils-2.8.1.orig/src/util.c ./src/util.c
+--- ../diffutils-2.8.1.orig/src/util.c	2002-02-28 05:23:10.000000000 +0100
++++ ./src/util.c	2008-08-10 15:10:45.000000000 +0200
+@@ -195,6 +195,7 @@
+ 
+       /* Make OUTFILE a pipe to a subsidiary `pr'.  */
+       {
++#if 0
+ #if HAVE_WORKING_FORK || HAVE_WORKING_VFORK
+ 	int pipes[2];
+ 
+@@ -239,6 +240,7 @@
+ 	  pfatal_with_name (command);
+ 	free (command);
+ #endif
++#endif
+       }
+     }
+   else
