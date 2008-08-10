@@ -35,6 +35,7 @@ for h in ${LOST_SRC}/src/include/* ${LOST_SRC}/src/include/arch/${ARCH}/* ${LOST
     echo $h
     cp -rLf $h ${ENV}/include/
 done
+rm -rf `find ${ENV}/ -name .svn`
 
 # Libc erstellen
 rm -f ${ENV}/lib/libc.a
