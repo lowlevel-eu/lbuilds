@@ -3,10 +3,13 @@ PREFIX=`pwd`/env
 TARGET=i386-pc-lost
 PATCHES=`pwd`/patches
 TMP=`pwd`/tmp
+LOGS=${TMP}
 MAKEOPTS=-j3
 
 mkdir -p ${TMP}/cross-binutils/build
 mkdir -p ${TMP}/cross-gcc/build
+mkdir -p ${TMP}/cross-fpc
+
 
 cd ${TMP}/cross-binutils
 echo "[binutils] Herunterladen..."
@@ -14,11 +17,15 @@ wget -q http://ftp.gnu.org/gnu/binutils/binutils-2.18.tar.bz2 || exit -1
 echo "[binutils] Entpacken..."
 tar -xjf binutils-2.18.tar.bz2 || exit -1
 echo "[binutils] Patch anwenden..."
-patch -p0 -d binutils-2.18/ < ${PATCHES}/binutils/2.18/binutils-2.18.patch
+patch -p0 -d binutils-2.18/ < ${PATCHES}/binutils/2.18/binutils-2.18.patch >${LOGS}/binutils.log || exit -1
 cd build
-../binutils-2.18/configure --prefix="${PREFIX}" --with-sysroot=${PREFIX} --target=${TARGET} --disable-nls || exit -1
-make ${MAKEOPTS} || exit -1
-make install ${MAKEOPTS} || exit -1
+echo "[binutils] Konfigurieren..."
+../binutils-2.18/configure --prefix="${PREFIX}" --with-sysroot=${PREFIX} --target=${TARGET} --disable-nls >>${LOGS}/binutils.log || exit -1
+echo "[binutils] Kompilieren..."
+make ${MAKEOPTS} >>${LOGS}/binutils.log 2>>${LOGS}/binutils.log || exit -1
+echo "[binutils] Installieren..."
+make install ${MAKEOPTS} >>${LOGS}/binutils.log 2>>${LOGS}/binutils.log || exit -1
+echo -e "[binutils] Abgeschlossen\n"
 
 cd ${TMP}/cross-gcc
 echo "[gcc] Herunterladen..."
@@ -26,13 +33,38 @@ wget -q http://ftp.gnu.org/gnu/gcc/gcc-4.2.2/gcc-core-4.2.2.tar.bz2 || exit -1
 echo "[gcc] Entpacken..."
 tar -xjf gcc-core-4.2.2.tar.bz2
 echo "[gcc] Patch anwenden..."
-patch -p0 -d gcc-4.2.2/ < ${PATCHES}/gcc/4.2.2/gcc-4.2.2.patch
+patch -p0 -d gcc-4.2.2/ < ${PATCHES}/gcc/4.2.2/gcc-4.2.2.patch >${LOGS}/gcc.log || exit -1
 cd build
-../gcc-4.2.2/configure --prefix="${PREFIX}" --target=${TARGET} --disable-nls --enable-languages=c --disable-shared --disable-libssp || exit -1
-make all-gcc ${MAKEOPTS} || exit -1
-make install-gcc ${MAKEOPTS} || exit -1
+echo "[gcc] Konfigurieren..."
+../gcc-4.2.2/configure --prefix="${PREFIX}" --target=${TARGET} --disable-nls --enable-languages=c --disable-shared --disable-libssp >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log|| exit -1
+echo "[gcc] Kompilieren..."
+make all-gcc ${MAKEOPTS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log || exit -1
+echo "[gcc] Installieren..."
+make install-gcc ${MAKEOPTS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log || exit -1
+echo -e "[gcc] Abgeschlossen\n"
 
-
+cd ${TMP}/cross-fpc
+echo "[fpc] Herunterladen..."
+wget -q http://gd.tuwien.ac.at/languages/pascal/fpc/dist/source-2.0.4/fpcbuild-2.0.4.tar.gz || exit -1
+echo "[fpc] Entpacken..."
+tar -xzf fpcbuild-2.0.4.tar.gz || exit -1
+echo "[fpc] Patch anwenden..."
+patch -p0 < ${PATCHES}/fpc/2.0.4/fpc-2.0.4.patch >${LOGS}/fpc.log || exit -1
+echo "[fpc] fpcmake bauen"
+cd fpcbuild_2.0.4_exp/fpcsrc/utils/fpcm
+make >>${LOGS}/fpc.log || exit -1
+cd ..
+cd ..
+echo "[fpc] Kompilieren"
+utils/fpcm/fpcmake -Tall -r >>${LOGS}/fpc.log || exit -1
+# Hindweis: Die folgende Anweisung wird nicht erfolgreich beendet werden, aber der Crosscompiler steht danach zur Verfuegung
+make all CPU_TARGET=i386 OS_TARGET=lost >>${LOGS}/fpc.log 2>>${LOGS}/fpc.log
+test -f compiler/ppcross386 || exit -1
+echo "[fpc] Installieren"
+#make compiler-install PREFIX=${PREFIX} CPU_TARGET=i386 OS_TARGET=lost >>${LOGS}/fpc.log || exit -1
+cp compiler/ppcross386 ${PREFIX}/bin/fpc
+echo -e "[fpc] Abgeschlossen\n"
 
 rm -rf ${TMP}/cross-binutils
 rm -rf ${TMP}/cross-gcc
+rm -rf ${TMP}/cross-fpc
