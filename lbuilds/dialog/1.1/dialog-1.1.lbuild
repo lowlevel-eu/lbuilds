@@ -1,0 +1,45 @@
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/dialog"
+SRC_URI="ftp://invisible-island.net/dialog/dialog.tar.gz"
+
+LICENSE="LGPL-2"
+
+RUN_DEPEND=""
+BUILD_DEPEND="=ncurses-5.6"
+
+MY_S="dialog-1.1-20080727"
+
+src_unpack() {
+	lunpack ${PN}.tar.gz
+	cd ${MY_S} || die "${MY_S} existiert nicht"
+    ln -s ${F} patches
+    for i in ${F}/*.patch; do
+        echo `basename $i` >> series
+        (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
+    done
+    (which quilt > /dev/null 2>&1) && quilt push -a
+}
+
+src_compile() {
+	cd ${MY_S}
+
+	./configure \
+		CC=`tc-cc` \
+		CFLAGS="-I `tc-incdir`/ncurses -I `tc-incdir` -L `tc-libdir` -lncurses" \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+		|| die "configure failed"
+
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+
+	# Sonst gibts Fehler
+	mkdir -p "${D}${R}/bin"
+	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+}

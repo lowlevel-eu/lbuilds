@@ -1,0 +1,82 @@
+Index: dialog-1.1-20080727/ui_getc.c
+===================================================================
+--- dialog-1.1-20080727.orig/ui_getc.c
++++ dialog-1.1-20080727/ui_getc.c
+@@ -102,8 +102,21 @@ dlg_remove_callback(DIALOG_CALLBACK * p)
+ static int
+ dlg_getc_ready(DIALOG_CALLBACK * p)
+ {
+-    fd_set read_fds;
+-    int fd = fileno(p->input);
++    int ch;
++    uint64_t timeout = 0;
++
++    timeout = get_tick_count() + WTIMEOUT_VAL * 1000;
++
++    do {
++        if (fread(&ch, 1, 1, p->input)) {
++            ungetc(ch, stdin);
++            return 1;
++        }
++    } while (timeout > get_tick_count());
++
++    return 0;
++
++#if 0
+     struct timeval test;
+ 
+     FD_ZERO(&read_fds);
+@@ -113,6 +126,7 @@ dlg_getc_ready(DIALOG_CALLBACK * p)
+     test.tv_usec = WTIMEOUT_VAL * 1000;		/* Microseconds.  */
+     return (select(fd + 1, &read_fds, (fd_set *) 0, (fd_set *) 0, &test) == 1)
+ 	&& (FD_ISSET(fd, &read_fds));
++#endif
+ }
+ 
+ int
+@@ -182,6 +196,8 @@ dlg_flush_getc(void)
+ static bool
+ valid_file(FILE *fp)
+ {
++    return TRUE;
++#if 0
+     bool code = FALSE;
+     int fd = fileno(fp);
+ 
+@@ -192,6 +208,7 @@ valid_file(FILE *fp)
+ 	}
+     }
+     return code;
++#endif
+ }
+ 
+ /*
+Index: dialog-1.1-20080727/util.c
+===================================================================
+--- dialog-1.1-20080727.orig/util.c
++++ dialog-1.1-20080727/util.c
+@@ -103,6 +103,11 @@ DIALOG_COLORS dlg_color_table[] =
+ };
+ /* *INDENT-ON* */
+ 
++char* ttyname(int fd)
++{
++    return "tty?";
++}
++
+ /*
+  * Display background title if it exists ...
+  */
+@@ -862,10 +867,12 @@ real_auto_size(const char *title,
+     } else if (prompt != 0) {
+ 	wide = MAX(title_length, mincols);
+ 	if (strchr(prompt, '\n') == 0) {
++#if 0
+ 	    double val = dialog_state.aspect_ratio * dlg_count_columns(prompt);
+ 	    double xxx = sqrt(val);
+ 	    int tmp = (int) xxx;
+ 	    wide = MAX(wide, tmp);
++#endif
+ 	    wide = MAX(wide, longest_word(prompt));
+ 	    justify_text((WINDOW *) 0, prompt, high, wide, height, width);
+ 	} else {
