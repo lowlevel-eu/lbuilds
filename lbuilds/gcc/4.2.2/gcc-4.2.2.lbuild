@@ -1,3 +1,6 @@
+include lutils
+include toolchain
+
 DESCRIPTION="GNU C-Compiler"
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/GCC"
 SRC_URI="http://ftp.gnu.org/gnu/gcc/gcc-${PV}/gcc-core-${PV}.tar.bz2"
@@ -38,7 +41,7 @@ src_compile() {
 		--without-headers \
 		--disable-libssp \
 		|| die "configure failed"
-		
+
 	lmake || die "make failed"
 	cd ..
 }
@@ -46,8 +49,8 @@ src_compile() {
 src_install() {
 	cd ${MY_S}/build
 	lmake DESTDIR="${D}" install || die "make install failed"
-	
+
 	rm -r ${D}${R}/libexec/gcc/`tc-host`/${PV}/install-tools ${D}${R}/info ${D}${R}/man
 	rm ${D}${R}/bin/gccbug
-	#lstrip ${D}${R}/bin/* ${D}${R}/libexec/gcc/`tc-host`/${PV}/*
+	lstrip ${D}${R}/bin/* ${D}${R}/libexec/gcc/`tc-host`/${PV}/*
 }

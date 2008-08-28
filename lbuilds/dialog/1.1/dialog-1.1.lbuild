@@ -1,3 +1,6 @@
+include lutils
+include toolchain
+
 DESCRIPTION=""
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/dialog"
 SRC_URI="ftp://invisible-island.net/dialog/dialog.tar.gz"

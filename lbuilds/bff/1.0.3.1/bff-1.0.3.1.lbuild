@@ -1,3 +1,6 @@
+include lutils
+include toolchain
+
 DESCRIPTION="Brainfuck interpreter"
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/BFF"
 SRC_URI="http://swapped.cc/bf/files/${P}.tar.gz"

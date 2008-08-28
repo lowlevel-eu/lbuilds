@@ -1,3 +1,6 @@
+include lutils
+include toolchain
+
 DESCRIPTION="Tools necessary to build programs"
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Binutils"
 SRC_URI="http://ftp.gnu.org/gnu/diffutils/${P}.tar.gz"
@@ -21,7 +24,7 @@ src_compile() {
 		--host=`tc-host` \
 		--prefix=${R} \
 		|| die "configure failed"
-	
+
 	lmake || die "make failed"
 	cd ..
 }

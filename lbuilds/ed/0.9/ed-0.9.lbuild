@@ -1,3 +1,6 @@
+include lutils
+include toolchain
+
 DESCRIPTION="Your basic line editor"
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/ED"
 SRC_URI="http://ftp.gnu.org/gnu/ed/ed-0.9.tar.bz2"
@@ -19,7 +22,7 @@ src_compile() {
 		CC=`tc-cc` \
 		--prefix="${D}${R}" \
 		|| die "configure failed"
-		
+
 	lmake || die "make failed"
 	cd ..
 }
@@ -27,7 +30,7 @@ src_compile() {
 src_install() {
 	cd ${S}/${P}
 	lmake install || die "make install failed"
-	
+
 	rm -r ${D}${R}/share
 	rm ${D}${R}/bin/red
 	lstrip ${D}${R}/bin/*

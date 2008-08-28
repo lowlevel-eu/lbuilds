@@ -1,3 +1,6 @@
+include lutils
+include toolchain
+
 DESCRIPTION=""
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/ncurses"
 SRC_URI="http://ftp.gnu.org/gnu/ncurses/${P}.tar.gz"
@@ -16,7 +19,7 @@ src_unpack() {
 
 src_compile() {
 	cd ${MY_S}
-	
+
 	./configure \
 		CC=`tc-cc` \
 		--build=`tc-build` \

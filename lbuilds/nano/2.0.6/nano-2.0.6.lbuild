@@ -1,3 +1,6 @@
+include lutils
+include toolchain
+
 DESCRIPTION=""
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/nano"
 SRC_URI="http://ftp.gnu.org/gnu/nano/${P}.tar.gz"
@@ -16,7 +19,7 @@ src_unpack() {
 
 src_compile() {
 	cd ${MY_S}
-	
+
 	./configure \
 		CC=`tc-cc` \
 		CFLAGS="-I `tc-incdir`/ncurses -I `tc-incdir` -L `tc-libdir` -lncurses" \
@@ -26,7 +29,7 @@ src_compile() {
 		--prefix="${R}" \
 		--enable-tiny \
 		|| die "configure failed"
-	
+
 	lmake || die "make failed"
 	cd ..
 }
@@ -41,4 +44,5 @@ src_install() {
 	cd "${D}${R}/bin"
 	rm -r rnano
 	mv `tc-host`-nano nano
+	rm -r "${D}${R}/share"
 }
