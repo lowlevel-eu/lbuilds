@@ -71,6 +71,7 @@ init_env() {
 
 # Kopiert env/ in das Arbeitsverzeichnis
 internal_prepare_env() {
+    lstatus "Bereite Umgebung zum Bauen vor..."
     cp -rL env ${WORKDIR}/env
     if [ "${BUILD_DEPEND}" == "" ]; then
         return
@@ -161,6 +162,7 @@ include lutils
 
 # Alle Reste von Bauen eines Paketes loeschen
 internal_pkg_clean() {
+    lstatus "Raeume auf..."
     rm -fr "${WORKDIR}"
 }
 
@@ -190,6 +192,13 @@ internal_src_unpack() {
     cd ${S}
     lstatus "Entpacke Quelldateien..."
     call_if_exists src_unpack src_unpack_default
+}
+
+# Quellcode konfigurieren
+internal_src_configure() {
+    cd ${S}
+    lstatus "Konfiguriere Quellcode..."
+    call_if_exists src_configure
 }
 
 # Quellcode kompilieren
@@ -269,10 +278,20 @@ case $1 in
         touch "${WORKDIR}/.unpacked"
         ;;
 
-    compile)
+    configure)
         [ $# -ne 2 ] && show_help && exit -1
 
         [ -f "${WORKDIR}/.unpacked" ] || die "lbuild not unpacked"
+
+        internal_src_configure
+
+        touch "${WORKDIR}/.configured"
+        ;;
+
+    compile)
+        [ $# -ne 2 ] && show_help && exit -1
+
+        [ -f "${WORKDIR}/.configured" ] || die "lbuild not configured"
 
         internal_src_compile
 
@@ -311,6 +330,7 @@ case $1 in
         internal_prepare_dirs || die "preparing dirs failed"
         internal_pkg_fetch_files || die "fetching files failed"
         internal_src_unpack || die "unpacking source failed"
+        internal_src_configure || die "configuring failed"
         internal_src_compile || die "compiling source failed"
         internal_src_install || die "installing source failed"
         internal_pack || die "packing failed"
