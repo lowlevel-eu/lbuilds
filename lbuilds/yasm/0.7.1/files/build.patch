@@ -1,0 +1,12 @@
+diff -ur ../yasm-0.7.1.orig/config/config.sub ./config/config.sub
+--- ../yasm-0.7.1.orig/config/config.sub	2008-09-22 16:45:06.000000000 +0200
++++ ./config/config.sub	2008-09-22 16:45:39.000000000 +0200
+@@ -1140,7 +1140,7 @@
+ 	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+-	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei*)
++	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei*| -lost*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)

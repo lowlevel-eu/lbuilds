@@ -1,0 +1,47 @@
+include lutils
+include toolchain
+
+DESCRIPTION="Tools necessary to build programs"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Yasm"
+SRC_URI="http://www.tortall.net/projects/yasm/releases/${P}.tar.gz"
+
+LICENSE="BSD"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+	lunpack ${P}.tar.gz
+	cd ${MY_S} && lpatch ${F}/build.patch || die "patching failed"
+}
+
+src_configure() {
+	cd ${MY_S}
+	./configure \
+		--build=`tc-build` \
+		--host=`tc-host` \
+		--target=`tc-host` \
+		--prefix=${R} \
+		--disable-nls \
+		--disable-dependency-tracking \
+		|| die "configure failed"
+}
+
+
+src_compile() {
+	cd ${MY_S}
+	lmake || die "make failed"
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake DESTDIR="${D}" install || die "make install failed"
+
+	# libyasm brauchen wir im Moment noch nicht
+	rm -r ${D}/${R}/lib ${D}/${R}/include
+
+	# Manpages auch nicht
+	rm -r ${D}/${R}/share
+}
