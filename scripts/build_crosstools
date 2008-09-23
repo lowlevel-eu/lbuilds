@@ -63,6 +63,7 @@ test -f compiler/ppcross386 || exit -1
 echo "[fpc] Installieren"
 #make compiler-install PREFIX=${PREFIX} CPU_TARGET=i386 OS_TARGET=lost >>${LOGS}/fpc.log || exit -1
 cp compiler/ppcross386 ${PREFIX}/bin/fpc
+cp utils/fpcm/fpcmake ${PREFIX}/bin/fpcmake
 echo -e "[fpc] Abgeschlossen\n"
 
 rm -rf ${TMP}/cross-binutils

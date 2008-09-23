@@ -1,0 +1,148 @@
+diff -ur ../../fpcbuild_2.0.4_exp.new/fpcsrc/compiler/globals.pas ./compiler/globals.pas
+--- ../../fpcbuild_2.0.4_exp.new/fpcsrc/compiler/globals.pas	2008-09-23 01:00:56.000000000 +0200
++++ ./compiler/globals.pas	2008-09-23 01:01:18.000000000 +0200
+@@ -688,6 +688,34 @@
+         FoundFile:=fn;
+       end;
+ 
++{$ifdef LOST}
++    function c_fopen(filename, mode: PChar): longint; cdecl; external name 'fopen';
++    function c_fclose(f: longint): integer; cdecl; external name 'fclose';
++    Function LOSTPathExists (F : String) : Boolean;
++      Var
++        cfilename: String;
++        cmode: String;
++        I: longint;
++      begin
++        cfilename := F + #0;
++        cmode := 'r'#0;
++        I := c_fopen(@cfilename[1], @cmode[1]);
++        if I <> 0 then begin
++            c_fclose(I);
++            LOSTPathExists := true;
++            exit;
++        end;
++        cmode := 'rd'#0;
++        I := c_fopen(@cfilename[1], @cmode[1]);
++        if I <> 0 then begin
++            c_fclose(I);
++            LOSTPathExists := true;
++            exit;
++        end;
++        LOSTPathExists := false;
++      end;
++{$endif LOST}
++
+ 
+     Function PathExists ( F : String) : Boolean;
+       Var
+@@ -703,6 +731,12 @@
+             PathExists := true;
+             exit;
+           end;
++
++{$ifdef LOST}
++        PathExists := LOSTPathExists(F);
++        exit;
++{$endif LOST}
++
+ {$ifdef USE_SYSUTILS}
+         F := ExpandFileName(F);
+ {$else USE_SYSUTILS}
+diff -ur ../../fpcbuild_2.0.4_exp.new/fpcsrc/compiler/options.pas ./compiler/options.pas
+--- ../../fpcbuild_2.0.4_exp.new/fpcsrc/compiler/options.pas	2008-09-23 01:00:56.000000000 +0200
++++ ./compiler/options.pas	2008-09-23 01:01:18.000000000 +0200
+@@ -1318,11 +1318,11 @@
+   If FileLevel>MaxLevel then
+    Message(option_too_many_cfg_files);
+ { Maybe It's Directory ?}   //Jaro Change:
+-  if DirectoryExists(filename) then
++  {if DirectoryExists(filename) then
+     begin
+        Message1(option_config_is_dir,filename);
+        exit;
+-    end;
++    end;}
+ { open file }
+   Message1(option_using_file,filename);
+ {$ifdef USE_SYSUTILS}
+@@ -1748,10 +1748,16 @@
+        foundfn:=configpath+fn
+      else
+ {$ifndef Unix}
++{$ifndef LOST}
+       if CfgFileExists(exepath+fn) then
+        foundfn:=exepath+fn
+      else
+ {$else}
++      if CfgFileExists('file:/packages/fpc/2.0.4/'+fn) then
++       foundfn:='file:/packages/fpc/2.0.4/'+fn
++     else
++{$endif}
++{$else}
+       if CfgFileExists('/etc/'+fn) then
+        foundfn:='/etc/'+fn
+      else
+diff -ur ../../fpcbuild_2.0.4_exp.new/fpcsrc/compiler/systems/t_lost.pas ./compiler/systems/t_lost.pas
+--- ../../fpcbuild_2.0.4_exp.new/fpcsrc/compiler/systems/t_lost.pas	2008-09-23 01:00:56.000000000 +0200
++++ ./compiler/systems/t_lost.pas	2008-09-23 01:03:17.000000000 +0200
+@@ -212,7 +212,7 @@
+ {$ifdef x86_64}
+    LibrarySearchPath.AddPath('/lib64;/usr/lib64;/usr/X11R6/lib64',true);
+ {$else}
+-   LibrarySearchPath.AddPath('/lib;/usr/lib;/usr/X11R6/lib',true);
++   LibrarySearchPath.AddPath('file:/system/lib',true);
+ {$endif x86_64}
+ end;
+ 
+@@ -223,13 +223,17 @@
+ }
+ 
+ const
+-{$ifdef i386}   platform_select='-b elf32-i386 -m elf_i386';{$endif} 
++{$ifdef i386}   platform_select='';{$endif} 
+ {$ifdef x86_64} platform_select='-b elf64-x86-64 -m elf_x86_64';{$endif}
+ 
+ begin
+   with Info do
+    begin
+-     ExeCmd[1]:='ld -Ttext=0x40000000 '+platform_select+' $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -L. -o $EXE $RES';
++   {$ifdef LOST}
++     ExeCmd[1]:='file:/system/lpt-bin/ld -Ttext=0x40000000 '+platform_select+' $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -L. -o $EXE $RES -lc';
++   {$else}
++    ExeCmd[1]:='gcc '+platform_select+' $OPT -L. -o $EXE $RES';
++   {$endif}
+      DllCmd[1]:='ld '+platform_select+' $OPT $INIT $FINI $SONAME -shared -L. -o $EXE $RES -E';
+      DllCmd[2]:='strip --strip-unneeded $EXE';
+ 
+@@ -354,13 +358,13 @@
+   if prtobj<>'' then
+    LinkRes.AddFileName(maybequoted(FindObjectFile(prtobj,'',false)));
+   { try to add crti and crtbegin if linking to C }
+-  if linklibc then
++  {if linklibc then
+    begin
+      if librarysearchpath.FindFile('crtbegin.o',s) then
+       LinkRes.AddFileName(s);
+      if librarysearchpath.FindFile('crti.o',s) then
+       LinkRes.AddFileName(s);
+-   end;
++   end;}
+   { main objectfiles }
+   while not ObjectFiles.Empty do
+    begin
+@@ -402,13 +406,9 @@
+            linklibc:=true;
+          end;
+       end;
+-     { be sure that libc is the last lib }
+-     if linklibc then
++      { Wir linken immer gegen die Libc }
+       LinkRes.Add('-lc');
+-     { when we have -static for the linker the we also need libgcc }
+-     if (cs_link_staticflag in aktglobalswitches) then
+       LinkRes.Add('-lgcc');
+-     LinkRes.Add(')');
+    end;
+ 
+   { objects which must be at the end }
