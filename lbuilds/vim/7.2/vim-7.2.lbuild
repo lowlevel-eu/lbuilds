@@ -1,0 +1,32 @@
+include lutils
+include toolchain
+
+DESCRIPTION="Vim, an improved vi-style text editor"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/VIM"
+SRC_URI="ftp://ftp.vim.org/pub/vim/unix/${P}.tar.bz2 \
+	ftp://ftp.vim.org/pub/vim/extra/${P}-extra.tar.gz"
+
+LICENSE="vim"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_P="${PN}72"
+MY_S="${S}/${MY_P}"
+
+src_unpack() {
+	lunpack ${P}.tar.bz2 || die "unpacking failed"
+	lunpack ${P}-extra.tar.gz || die "unpacking extra failed"
+	cd ${MY_S} && lpatch ${F}/build.patch ${F}/os_lost.patch || die "patching failed"
+}
+
+src_compile() {
+	cd ${MY_S}/src
+	mkdir lostout
+	lmake -f Make_lost.mak all || die "make all failed"
+}
+
+src_install() {
+	cd ${MY_S}/src
+	lmake -f Make_lost.mak DESTDIR="${D}" install || die "make install failed"
+}

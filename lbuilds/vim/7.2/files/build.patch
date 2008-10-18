@@ -1,0 +1,69 @@
+Makefile um VIM fuer LOST zu kompilieren. Funktioniert zwar noch nicht, ist aber immerhin schon mal ein Anfang. ;-)
+
+Die Aenderungen unterliegen der vim-Lizenz.
+Autor: Antoine Kaufmann <toni@famkaufmann.info>
+
+diff -prNu ../vim72.orig/src/Make_lost.mak ./src/Make_lost.mak
+--- ../vim72.orig/src/Make_lost.mak	1970-01-01 01:00:00.000000000 +0100
++++ ./src/Make_lost.mak	2008-10-14 20:11:17.000000000 +0200
+@@ -0,0 +1,60 @@
++CC = i386-pc-lost-gcc
++CFLAGS = -I proto -DFEAT_TINY
++
++OUTDIR = lostout
++
++
++OBJ = \
++	$(OUTDIR)/buffer.o \
++	$(OUTDIR)/charset.o \
++	$(OUTDIR)/diff.o \
++	$(OUTDIR)/digraph.o \
++	$(OUTDIR)/edit.o \
++	$(OUTDIR)/eval.o \
++	$(OUTDIR)/ex_cmds.o \
++	$(OUTDIR)/ex_cmds2.o \
++	$(OUTDIR)/ex_docmd.o \
++	$(OUTDIR)/ex_eval.o \
++	$(OUTDIR)/ex_getln.o \
++	$(OUTDIR)/fileio.o \
++	$(OUTDIR)/fold.o \
++	$(OUTDIR)/getchar.o \
++	$(OUTDIR)/hardcopy.o \
++	$(OUTDIR)/hashtab.o \
++	$(OUTDIR)/main.o \
++	$(OUTDIR)/mark.o \
++	$(OUTDIR)/memfile.o \
++	$(OUTDIR)/memline.o \
++	$(OUTDIR)/menu.o \
++	$(OUTDIR)/message.o \
++	$(OUTDIR)/misc1.o \
++	$(OUTDIR)/misc2.o \
++	$(OUTDIR)/move.o \
++	$(OUTDIR)/mbyte.o \
++	$(OUTDIR)/normal.o \
++	$(OUTDIR)/ops.o \
++	$(OUTDIR)/option.o \
++	$(OUTDIR)/os_lost.o \
++	$(OUTDIR)/popupmnu.o \
++	$(OUTDIR)/quickfix.o \
++	$(OUTDIR)/regexp.o \
++	$(OUTDIR)/screen.o \
++	$(OUTDIR)/search.o \
++	$(OUTDIR)/spell.o \
++	$(OUTDIR)/syntax.o \
++	$(OUTDIR)/tag.o \
++	$(OUTDIR)/term.o \
++	$(OUTDIR)/ui.o \
++	$(OUTDIR)/undo.o \
++	$(OUTDIR)/version.o \
++	$(OUTDIR)/window.o
++
++all: $(OBJ) $(OUTDIR)/vim
++clean:
++	rm -r $(OBJ)
++
++$(OUTDIR)/vim: $(OBJ)
++	$(CC) -o $@ $(OBJ)
++
++$(OUTDIR)/%.o : %.c
++	$(CC) -c $(CFLAGS) $< -o $@

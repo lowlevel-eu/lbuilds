@@ -1,0 +1,123 @@
+Patch um vim fuer LOST zu kompilieren. Tut so zwar noch nicht, aber es ist immerhin schon mal ein Anfang. ;-)
+
+Die Aenderungen unterliegen der vim-Lizenz.
+Autor: Antoine Kaufmann <toni@famkaufmann.info>
+
+diff -prNu ../vim72.orig/src/os_lost.c ./src/os_lost.c
+--- ../vim72.orig/src/os_lost.c	1970-01-01 01:00:00.000000000 +0100
++++ ./src/os_lost.c	2008-10-18 11:05:38.000000000 +0200
+@@ -0,0 +1,49 @@
++/* vi:set ts=8 sts=4 sw=4 noexpandtab:
++ *
++ * VIM - Vi IMproved	by Bram Moolenaar
++ *
++ * Do ":help uganda"  in Vim to read copying and usage conditions.
++ * Do ":help credits" in Vim to see a list of people who contributed.
++ * See README.txt for an overview of the Vim source code.
++ */
++
++#include "os_lost.h"
++
++void mch_breakcheck()
++{
++}
++
++/*
++ * Get name of current directory into buffer 'buf' of length 'len' bytes.
++ * Return OK for success, FAIL for failure.
++ */
++int mch_dirname(char_u* buf, int len)
++{
++    if (!getcwd((char*) buf, len)) {
++        return FAIL;
++    }
++    return OK;
++}
++
++int mch_call_shell(char_u* cmd, int options)
++{
++    int result;
++
++    if (cmd) {
++        result = system(cmd);
++    } else {
++        result = system("sh");
++    }
++
++    return result;
++}
++
++/*
++ * Return 1 if "name" can be found in $PATH and executed, 0 if not.
++ * Return -1 if unknown.
++ */
++int mch_can_exe(char_u* name)
++{
++    /* STUB */
++    return 1;
++}
+diff -prNu ../vim72.orig/src/os_lost.h ./src/os_lost.h
+--- ../vim72.orig/src/os_lost.h	1970-01-01 01:00:00.000000000 +0100
++++ ./src/os_lost.h	2008-10-18 11:05:40.000000000 +0200
+@@ -0,0 +1,46 @@
++/* vi:set ts=8 sts=4 sw=4:
++ *
++ * VIM - Vi IMproved	by Bram Moolenaar
++ *
++ * Do ":help uganda"  in Vim to read copying and usage conditions.
++ * Do ":help credits" in Vim to see a list of people who contributed.
++ * See README.txt for an overview of the Vim source code.
++ */
++
++#include "vim.h"
++
++#include <stdlib.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++
++#define __LOST_VIMDIR       "/packages/vim/7.2"
++#define __LOST_CFG_PATH     __LOST_VIMDIR"/config"
++
++#define VIMRC_FILE          __LOST_CFG_PATH"/vimrc"
++#define EXRC_FILE           __LOST_CFG_PATH"/exrc"
++#define EVIM_FILE           __LOST_CFG_PATH"/evimrc"
++
++#define USR_VIMRC_FILE      __LOST_CFG_PATH"/usrvimrc"
++#define USR_EXRC_FILE       __LOST_CFG_PATH"/usrexrc"
++
++#define DFLT_DIR            "/tmp"
++#define DFLT_BDIR           "/tmp"
++#define DFLT_RUNTIMEPATH    __LOST_VIMDIR"/runtime"
++#define DFLT_HELPFILE       "$VIMRUNTIME/doc/help.txt"
++
++#define DFLT_MAXMEM         1024
++#define DFLT_MAXMEMTOT      2048
++
++/* Muss laut VIM-Lizenz bei veraenderten Kopien rein */
++#define MODIFIED_BY "Antoine Kaufmann <toni@famkaufmann.info>"
++
++
++// XXX Hacks
++#define BASENAMELEN         255
++#define TEMPNAME            "/tmp"
++#define TEMPNAMELEN         8
++
++
++#define mch_getenv(x)       (char_u *)getenv((char *)(x))
++#define mch_remove(x)       unlink((char *)(x))
++#define mch_chdir(s)        chdir(s)
+diff -prNu ../vim72.orig/src/vim.h ./src/vim.h
+--- ../vim72.orig/src/vim.h	2008-08-09 18:03:38.000000000 +0200
++++ ./src/vim.h	2008-10-14 19:34:13.000000000 +0200
+@@ -240,6 +240,11 @@
+ # define __ARGS(x)  x
+ #endif
+ 
++#ifdef __LOST__
++# include "os_lost.h"
++# define __ARGS(x)  x
++#endif
++
+ #if (defined(UNIX) || defined(__EMX__) || defined(VMS)) \
+ 	&& (!defined(MACOS_X) || defined(HAVE_CONFIG_H))
+ # include "os_unix.h"	    /* bring lots of system header files */
