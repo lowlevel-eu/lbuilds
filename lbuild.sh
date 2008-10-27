@@ -181,7 +181,7 @@ internal_pkg_fetch_files() {
 
         wget -O ${fn} ${u}
         if [ $? -ne 0 ]; then
-            return -1
+            die "Das Herunterladen ist fehlgeschlagen"
         fi
     done
     return 0
