@@ -28,14 +28,43 @@ lpatch() {
     while [ "$1" != "" ]; do
         lstatus "    $1"
 
+        SUCCESS=0
         if [ -f $1 ]; then
-            patch -s -p0 < $1 || return -1
+            # Patchlevel durchprobieren
+            for pl in `seq 0 4`; do
+
+                # Komprimierte Patches handhaben
+                case $1 in
+                    *.gz)
+                        SRC="gzip -d -c $1"
+                        ;;
+                    *.bz2)
+                        SRC="bzip2 -d -c $1"
+                        ;;
+                    *)
+                        SRC="cat $1"
+                        ;;
+                esac
+
+                if $SRC | patch -s -p$pl -f >/dev/null; then
+                    # wenn es geklappt hat, kann aufgehoert werden
+                    SUCCESS=1
+                    break
+                fi
+           done
         else
             echo Patch nicht gefunden
             return -1
         fi
+
+        if [ $SUCCESS -eq 0 ]; then
+            echo Patch anwenden fehlgeschlagen
+            return -1
+        fi
+
         shift
     done
+
 }
 
 #
