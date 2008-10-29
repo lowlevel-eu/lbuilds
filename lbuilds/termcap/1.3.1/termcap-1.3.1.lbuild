@@ -1,0 +1,47 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Termcap"
+SRC_URI="http://ftp.gnu.org/gnu/termcap/${P}.tar.gz"
+
+LICENSE="GPL"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+	lunpack ${P}.tar.gz
+	cd ${MY_S} && lpatch ${F}/termcap.patch || die "patching failed"
+}
+
+src_configure() {
+	cd ${MY_S}
+	./configure \
+		--build=`tc-build` \
+		--host=`tc-host` \
+		--target=`tc-host` \
+		--prefix=${D}${R} \
+		--with-termcap="file:/packages/${PN}/${PV}/data/termcap" \
+		|| die "configure failed"
+}
+
+
+src_compile() {
+	cd ${MY_S}
+	lmake CC=`tc-cc` || die "make failed"
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake install || die "make install failed"
+
+	# Termcap-Definitionen kopieren
+	mkdir "${D}/${R}/data"
+	cp termcap.src "${D}/${R}/data/termcap"
+
+	# info-Dateien loeschen
+	rm -r "${D}/${R}/info"
+}
