@@ -43,7 +43,7 @@ init_env() {
     # Nur Paketname ohne Version
     export PN=`expr match "${P}" '^\([^\-]*\)-.*$'`
     # Paketversion
-    export PV=`expr match "${P}" '[^\-]*\-\(.*\)$'`
+    export PV=`expr match "${P}" '[^0-9]*\-\([0-9].*\)$'`
 
     # Das Arbeitsverzeichnis wird nach Kategorien und Paketen unterteilt
     export WORKDIR="${WORKDIR_BASE}/${P}"
@@ -93,7 +93,7 @@ internal_prepare_dirs() {
     mkdir -p ${D}
 
     internal_prepare_env
-
+    return 0
 }
 
 #

@@ -1,0 +1,48 @@
+include lutils
+include toolchain
+
+DESCRIPTION="bsd-games"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Bsd-games"
+SRC_URI="ftp://metalab.unc.edu/pub/Linux/games/${P}.tar.gz
+	http://mirror.switch.ch/ftp/mirror/gentoo/distfiles/bsdgames_${PV}-7.diff.gz"
+
+
+LICENSE="BSD"
+
+BUILD_DEPEND="=ncurses-5.6 =termcap-1.3.1"
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+	lunpack ${P}.tar.gz
+	cd ${MY_S} && lpatch ${DISTDIR}/bsdgames_${PV}-7.diff.gz ${F}/lost.patch \
+		${F}/hack.patch || die "patching failed"
+}
+
+src_configure() {
+	cd ${MY_S}
+
+	echo bsd_games_cfg_build_dirs=\"hack\" >> config.params
+	echo bsd_games_cfg_install_prefix=\"${D}\" >> config.params
+
+	./configure || die "configure failed"
+}
+
+
+src_compile() {
+	cd ${MY_S}
+
+	lmake hack/makedefs || die "make failed"
+	lmake CC="`tc-cc`" \
+		CFLAGS+="-I`tc-incdir`" \
+		CFLAGS+="-I`tc-incdir`/ncurses" \
+		LDFLAGS="-L`tc-libdir`" \
+		|| die "make failed"
+}
+
+src_install() {
+	cd ${MY_S}
+	mkdir -p "${D}/${R}/bin"
+	cp hack/hack "${D}/${R}/bin"
+}

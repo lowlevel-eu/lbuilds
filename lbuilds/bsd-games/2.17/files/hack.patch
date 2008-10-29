@@ -1,0 +1,474 @@
+diff -ur bsd-games-2.17.orig/hack/extern.h bsd-games-2.17/hack/extern.h
+--- bsd-games-2.17.orig/hack/extern.h	2008-10-29 16:46:46.000000000 +0100
++++ bsd-games-2.17/hack/extern.h	2008-10-29 17:00:51.000000000 +0100
+@@ -170,6 +170,7 @@
+ void outheader(void);
+ struct toptenentry;
+ int outentry(int, struct toptenentry *, int);
++/* Schon in LOST-Libc */
+ char *h_itoa(int);
+ const char *ordin(int);
+ void clearlocks(void);
+@@ -511,7 +512,8 @@
+ void standoutend(void);
+ void backsp(void);
+ void bell(void);
+-void delay_output(void);
++/* Schon in ncurses definiert */
++void h_delay_output(void);
+ void cl_eos(void);
+ 
+ /* hack.timeout.c */
+diff -ur bsd-games-2.17.orig/hack/hack.end.c bsd-games-2.17/hack/hack.end.c
+--- bsd-games-2.17.orig/hack/hack.end.c	2008-10-29 16:46:46.000000000 +0100
++++ bsd-games-2.17/hack/hack.end.c	2008-10-29 16:51:03.000000000 +0100
+@@ -318,7 +318,7 @@
+ void
+ topten()
+ {
+-	int             uid = getuid();
++	int             uid = 0;
+ 	int             rank, rank0 = -1, rank1 = 0;
+ 	int             occ_cnt = PERSMAX;
+ 	struct toptenentry *t0, *t1, *tprev;
+@@ -681,7 +681,7 @@
+ 	}
+ 	if (argc <= 1) {
+ #ifdef PERS_IS_UID
+-		uid = getuid();
++		uid = 0;
+ 		playerct = 0;
+ #else
+ 		player0 = plname;
+Dateien bsd-games-2.17.orig/hack/hack.end.o und bsd-games-2.17/hack/hack.end.o sind verschieden.
+diff -ur bsd-games-2.17.orig/hack/hack.main.c bsd-games-2.17/hack/hack.main.c
+--- bsd-games-2.17.orig/hack/hack.main.c	2008-10-29 16:46:46.000000000 +0100
++++ bsd-games-2.17/hack/hack.main.c	2008-10-29 16:52:33.000000000 +0100
+@@ -159,7 +159,7 @@
+ 			(void) strncpy(plname, s, sizeof(plname) - 1);
+ 		if (!*plname && (s = getenv("LOGNAME")))
+ 			(void) strncpy(plname, s, sizeof(plname) - 1);
+-		if (!*plname && (s = getlogin()))
++		if (!*plname && (s = "LOST-Benutzer"))
+ 			(void) strncpy(plname, s, sizeof(plname) - 1);
+ 	}
+ 
+@@ -308,7 +308,7 @@
+ 	}
+ #endif
+ 	setftty();
+-	(void) sprintf(SAVEF, "save/%d%s", getuid(), plname);
++	(void) sprintf(SAVEF, "save/%d%s", 0, plname);
+ 	regularize(SAVEF + 5);	/* avoid . or / in name */
+ 	if ((fd = open(SAVEF, O_RDONLY)) >= 0 &&
+ 	    (uptodate(fd) || unlink(SAVEF) == 666)) {
+@@ -546,8 +546,8 @@
+ 	    && strcmp(dir, HACKDIR)	/* and not the default? */
+ #endif
+ 		) {
+-		(void) setuid(getuid());	/* Ron Wessels */
+-		(void) setregid(getgid(), getgid());
++		//(void) setuid(getuid());	/* Ron Wessels */
++		//(void) setregid(getgid(), getgid());
+ 	}
+ #endif
+ 
+Dateien bsd-games-2.17.orig/hack/hack.main.o und bsd-games-2.17/hack/hack.main.o sind verschieden.
+diff -ur bsd-games-2.17.orig/hack/hack.pager.c bsd-games-2.17/hack/hack.pager.c
+--- bsd-games-2.17.orig/hack/hack.pager.c	2008-10-29 16:46:46.000000000 +0100
++++ bsd-games-2.17/hack/hack.pager.c	2008-10-29 16:50:15.000000000 +0100
+@@ -367,7 +367,7 @@
+ 	const char           *fnam;
+ 	boolean         silent;
+ {
+-#ifdef DEF_PAGER		/* this implies that UNIX is defined */
++#if DEF_PAGER && 0		/* this implies that UNIX is defined */
+ 	{
+ 		/* use external pager; this may give security problems */
+ 
+@@ -425,11 +425,11 @@
+ {
+ 	char           *str;
+ 	if (child(0)) {
+-		if ((str = getenv("SHELL")) != NULL)
++		/*if ((str = getenv("SHELL")) != NULL)
+ 			execl(str, str, (char *) 0);
+ 		else
+ 			execl("/bin/sh", "sh", (char *) 0);
+-		pline("sh: cannot execute.");
++		pline("sh: cannot execute.");*/
+ 		exit(1);
+ 	}
+ 	return (0);
+@@ -464,8 +464,8 @@
+ 	f = fork();
+ 	if (f == 0) {		/* child */
+ 		settty((char *) 0);	/* also calls end_screen() */
+-		(void) setuid(getuid());
+-		(void) setgid(getgid());
++		//(void) setuid(getuid());
++		//(void) setgid(getgid());
+ #ifdef CHDIR
+ 		(void) chdir(getenv("HOME"));
+ #endif	/* CHDIR */
+Dateien bsd-games-2.17.orig/hack/hack.pager.o und bsd-games-2.17/hack/hack.pager.o sind verschieden.
+diff -ur bsd-games-2.17.orig/hack/hack.pri.c bsd-games-2.17/hack/hack.pri.c
+--- bsd-games-2.17.orig/hack/hack.pri.c	2008-10-29 16:46:46.000000000 +0100
++++ bsd-games-2.17/hack/hack.pri.c	2008-10-29 17:01:06.000000000 +0100
+@@ -171,7 +171,7 @@
+ 		return;
+ 	}
+ 	if (prevx >= 0 && cansee(prevx, prevy)) {
+-		delay_output();
++		h_delay_output();
+ 		prl(prevx, prevy);	/* in case there was a monster */
+ 		at(prevx, prevy, levl[prevx][prevy].scrsym);
+ 	}
+@@ -218,7 +218,7 @@
+ 	/* normal call */
+ 	if (cansee(x, y)) {
+ 		if (cnt)
+-			delay_output();
++			h_delay_output();
+ 		at(x, y, let);
+ 		tc[cnt].x = x;
+ 		tc[cnt].y = y;
+Dateien bsd-games-2.17.orig/hack/hack.pri.o und bsd-games-2.17/hack/hack.pri.o sind verschieden.
+diff -ur bsd-games-2.17.orig/hack/hack.save.c bsd-games-2.17/hack/hack.save.c
+--- bsd-games-2.17.orig/hack/hack.save.c	2008-10-29 16:46:46.000000000 +0100
++++ bsd-games-2.17/hack/hack.save.c	2008-10-29 16:51:54.000000000 +0100
+@@ -116,7 +116,7 @@
+ 	saveobjchn(fd, invent);
+ 	saveobjchn(fd, fcobj);
+ 	savemonchn(fd, fallen_down);
+-	tmp = getuid();
++	tmp = 0;
+ 	bwrite(fd, (char *) &tmp, sizeof tmp);
+ 	bwrite(fd, (char *) &flags, sizeof(struct flag));
+ 	bwrite(fd, (char *) &dlevel, sizeof dlevel);
+@@ -175,7 +175,7 @@
+ 	fcobj = restobjchn(fd);
+ 	fallen_down = restmonchn(fd);
+ 	mread(fd, (char *) &tmp, sizeof tmp);
+-	if (tmp != (int)getuid()) {	/* strange ... */
++	if (tmp != (int)0) {	/* strange ... */
+ 		(void) close(fd);
+ 		(void) unlink(SAVEF);
+ 		puts("Saved game was not yours.");
+Dateien bsd-games-2.17.orig/hack/hack.save.o und bsd-games-2.17/hack/hack.save.o sind verschieden.
+diff -ur bsd-games-2.17.orig/hack/hack.termcap.c bsd-games-2.17/hack/hack.termcap.c
+--- bsd-games-2.17.orig/hack/hack.termcap.c	2008-10-29 16:46:46.000000000 +0100
++++ bsd-games-2.17/hack/hack.termcap.c	2008-10-29 17:01:57.000000000 +0100
+@@ -80,7 +80,7 @@
+ char           *HO, *CL, *CE, *UP, *CM, *ND, *XD, *BC, *SO, *SE, *TI, *TE;
+ static char    *VS, *VE;
+ static int      SG;
+-char            PC = '\0';
++char            h_PC = '\0';
+ char           *CD;		/* tested in pri.c: docorner() */
+ int             CO, LI;		/* used in pri.c and whatis.c */
+ 
+@@ -101,7 +101,7 @@
+ 	if (tgetent(tptr, term) < 1)
+ 		error("Unknown terminal type: %s.", term);
+ 	if ((pc = tgetstr("pc", &tbufptr)) != NULL)
+-		PC = *pc;
++		h_PC = *pc;
+ 	if (!(BC = tgetstr("bc", &tbufptr))) {
+ 		if (!tgetflag("bs"))
+ 			error("Terminal must backspace.");
+@@ -326,12 +326,13 @@
+ }
+ 
+ void
+-delay_output()
++h_delay_output()
+ {
+ 
+ 	/* delay 50 ms - could also use a 'nap'-system call */
+ 	  /* or the usleep call like this :-) */
+-	usleep(50000);
++        /* or the msleep call like this :-) */
++        msleep(50);
+ }
+ 
+ void
+Dateien bsd-games-2.17.orig/hack/hack.termcap.o und bsd-games-2.17/hack/hack.termcap.o sind verschieden.
+diff -ur bsd-games-2.17.orig/config.params bsd-games-2.17/config.params
+--- bsd-games-2.17.orig/config.params	2008-10-29 17:49:06.000000000 +0100
++++ bsd-games-2.17/config.params	2008-10-29 17:52:11.000000000 +0100
+@@ -42,3 +42,5 @@
+ bsd_games_cfg_build_dirs="hack"
+ bsd_games_cfg_install_prefix="/home/toni/arbeitskopien/lost_packages/work/bsd-games-2.17/root"
+ bsd_games_cfg_build_dirs="hack"
++bsd_games_cfg_build_dirs="hack"
++bsd_games_cfg_install_prefix="/home/toni/arbeitskopien/lost_packages/work/bsd-games-2.17/root"
+Nur in bsd-games-2.17: GNUmakefile.
+Nur in bsd-games-2.17/hack: alloc.d.
+Nur in bsd-games-2.17/hack: alloc.o.
+Nur in bsd-games-2.17/hack: hack.
+Nur in bsd-games-2.17/hack: hack.6.
+Nur in bsd-games-2.17/hack: hack.apply.d.
+Nur in bsd-games-2.17/hack: hack.apply.o.
+Nur in bsd-games-2.17/hack: hack.bones.d.
+Nur in bsd-games-2.17/hack: hack.bones.o.
+Nur in bsd-games-2.17/hack: hack.cmd.d.
+Nur in bsd-games-2.17/hack: hack.cmd.o.
+Nur in bsd-games-2.17/hack: hack.d.
+Nur in bsd-games-2.17/hack: hack.Decl.d.
+Nur in bsd-games-2.17/hack: hack.Decl.o.
+Nur in bsd-games-2.17/hack: hack.do.d.
+Nur in bsd-games-2.17/hack: hack.dog.d.
+Nur in bsd-games-2.17/hack: hack.dog.o.
+Nur in bsd-games-2.17/hack: hack.do_name.d.
+Nur in bsd-games-2.17/hack: hack.do_name.o.
+Nur in bsd-games-2.17/hack: hack.do.o.
+Nur in bsd-games-2.17/hack: hack.do_wear.d.
+Nur in bsd-games-2.17/hack: hack.do_wear.o.
+Nur in bsd-games-2.17/hack: hack.eat.d.
+Nur in bsd-games-2.17/hack: hack.eat.o.
+diff -ur bsd-games-2.17.orig/hack/hack.end.c bsd-games-2.17/hack/hack.end.c
+--- bsd-games-2.17.orig/hack/hack.end.c	2008-10-29 17:49:06.000000000 +0100
++++ bsd-games-2.17/hack/hack.end.c	2008-10-29 17:52:11.000000000 +0100
+@@ -287,10 +287,12 @@
+ 		getret();	/* all those pieces of coloured glass ... */
+ 		cls();
+ 	}
++#if 0
+ #ifdef WIZARD
+ 	if (!wizard)
+ #endif	/* WIZARD */
+ 		topten();
++#endif
+ 	if (done_stopprint)
+ 		printf("\n\n");
+ 	exit(0);
+@@ -328,7 +330,8 @@
+ 	FILE           *rfile;
+ 	int 		flg = 0;
+ #define	HUP	if(!done_hup)
+-	while (link(recfile, reclock) == -1) {
++#if 0
++    while (link(recfile, reclock) == -1) {
+ 		HUP             perror(reclock);
+ 		if (!sleepct--) {
+ 			HUP             puts("I give up. Sorry.");
+@@ -340,9 +343,10 @@
+ 		HUP(void) fflush(stdout);
+ 		sleep(1);
+ 	}
++#endif
+ 	if (!(rfile = fopen(recfile, "r"))) {
+ 		HUP             puts("Cannot open record file!");
+-		goto unlock;
++		//goto unlock;
+ 	}
+ 	HUP(void) putchar('\n');
+ 
+@@ -421,7 +425,7 @@
+ 		(void) fclose(rfile);
+ 		if (!(rfile = fopen(recfile, "w"))) {
+ 			HUP             puts("Cannot write record file\n");
+-			goto unlock;
++			//goto unlock;
+ 		}
+ 		if (!done_stopprint)
+ 			if (rank0 > 0) {
+@@ -477,8 +481,10 @@
+ 		if (!done_stopprint)
+ 			(void) outentry(0, t0, 1);
+ 	(void) fclose(rfile);
+-unlock:
++#if 0
++    unlock:
+ 	(void) unlink(reclock);
++#endif
+ }
+ 
+ void
+Nur in bsd-games-2.17/hack: hack.end.d.
+Nur in bsd-games-2.17/hack: hack.end.o.
+Nur in bsd-games-2.17/hack: hack.engrave.d.
+Nur in bsd-games-2.17/hack: hack.engrave.o.
+Nur in bsd-games-2.17/hack: hack.fight.d.
+Nur in bsd-games-2.17/hack: hack.fight.o.
+Nur in bsd-games-2.17/hack: hack.invent.d.
+Nur in bsd-games-2.17/hack: hack.invent.o.
+Nur in bsd-games-2.17/hack: hack.ioctl.d.
+Nur in bsd-games-2.17/hack: hack.ioctl.o.
+Nur in bsd-games-2.17/hack: hack.lev.d.
+Nur in bsd-games-2.17/hack: hack.lev.o.
+diff -ur bsd-games-2.17.orig/hack/hack.main.c bsd-games-2.17/hack/hack.main.c
+--- bsd-games-2.17.orig/hack/hack.main.c	2008-10-29 17:49:06.000000000 +0100
++++ bsd-games-2.17/hack/hack.main.c	2008-10-29 17:52:11.000000000 +0100
+@@ -106,10 +106,10 @@
+ #endif
+ 
+ 	/* Check for dirty tricks with closed fds 0, 1, 2 */
+-	fd = open("/dev/null", O_RDONLY);
++	/*fd = open("/dev/null", O_RDONLY);
+ 	if (fd < 3)
+ 		exit(1);
+-	close(fd);
++	close(fd);*/
+ 
+ 	hname = argv[0];
+ 	hackpid = getpid();
+@@ -277,7 +277,7 @@
+ 		(void) signal(SIGINT, SIG_IGN);
+ 		if (!locknum)
+ 			(void) strcpy(lock, plname);
+-		getlock();	/* sets lock if locknum != 0 */
++		//getlock();	/* sets lock if locknum != 0 */
+ #ifdef WIZARD
+ 	} else {
+ 		char           *sfoo;
+@@ -568,11 +568,11 @@
+ 
+ 		if (dir == NULL)
+ 			dir = ".";
+-		if ((fd = open(RECORD, O_RDWR)) < 0) {
++		/*if ((fd = open(RECORD, O_RDWR)) < 0) {
+ 			printf("Warning: cannot write %s/%s", dir, RECORD);
+ 			getret();
+ 		} else
+-			(void) close(fd);
++			(void) close(fd);*/
+ 	}
+ }
+ #endif
+Nur in bsd-games-2.17/hack: hack.main.d.
+Nur in bsd-games-2.17/hack: hack.main.o.
+Nur in bsd-games-2.17/hack: hack.makemon.d.
+Nur in bsd-games-2.17/hack: hack.makemon.o.
+Nur in bsd-games-2.17/hack: hack.mhitu.d.
+Nur in bsd-games-2.17/hack: hack.mhitu.o.
+Nur in bsd-games-2.17/hack: hack.mklev.d.
+Nur in bsd-games-2.17/hack: hack.mklev.o.
+Nur in bsd-games-2.17/hack: hack.mkmaze.d.
+Nur in bsd-games-2.17/hack: hack.mkmaze.o.
+Nur in bsd-games-2.17/hack: hack.mkobj.d.
+Nur in bsd-games-2.17/hack: hack.mkobj.o.
+Nur in bsd-games-2.17/hack: hack.mkshop.d.
+Nur in bsd-games-2.17/hack: hack.mkshop.o.
+Nur in bsd-games-2.17/hack: hack.mon.d.
+Nur in bsd-games-2.17/hack: hack.mon.o.
+Nur in bsd-games-2.17/hack: hack.monst.d.
+Nur in bsd-games-2.17/hack: hack.monst.o.
+Nur in bsd-games-2.17/hack: hack.o.
+Nur in bsd-games-2.17/hack: hack.objnam.d.
+Nur in bsd-games-2.17/hack: hack.objnam.o.
+Nur in bsd-games-2.17/hack: hack.o_init.d.
+Nur in bsd-games-2.17/hack: hack.o_init.o.
+Nur in bsd-games-2.17/hack: hack.onames.h.
+Nur in bsd-games-2.17/hack: hack.options.d.
+Nur in bsd-games-2.17/hack: hack.options.o.
+Nur in bsd-games-2.17/hack: hack.pager.d.
+Nur in bsd-games-2.17/hack: hack.pager.o.
+Nur in bsd-games-2.17/hack: hack.potion.d.
+Nur in bsd-games-2.17/hack: hack.potion.o.
+Nur in bsd-games-2.17/hack: hack.pri.d.
+Nur in bsd-games-2.17/hack: hack.pri.o.
+Nur in bsd-games-2.17/hack: hack.read.d.
+Nur in bsd-games-2.17/hack: hack.read.o.
+Nur in bsd-games-2.17/hack: hack.rip.d.
+Nur in bsd-games-2.17/hack: hack.rip.o.
+Nur in bsd-games-2.17/hack: hack.rumors.d.
+Nur in bsd-games-2.17/hack: hack.rumors.o.
+Nur in bsd-games-2.17/hack: hack.save.d.
+Nur in bsd-games-2.17/hack: hack.save.o.
+Nur in bsd-games-2.17/hack: hack.search.d.
+Nur in bsd-games-2.17/hack: hack.search.o.
+Nur in bsd-games-2.17/hack: hack.shk.d.
+Nur in bsd-games-2.17/hack: hack.shknam.d.
+Nur in bsd-games-2.17/hack: hack.shknam.o.
+Nur in bsd-games-2.17/hack: hack.shk.o.
+Nur in bsd-games-2.17/hack: hack.steal.d.
+Nur in bsd-games-2.17/hack: hack.steal.o.
+Nur in bsd-games-2.17/hack: hack.termcap.d.
+Nur in bsd-games-2.17/hack: hack.termcap.o.
+Nur in bsd-games-2.17/hack: hack.timeout.d.
+Nur in bsd-games-2.17/hack: hack.timeout.o.
+Nur in bsd-games-2.17/hack: hack.topl.d.
+Nur in bsd-games-2.17/hack: hack.topl.o.
+Nur in bsd-games-2.17/hack: hack.track.d.
+Nur in bsd-games-2.17/hack: hack.track.o.
+Nur in bsd-games-2.17/hack: hack.trap.d.
+Nur in bsd-games-2.17/hack: hack.trap.o.
+diff -ur bsd-games-2.17.orig/hack/hack.tty.c bsd-games-2.17/hack/hack.tty.c
+--- bsd-games-2.17.orig/hack/hack.tty.c	2008-10-29 17:49:06.000000000 +0100
++++ bsd-games-2.17/hack/hack.tty.c	2008-10-29 17:52:11.000000000 +0100
+@@ -353,7 +353,8 @@
+ 	int             sym;
+ 
+ 	(void) fflush(stdout);
+-	if ((sym = getchar()) == EOF)
++#if 0
++    if ((sym = getchar()) == EOF)
+ #ifdef NR_OF_EOFS
+ 	{			/*
+ 			         * Some SYSV systems seem to return EOFs for various reasons
+@@ -376,6 +377,9 @@
+ 	if (flags.toplin == 1)
+ 		flags.toplin = 2;
+ 	return ((char) sym);
++#endif
++    while ((sym = getchar()) == EOF);
++    return sym;
+ }
+ 
+ void
+Nur in bsd-games-2.17/hack: hack.tty.d.
+Nur in bsd-games-2.17/hack: hack.tty.o.
+Nur in bsd-games-2.17/hack: hack.u_init.d.
+Nur in bsd-games-2.17/hack: hack.u_init.o.
+diff -ur bsd-games-2.17.orig/hack/hack.unix.c bsd-games-2.17/hack/hack.unix.c
+--- bsd-games-2.17.orig/hack/hack.unix.c	2003-12-17 03:47:37.000000000 +0100
++++ bsd-games-2.17/hack/hack.unix.c	2008-10-29 17:52:11.000000000 +0100
+@@ -274,7 +274,7 @@
+ 
+ 	/* we ignore QUIT and INT at this point */
+ 	if (link(HLOCK, LLOCK) == -1) {
+-		int             errnosv = errno;
++		/*int             errnosv = errno;
+ 
+ 		perror(HLOCK);
+ 		printf("Cannot link %s to %s\n", LLOCK, HLOCK);
+@@ -292,7 +292,7 @@
+ 			printf("I don't know what is wrong.");
+ 		}
+ 		getret();
+-		error("%s", "");
++		error("%s", "");*/
+ 		/* NOTREACHED */
+ 	}
+ 	regularize(lock);
+Nur in bsd-games-2.17/hack: hack.unix.d.
+Nur in bsd-games-2.17/hack: hack.unix.o.
+Nur in bsd-games-2.17/hack: hack.vault.d.
+Nur in bsd-games-2.17/hack: hack.vault.o.
+Nur in bsd-games-2.17/hack: hack.version.d.
+Nur in bsd-games-2.17/hack: hack.version.o.
+Nur in bsd-games-2.17/hack: hack.wield.d.
+Nur in bsd-games-2.17/hack: hack.wield.o.
+Nur in bsd-games-2.17/hack: hack.wizard.d.
+Nur in bsd-games-2.17/hack: hack.wizard.o.
+Nur in bsd-games-2.17/hack: hack.worm.d.
+Nur in bsd-games-2.17/hack: hack.worm.o.
+Nur in bsd-games-2.17/hack: hack.worn.d.
+Nur in bsd-games-2.17/hack: hack.worn.o.
+Nur in bsd-games-2.17/hack: hack.zap.d.
+Nur in bsd-games-2.17/hack: hack.zap.o.
+Nur in bsd-games-2.17/hack: makedefs.
+Nur in bsd-games-2.17/hack: makedefs.d.
+Nur in bsd-games-2.17/hack: makedefs.o.
+Nur in bsd-games-2.17/hack: pathnames.h.
+Nur in bsd-games-2.17/hack: rnd.d.
+Nur in bsd-games-2.17/hack: rnd.o.
+Nur in bsd-games-2.17: hide-game.
+Nur in bsd-games-2.17/include: bsd-games.h.
+Nur in bsd-games-2.17: install-man.
+Nur in bsd-games-2.17: install-score.
+Nur in bsd-games-2.17: Makeconfig.
+Nur in bsd-games-2.17: subst.rules.
+Nur in bsd-games-2.17: subst.sed.
