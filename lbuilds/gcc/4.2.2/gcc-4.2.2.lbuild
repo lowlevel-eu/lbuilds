@@ -17,7 +17,7 @@ MY_S="${S}/${P}"
 
 src_unpack() {
 	lunpack gcc-core-${PV}.tar.bz2
-	cd ${MY_S} && lpatch ${F}/gcc-${PV}.patch || die "patching failed"
+	cd ${MY_S} && lpatch ${F}/gcc-${PV}.patch ${F}/pathsep.patch || die "patching failed"
 }
 
 src_compile() {
@@ -50,7 +50,7 @@ src_install() {
 	cd ${MY_S}/build
 	lmake DESTDIR="${D}" install || die "make install failed"
 
-	rm -r ${D}${R}/libexec/gcc/`tc-host`/${PV}/install-tools ${D}${R}/info ${D}${R}/man
-	rm ${D}${R}/bin/gccbug
+	rm -r ${D}${R}/libexec/gcc/`tc-host`/${PV}/install-tools ${D}${R}/info ${D}${R}/man ${D}${R}/lib/libiberty.a ${D}${R}/lib/${PN}/`tc-host`/${PV}/install-tools
+	rm ${D}${R}/bin/gccbug ${D}${R}/bin/gcov ${D}${R}/bin/`tc-host`-*
 	lstrip ${D}${R}/bin/* ${D}${R}/libexec/gcc/`tc-host`/${PV}/*
 }
