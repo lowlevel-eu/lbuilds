@@ -1,0 +1,59 @@
+include lutils
+include toolchain
+include freepascal
+
+DESCRIPTION="Tools necessary to build programs"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/FPC"
+SRC_URI="ftp://ftp.freepascal.org/pub/fpc/snapshot/trunk/source/fpc.zip"
+
+LICENSE="GPL-2"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/fpc"
+
+src_unpack() {
+	fpc-available || die "freepascal nicht verfuegbar"
+
+	lunpack fpc.zip
+	cd ${MY_S}
+	lpatch ${F}/fpc-${PV}-compiler.patch ${F}/fpc-${PV}-fpcmake.patch ${F}/fpc-${PV}-tyndur.patch || die "patching failed"
+
+	# LOST-Unitskopieren
+	mkdir -p rtl/units/i386-tyndur
+	cp `fpc-unitpath`/* rtl/units/i386-tyndur
+
+}
+
+src_configure() {
+	cd ${MY_S}
+
+	# FPCmake durchlaufen lassen damit das LOST-Target bekannt ist
+	fpc-fpcmake -Tall -r || die "fpcmake failed"
+}
+
+src_compile() {
+	cd ${MY_S}/compiler
+	# eigentlichen Compiler bauen
+	lmake cycle \
+		FPC="`fpc-hostfpc`" \
+		RELEASE=1 \
+		BINUTILSPREFIX="`tc-host`-" \
+		OS_TARGET=tyndur \
+		CPU_TARGET=i386 \
+		CROSSOPT="-XX" \
+		|| die "make failed"
+}
+
+src_install() {
+	mkdir -p "${D}${R}/bin"
+	mkdir -p "${D}${R}/units"
+
+	# Compiler und Konfigurationsdatei kopieren
+	cp ${MY_S}/compiler/ppc386 "${D}${R}/bin/fpc"
+	cp ${F}/fpc.cfg ${D}${R}
+
+	# Units kopieren
+	cp `fpc-unitpath`/* "${D}${R}/units"
+}

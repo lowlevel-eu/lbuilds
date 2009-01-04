@@ -1,0 +1,122 @@
+Index: fpc/compiler/options.pas
+===================================================================
+--- fpc.orig/compiler/options.pas
++++ fpc/compiler/options.pas
+@@ -2223,10 +2223,16 @@ begin
+        foundfn:=configpath+fn
+      else
+ {$ifndef Unix}
++{$ifndef TYNDUR}
+       if CfgFileExists(exepath+fn) then
+        foundfn:=exepath+fn
+      else
+ {$else}
++      if CfgFileExists('file:/packages/fpc/2.3.x/'+fn) then
++       foundfn:='file:/packages/fpc/2.3.x/'+fn
++     else
++{$endif}
++{$else}
+       if CfgFileExists('/etc/'+fn) then
+        foundfn:='/etc/'+fn
+      else
+Index: fpc/compiler/systems/t_tyndur.pas
+===================================================================
+--- fpc.orig/compiler/systems/t_tyndur.pas
++++ fpc/compiler/systems/t_tyndur.pas
+@@ -112,15 +112,7 @@ Constructor TLinkerTyndur.Create;
+ begin
+   Inherited Create;
+   if not Dontlinkstdlibpath Then
+-{$ifdef x86_64}
+-   LibrarySearchPath.AddPath(sysrootpath,'/lib64;/usr/lib64;/usr/X11R6/lib64',true);
+-{$else}
+-{$ifdef powerpc64}
+-   LibrarySearchPath.AddPath(sysrootpath,'/lib64;/usr/lib64;/usr/X11R6/lib64',true);
+-{$else powerpc64}
+-   LibrarySearchPath.AddPath(sysrootpath,'/lib;/usr/lib;/usr/X11R6/lib',true);
+-{$endif powerpc64}
+-{$endif x86_64}
++    LibrarySearchPath.AddPath('file:/system/lib',true);
+ end;
+ 
+ 
+@@ -130,7 +122,7 @@ procedure TLinkerTyndur.SetDefaultInfo;
+ }
+ 
+ const
+-{$ifdef i386}   platform_select='-b elf32-i386 -m elf_i386';{$endif}
++{$ifdef i386}   platform_select='';{$endif}
+ {$ifdef x86_64} platform_select='-b elf64-x86-64 -m elf_x86_64';{$endif}
+ 
+ var
+@@ -138,7 +130,11 @@ var
+ begin
+   with Info do
+    begin
+-     ExeCmd[1]:='ld -Ttext=0x40000000 '+platform_select+' $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -L. -o $EXE';
++     {$ifdef LOST}
++        ExeCmd[1]:='file:/system/lpt-bin/ld -Ttext=0x40000000 '+platform_select+' $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -L. -o $EXE -lc';
++     {$else}
++        ExeCmd[1]:='gcc '+platform_select+' $OPT -L. -o $EXE';
++     {$endif}
+      { when we want to cross-link we need to override default library paths }
+      if length(sysrootpath) > 0 then
+        ExeCmd[1]:=ExeCmd[1]+' -T';
+@@ -372,26 +368,7 @@ begin
+       { add objectfiles, start with prt0 always }
+       if not (target_info.system in system_internal_sysinit) and (prtobj<>'') then
+        AddFileName(maybequoted(FindObjectFile(prtobj,'',false)));
+-      { try to add crti and crtbegin if linking to C }
+-      if linklibc and (libctype<>uclibc) then
+-       begin
+-         { x86_64 requires this to use entry/exit code with pic,
+-           see also issue #8210 regarding a discussion
+-           no idea about the other non i386 CPUs (FK)
+-         }
+-{$ifdef x86_64}
+-         if current_module.islibrary then
+-           begin
+-             if librarysearchpath.FindFile('crtbeginS.o',false,s) then
+-               AddFileName(s);
+-           end
+-         else
+-{$endif x86_64}
+-           if librarysearchpath.FindFile('crtbegin.o',false,s) then
+-             AddFileName(s);
+-         if librarysearchpath.FindFile('crti.o',false,s) then
+-           AddFileName(s);
+-       end;
++
+       { main objectfiles }
+       while not ObjectFiles.Empty do
+        begin
+@@ -441,12 +418,13 @@ begin
+              end;
+           end;
+          { be sure that libc is the last lib }
+-         if linklibc and not reorder then
++         //if linklibc and not reorder then
++          { Wir linken immer gegen die Libc }
+           Add('-lc');
+          { when we have -static for the linker the we also need libgcc }
+-         if (cs_link_staticflag in current_settings.globalswitches) then
++         //if (cs_link_staticflag in current_settings.globalswitches) then
+           Add('-lgcc');
+-         Add(')');
++         //Add(')');
+        end;
+ 
+       { objects which must be at the end }
+Index: fpc/Makefile.fpc
+===================================================================
+--- fpc.orig/Makefile.fpc
++++ fpc/Makefile.fpc
+@@ -7,7 +7,7 @@ name=fpc
+ version=2.3.1
+ 
+ [target]
+-dirs=compiler rtl utils packages ide installer
++dirs=compiler rtl utils
+ 
+ [require]
+ nortl=y

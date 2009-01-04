@@ -88,6 +88,10 @@ lunpack() {
         *.tar.bz2)
             tar -xjf ${fn}
             ;;
+
+        *.zip)
+            unzip -qo ${fn}
+            ;;
     esac
     return $?
 }
