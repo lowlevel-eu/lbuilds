@@ -1,0 +1,46 @@
+Index: libnxml-0.18.3/src/nxml_tools.c
+===================================================================
+--- libnxml-0.18.3.orig/src/nxml_tools.c
++++ libnxml-0.18.3/src/nxml_tools.c
+@@ -25,11 +25,37 @@
+ #include "nxml.h"
+ 
+ int
+-__nxml_atoi (char *str)
++__nxml_atoi (char *s)
+ {
+-  int ret;
+-  sscanf (str, "%x", (unsigned int *) &ret);
+-  return ret;
++	size_t digit = 0;
++	size_t highest = 0;
++	size_t i;
++    for (i=0;s[i] != '\0';i++)
++	{
++		if (highest == 0)highest = 1;
++		else highest *= 16;
++		digit++;
++	}
++
++	unsigned int result = 0;
++	for (i=0;i < digit;i++)
++	{
++        switch (s[i]) {
++            case '0' ... '9':
++		        result += (s[i] - '0') * highest;
++                break;
++            case 'A' ... 'F':
++		        result += (s[i] - 'A' + 10) * highest;
++                break;
++            case 'a' ... 'f':
++		        result += (s[i] - 'a' + 10) * highest;
++                break;
++            default:
++                return 0;
++        }
++		highest /= 16;
++	}
++	return result;
+ }
+ 
+ int

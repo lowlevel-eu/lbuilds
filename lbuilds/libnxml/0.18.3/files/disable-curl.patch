@@ -1,0 +1,195 @@
+Index: libnxml-0.18.3/src/nxml.h
+===================================================================
+--- libnxml-0.18.3.orig/src/nxml.h
++++ libnxml-0.18.3/src/nxml.h
+@@ -19,7 +19,9 @@
+ #ifndef __N_XML_H__
+ #define __N_XML_H__
+ 
++#if HAVE_LIBCURL
+ #include <curl/curl.h>
++#endif
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+@@ -191,7 +193,9 @@ struct __nxml_private_t
+   char *user_agent;
+   char textindent;
+ 
++#ifdef HAVE_LIBCURL
+   CURLcode curl_error;
++#endif
+ 
+   __nxml_entity_t *entities;
+ };
+@@ -425,13 +429,16 @@ nxml_error_t	nxml_set_textindent	(nxml_t
+  * \param size The function sets here the length of the file if it's not NULL.
+  * \return a buffer or NULL
+  */
++#ifdef HAVE_LIBCURL
+ nxml_error_t	nxml_download_file	(nxml_t *nxml,
+ 					 char *url,
+ 					 char ** buffer,
+ 					 size_t *size);
++#endif
+ 
+ /* PARSER FUNCTIONS *********************************************************/
+ 
++#ifdef HAVE_LIBCURL
+ /**
+  * This function parses a url. It downloads a url with curl library and
+  * parses it.
+@@ -442,6 +449,7 @@ nxml_error_t	nxml_download_file	(nxml_t
+  */
+ nxml_error_t	nxml_parse_url		(nxml_t * nxml,
+ 					 char *url);
++#endif
+ 
+ /** 
+  * This function parses a file.
+@@ -695,8 +703,10 @@ char *		nxml_strerror		(nxml_t * nxml,
+  * \param err the error code that you need as string
+  * \return the CURLcode
+  */
++#ifdef HAVE_LIBCURL
+ CURLcode	nxml_curl_error		(nxml_t * nxml,
+ 					 nxml_error_t err);
++#endif
+ 
+ /**
+  * This function return the line of a error of parse.
+Index: libnxml-0.18.3/src/nxml.h.in
+===================================================================
+--- libnxml-0.18.3.orig/src/nxml.h.in
++++ libnxml-0.18.3/src/nxml.h.in
+@@ -19,7 +19,9 @@
+ #ifndef __N_XML_H__
+ #define __N_XML_H__
+ 
++#if HAVE_LIBCURL
+ #include <curl/curl.h>
++#endif
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+@@ -191,7 +193,9 @@ struct __nxml_private_t
+   char *user_agent;
+   char textindent;
+ 
++#ifdef HAVE_LIBCURL
+   CURLcode curl_error;
++#endif
+ 
+   __nxml_entity_t *entities;
+ };
+@@ -425,13 +429,16 @@ nxml_error_t	nxml_set_textindent	(nxml_t
+  * \param size The function sets here the length of the file if it's not NULL.
+  * \return a buffer or NULL
+  */
++#ifdef HAVE_LIBCURL
+ nxml_error_t	nxml_download_file	(nxml_t *nxml,
+ 					 char *url,
+ 					 char ** buffer,
+ 					 size_t *size);
++#endif
+ 
+ /* PARSER FUNCTIONS *********************************************************/
+ 
++#ifdef HAVE_LIBCURL
+ /**
+  * This function parses a url. It downloads a url with curl library and
+  * parses it.
+@@ -442,6 +449,7 @@ nxml_error_t	nxml_download_file	(nxml_t
+  */
+ nxml_error_t	nxml_parse_url		(nxml_t * nxml,
+ 					 char *url);
++#endif
+ 
+ /** 
+  * This function parses a file.
+@@ -695,8 +703,10 @@ char *		nxml_strerror		(nxml_t * nxml,
+  * \param err the error code that you need as string
+  * \return the CURLcode
+  */
++#ifdef HAVE_LIBCURL
+ CURLcode	nxml_curl_error		(nxml_t * nxml,
+ 					 nxml_error_t err);
++#endif
+ 
+ /**
+  * This function return the line of a error of parse.
+Index: libnxml-0.18.3/src/nxml_download.c
+===================================================================
+--- libnxml-0.18.3.orig/src/nxml_download.c
++++ libnxml-0.18.3/src/nxml_download.c
+@@ -22,6 +22,7 @@
+ # error Use configure; make; make install
+ #endif
+ 
++#ifdef HAVE_LIBCURL
+ #include "nxml.h"
+ 
+ typedef struct __nxml_download_t__ __nxml_download_t;
+@@ -142,4 +143,6 @@ nxml_download_file (nxml_t * nxml, char
+   return NXML_OK;
+ }
+ 
++#endif
++
+ /* EOF */
+Index: libnxml-0.18.3/src/nxml_parser.c
+===================================================================
+--- libnxml-0.18.3.orig/src/nxml_parser.c
++++ libnxml-0.18.3/src/nxml_parser.c
+@@ -1388,6 +1388,7 @@ __nxml_parse_buffer (nxml_t * nxml, char
+ nxml_error_t
+ nxml_parse_url (nxml_t * nxml, char *url)
+ {
++#ifdef HAVE_LIBCURL
+   nxml_error_t err;
+   char *buffer;
+   size_t size;
+@@ -1416,6 +1417,9 @@ nxml_parse_url (nxml_t * nxml, char *url
+   free (buffer);
+ 
+   return err;
++#else
++  return NXML_ERR_DOWNLOAD;
++#endif
+ }
+ 
+ nxml_error_t
+Index: libnxml-0.18.3/src/nxml_error.c
+===================================================================
+--- libnxml-0.18.3.orig/src/nxml_error.c
++++ libnxml-0.18.3/src/nxml_error.c
+@@ -36,9 +36,13 @@ nxml_strerror (nxml_t * nxml, nxml_error
+       return "Parser error";
+ 
+     case NXML_ERR_DOWNLOAD:
++#ifdef HAVE_LIBCURL
+       return nxml
+ 	&& nxml->priv.curl_error ? (char *) curl_easy_strerror (nxml->priv.
+ 								curl_error) :
++#else
++    return
++#endif
+ 	"Download error";
+ 
+     case NXML_ERR_DATA:
+@@ -49,6 +53,7 @@ nxml_strerror (nxml_t * nxml, nxml_error
+     }
+ }
+ 
++#ifdef HAVE_LIBCURL
+ CURLcode
+ nxml_curl_error (nxml_t * nxml, nxml_error_t err)
+ {
+@@ -57,6 +62,7 @@ nxml_curl_error (nxml_t * nxml, nxml_err
+ 
+   return nxml->priv.curl_error;
+ }
++#endif
+ 
+ nxml_error_t
+ nxml_line_error (nxml_t * nxml, int *line)
