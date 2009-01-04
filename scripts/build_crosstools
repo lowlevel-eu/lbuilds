@@ -10,10 +10,9 @@ mkdir -p ${TMP}/cross-binutils/build
 mkdir -p ${TMP}/cross-gcc/build
 mkdir -p ${TMP}/cross-fpc
 
-
 cd ${TMP}/cross-binutils
 echo "[binutils] Herunterladen..."
-wget -q http://ftp.gnu.org/gnu/binutils/binutils-2.18.tar.bz2 || exit -1
+[ -f binutils-2.18.tar.bz2 ] || wget -q http://ftp.gnu.org/gnu/binutils/binutils-2.18.tar.bz2 || exit -1
 echo "[binutils] Entpacken..."
 tar -xjf binutils-2.18.tar.bz2 || exit -1
 echo "[binutils] Patch anwenden..."
@@ -29,7 +28,7 @@ echo -e "[binutils] Abgeschlossen\n"
 
 cd ${TMP}/cross-gcc
 echo "[gcc] Herunterladen..."
-wget -q http://ftp.gnu.org/gnu/gcc/gcc-4.2.2/gcc-core-4.2.2.tar.bz2 || exit -1
+[ -f gcc-core-4.2.2.tar.bz2 ] || wget -q http://ftp.gnu.org/gnu/gcc/gcc-4.2.2/gcc-core-4.2.2.tar.bz2 || exit -1
 echo "[gcc] Entpacken..."
 tar -xjf gcc-core-4.2.2.tar.bz2
 echo "[gcc] Patch anwenden..."
@@ -45,27 +44,30 @@ echo -e "[gcc] Abgeschlossen\n"
 
 cd ${TMP}/cross-fpc
 echo "[fpc] Herunterladen..."
-wget -q http://gd.tuwien.ac.at/languages/pascal/fpc/dist/source-2.0.4/fpcbuild-2.0.4.tar.gz || exit -1
+# [ -f fpc-2.2.2.source.tar.gz ] || wget -q http://gd.tuwien.ac.at/languages/pascal/fpc/dist/source-2.2.2/fpc-2.2.2.source.tar.gz || exit -1
+[ -f fpc.zip ] || wget -q ftp://ftp.freepascal.org/pub/fpc/snapshot/trunk/source/fpc.zip || exit -1
 echo "[fpc] Entpacken..."
-tar -xzf fpcbuild-2.0.4.tar.gz || exit -1
+#tar -xzf fpc-2.2.2.source.tar.gz || exit -1
+unzip -fq fpc.zip || exit -1
 echo "[fpc] Patch anwenden..."
-patch -p0 < ${PATCHES}/fpc/2.0.4/fpc-2.0.4.patch >${LOGS}/fpc.log || exit -1
-echo "[fpc] fpcmake bauen"
-cd fpcbuild_2.0.4_exp/fpcsrc/utils/fpcm
-make >>${LOGS}/fpc.log || exit -1
-cd ..
-cd ..
+patch -p0 < ${PATCHES}/fpc/2.3.x/fpc-2.3.x.patch >${LOGS}/fpc.log || exit -1
+#echo "[fpc] fpcmake bauen"
+#cd fpcbuild_2.0.4_exp/fpcsrc/utils/fpcm
+#make >>${LOGS}/fpc.log || exit -1
+#cd ..
+#cd ..
 echo "[fpc] Kompilieren"
-utils/fpcm/fpcmake -Tall -r >>${LOGS}/fpc.log || exit -1
+cd fpc
+#utils/fpcm/fpcmake -Tall -r >>${LOGS}/fpc.log || exit -1
 # Hindweis: Die folgende Anweisung wird nicht erfolgreich beendet werden, aber der Crosscompiler steht danach zur Verfuegung
-make all CPU_TARGET=i386 OS_TARGET=lost >>${LOGS}/fpc.log 2>>${LOGS}/fpc.log
-test -f compiler/ppcross386 || exit -1
+make all CPU_TARGET=i386 OS_TARGET=linux >>${LOGS}/fpc.log 2>>${LOGS}/fpc.log
+test -f compiler/ppc386 || exit -1
 echo "[fpc] Installieren"
 #make compiler-install PREFIX=${PREFIX} CPU_TARGET=i386 OS_TARGET=lost >>${LOGS}/fpc.log || exit -1
-cp compiler/ppcross386 ${PREFIX}/bin/fpc
+cp compiler/ppc386 ${PREFIX}/bin/fpc
 cp utils/fpcm/fpcmake ${PREFIX}/bin/fpcmake
 echo -e "[fpc] Abgeschlossen\n"
 
-rm -rf ${TMP}/cross-binutils
-rm -rf ${TMP}/cross-gcc
-rm -rf ${TMP}/cross-fpc
+rm -rf ${TMP}/cross-binutils/binutils-2.18/
+rm -rf ${TMP}/cross-gcc/gcc-4.2.2/
+rm -rf ${TMP}/cross-fpc/fpc/
