@@ -208,6 +208,13 @@ internal_src_compile() {
     call_if_exists src_compile
 }
 
+# Quellcode fixen
+internal_src_fix() {
+    cd ${S}
+    lstatus "Starte Umgebung zur Fehlerkorrektur, fertigstellen mit exit"
+    bash
+}
+
 # Quellcode in virtuellen Root installieren
 internal_src_install() {
     cd ${S}
@@ -297,6 +304,13 @@ case $1 in
 
         touch "${WORKDIR}/.compiled"
         ;;
+
+    fix)
+        [ $# -ne 2 ] && show_help && exit -1
+
+        internal_src_fix
+        ;;
+
 
     install)
         [ $# -ne 2 ] && show_help && exit -1
