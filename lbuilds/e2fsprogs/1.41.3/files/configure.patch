@@ -1,0 +1,13 @@
+Index: e2fsprogs-1.41.3/config/config.sub
+===================================================================
+--- e2fsprogs-1.41.3.orig/config/config.sub
++++ e2fsprogs-1.41.3/config/config.sub
+@@ -1217,7 +1217,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos*)
++	      | -skyos* | -haiku* | -rdos* | -lost* )
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)

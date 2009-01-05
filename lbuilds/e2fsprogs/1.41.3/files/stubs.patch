@@ -1,0 +1,1172 @@
+Index: e2fsprogs-1.41.3/lib/et/error_message.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/et/error_message.c
++++ e2fsprogs-1.41.3/lib/et/error_message.c
+@@ -225,12 +225,14 @@ static void init_debug(void)
+ 	if (!debug_f)
+ 		debug_f = fopen("/dev/tty", "a");
+ 	if (debug_f) {
++#if 0
+ 		fd = fileno(debug_f);
+ 		if (fd >= 0) {
+ 			flags = fcntl(fd, F_GETFD);
+ 			if (flags >= 0)
+ 				fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
+ 		}
++#endif
+ 	} else
+ 		debug_mask = DEBUG_INIT;
+ 
+Index: e2fsprogs-1.41.3/lib/ss/help.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/ss/help.c
++++ e2fsprogs-1.41.3/lib/ss/help.c
+@@ -25,7 +25,9 @@ extern int errno;
+ #include <fcntl.h>
+ #include <sys/param.h>
+ #include <sys/types.h>
++#if 0
+ #include <sys/file.h>
++#endif
+ #ifdef NEED_SYS_FCNTL_H
+ /* just for O_* */
+ #include <sys/fcntl.h>
+Index: e2fsprogs-1.41.3/lib/e2p/fgetflags.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/e2p/fgetflags.c
++++ e2fsprogs-1.41.3/lib/e2p/fgetflags.c
+@@ -90,6 +90,6 @@ int fgetflags (const char * name, unsign
+ #endif /* HAVE_EXT2_IOCTLS */
+ #endif
+ notsupp:
+-	errno = EOPNOTSUPP;
++	errno = 95 /*EOPNOTSUPP*/;
+ 	return -1;
+ }
+Index: e2fsprogs-1.41.3/lib/e2p/fgetversion.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/e2p/fgetversion.c
++++ e2fsprogs-1.41.3/lib/e2p/fgetversion.c
+@@ -24,7 +24,9 @@
+ #include <unistd.h>
+ #endif
+ #include <fcntl.h>
++#if 0
+ #include <sys/ioctl.h>
++#endif
+ 
+ #include "e2p.h"
+ 
+@@ -59,7 +61,7 @@ int fgetversion (const char * name, unsi
+ #endif
+ #else /* ! HAVE_EXT2_IOCTLS */
+ 	extern int errno;
+-	errno = EOPNOTSUPP;
++	errno = 95 /*EOPNOTSUPP*/;
+ 	return -1;
+ #endif /* ! HAVE_EXT2_IOCTLS */
+ }
+Index: e2fsprogs-1.41.3/lib/e2p/fsetflags.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/e2p/fsetflags.c
++++ e2fsprogs-1.41.3/lib/e2p/fsetflags.c
+@@ -94,6 +94,6 @@ int fsetflags (const char * name, unsign
+ #endif /* HAVE_EXT2_IOCTLS */
+ #endif
+ notsupp:
+-	errno = EOPNOTSUPP;
++	errno = 95 /*EOPNOTSUPP*/;
+ 	return -1;
+ }
+Index: e2fsprogs-1.41.3/lib/e2p/fsetversion.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/e2p/fsetversion.c
++++ e2fsprogs-1.41.3/lib/e2p/fsetversion.c
+@@ -24,7 +24,9 @@
+ #include <unistd.h>
+ #endif
+ #include <fcntl.h>
++#if 0
+ #include <sys/ioctl.h>
++#endif
+ 
+ #include "e2p.h"
+ 
+@@ -57,7 +59,7 @@ int fsetversion (const char * name, unsi
+ #endif
+ #else /* ! HAVE_EXT2_IOCTLS */
+ 	extern int errno;
+-	errno = EOPNOTSUPP;
++	errno = 95 /*EOPNOTSUPP*/;
+ 	return -1;
+ #endif /* ! HAVE_EXT2_IOCTLS */
+ }
+Index: e2fsprogs-1.41.3/lib/e2p/getflags.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/e2p/getflags.c
++++ e2fsprogs-1.41.3/lib/e2p/getflags.c
+@@ -61,6 +61,6 @@ int getflags (int fd, unsigned long * fl
+ #endif /* HAVE_EXT2_IOCTLS */
+ #endif
+ notsupp:
+-	errno = EOPNOTSUPP;
++	errno = 95 /*EOPNOTSUPP*/;
+ 	return -1;
+ }
+Index: e2fsprogs-1.41.3/lib/e2p/getversion.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/e2p/getversion.c
++++ e2fsprogs-1.41.3/lib/e2p/getversion.c
+@@ -17,7 +17,7 @@
+ #if HAVE_ERRNO_H
+ #include <errno.h>
+ #endif
+-#include <sys/ioctl.h>
++//#include <sys/ioctl.h>
+ 
+ #include "e2p.h"
+ 
+@@ -31,7 +31,7 @@ int getversion (int fd, unsigned long *
+ 	return 0;
+ #else /* ! HAVE_EXT2_IOCTLS */
+ 	extern int errno;
+-	errno = EOPNOTSUPP;
++	errno = 95 /*EOPNOTSUPP*/;
+ 	return -1;
+ #endif /* ! HAVE_EXT2_IOCTLS */
+ }
+Index: e2fsprogs-1.41.3/lib/e2p/ls.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/e2p/ls.c
++++ e2fsprogs-1.41.3/lib/e2p/ls.c
+@@ -15,14 +15,17 @@
+ #include <stdlib.h>
+ #include <sys/types.h>
+ #include <string.h>
++#if 0
+ #include <grp.h>
+ #include <pwd.h>
++#endif
+ #include <time.h>
+ 
+ #include "e2p.h"
+ 
+ static void print_user (unsigned short uid, FILE *f)
+ {
++#if 0
+ 	struct passwd *pw;
+ 
+ 	fprintf(f, "%u ", uid);
+@@ -31,10 +34,13 @@ static void print_user (unsigned short u
+ 		fprintf(f, "(user unknown)\n");
+ 	else
+ 		fprintf(f, "(user %s)\n", pw->pw_name);
++#endif
++    fprintf(f, "(pwd.h not supported)");
+ }
+ 
+ static void print_group (unsigned short gid, FILE *f)
+ {
++#if 0
+ 	struct group *gr;
+ 
+ 	fprintf(f, "%u ", gid);
+@@ -43,6 +49,8 @@ static void print_group (unsigned short
+ 		fprintf(f, "(group unknown)\n");
+ 	else
+ 		fprintf(f, "(group %s)\n", gr->gr_name);
++#endif
++    fprintf(f, "(grp.h not supported)");
+ }
+ 
+ #define MONTH_INT (86400 * 30)
+Index: e2fsprogs-1.41.3/lib/e2p/setflags.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/e2p/setflags.c
++++ e2fsprogs-1.41.3/lib/e2p/setflags.c
+@@ -67,6 +67,6 @@ int setflags (int fd, unsigned long flag
+ 	return ioctl (fd, EXT2_IOC_SETFLAGS, &f);
+ #endif /* HAVE_EXT2_IOCTLS */
+ #endif
+-	errno = EOPNOTSUPP;
++	errno = 95 /*EOPNOTSUPP*/;
+ 	return -1;
+ }
+Index: e2fsprogs-1.41.3/lib/e2p/setversion.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/e2p/setversion.c
++++ e2fsprogs-1.41.3/lib/e2p/setversion.c
+@@ -17,7 +17,7 @@
+ #if HAVE_ERRNO_H
+ #include <errno.h>
+ #endif
+-#include <sys/ioctl.h>
++//#include <sys/ioctl.h>
+ 
+ #include "e2p.h"
+ 
+@@ -30,7 +30,7 @@ int setversion (int fd, unsigned long ve
+ 	return ioctl (fd, EXT2_IOC_SETVERSION, &ver);
+ #else /* ! HAVE_EXT2_IOCTLS */
+ 	extern int errno;
+-	errno = EOPNOTSUPP;
++	errno = 95 /*EOPNOTSUPP*/;
+ 	return -1;
+ #endif /* ! HAVE_EXT2_IOCTLS */
+ }
+Index: e2fsprogs-1.41.3/lib/ss/list_rqs.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/ss/list_rqs.c
++++ e2fsprogs-1.41.3/lib/ss/list_rqs.c
+@@ -41,11 +41,11 @@ void ss_list_requests(int argc __SS_ATTR
+ 
+     sigemptyset(&igmask);
+     sigaddset(&igmask, SIGINT);
+-    sigprocmask(SIG_BLOCK, &igmask, &omask);
++    //sigprocmask(SIG_BLOCK, &igmask, &omask);
+     func = signal(SIGINT, SIG_IGN);
+     fd = ss_pager_create();
+     output = fdopen(fd, "w");
+-    sigprocmask(SIG_SETMASK, &omask, (sigset_t *) 0);
++    //sigprocmask(SIG_SETMASK, &omask, (sigset_t *) 0);
+ 
+     fprintf (output, "Available %s requests:\n\n",
+ 	     ss_info (sci_idx) -> subsystem_name);
+Index: e2fsprogs-1.41.3/lib/ss/listen.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/ss/listen.c
++++ e2fsprogs-1.41.3/lib/ss/listen.c
+@@ -47,6 +47,8 @@ static sigret_t listen_int_handler(int s
+ 
+ int ss_listen (int sci_idx)
+ {
++    return 0;
++#if 0
+     char *cp;
+     ss_data *info;
+     sigret_t (*sig_int)(int), (*old_sig_cont)(int);
+@@ -124,6 +126,7 @@ egress:
+     memcpy(listen_jmpb, old_jmpb, sizeof(jmp_buf));
+     current_info = old_info;
+     return code;
++#endif
+ }
+ 
+ void ss_abort_subsystem(int sci_idx, int code)
+Index: e2fsprogs-1.41.3/lib/ss/pager.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/ss/pager.c
++++ e2fsprogs-1.41.3/lib/ss/pager.c
+@@ -26,7 +26,9 @@ extern int errno;
+ #include "ss_internal.h"
+ #include <stdio.h>
+ #include <sys/types.h>
++#if 0
+ #include <sys/file.h>
++#endif
+ #include <signal.h>
+ #ifdef HAVE_SYS_PRCTL_H
+ #include <sys/prctl.h>
+@@ -114,14 +116,14 @@ void ss_page_stdin()
+ 	for (i = 3; i < 32; i++)
+ 		(void) close(i);
+ 	(void) signal(SIGINT, SIG_DFL);
+-	sigprocmask(SIG_BLOCK, 0, &mask);
++//	sigprocmask(SIG_BLOCK, 0, &mask);
+ 	sigdelset(&mask, SIGINT);
+-	sigprocmask(SIG_SETMASK, &mask, 0);
++//	sigprocmask(SIG_SETMASK, &mask, 0);
+ 	if (_ss_pager_name == (char *)NULL) {
+ 		if ((_ss_pager_name = ss_safe_getenv("PAGER")) == (char *)NULL)
+ 			_ss_pager_name = MORE;
+ 	}
+-	(void) execlp(_ss_pager_name, _ss_pager_name, (char *) NULL);
++//	(void) execlp(_ss_pager_name, _ss_pager_name, (char *) NULL);
+ 	{
+ 		/* minimal recovery if pager program isn't found */
+ 		char buf[80];
+Index: e2fsprogs-1.41.3/lib/uuid/gen_uuid.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/uuid/gen_uuid.c
++++ e2fsprogs-1.41.3/lib/uuid/gen_uuid.c
+@@ -123,12 +123,16 @@ static void gettimeofday (struct timeval
+ 	tv->tv_sec = n / 1000000;
+ 	tv->tv_usec = n % 1000000;
+ }
++#endif
+ 
+-static int getuid (void)
++/* Dummies fuer LOST */
++static int ftruncate(int fd, off_t length)
+ {
+-	return 1;
++    return 0;
+ }
+-#endif
++/* Ende Dummies */
++
++
+ 
+ static int get_random_fd(void)
+ {
+@@ -139,6 +143,7 @@ static int get_random_fd(void)
+ 	if (fd == -2) {
+ 		gettimeofday(&tv, 0);
+ #ifndef _WIN32
++#if 0
+ 		fd = open("/dev/urandom", O_RDONLY);
+ 		if (fd == -1)
+ 			fd = open("/dev/random", O_RDONLY | O_NONBLOCK);
+@@ -148,6 +153,7 @@ static int get_random_fd(void)
+ 				fcntl(fd, F_SETFD, i | FD_CLOEXEC);
+ 		}
+ #endif
++#endif
+ 		srand((getpid() << 16) ^ getuid() ^ tv.tv_sec ^ tv.tv_usec);
+ #ifdef DO_JRAND_MIX
+ 		jrand_seed[0] = getpid() ^ (tv.tv_sec & 0xFFFF);
+@@ -308,7 +314,9 @@ static int get_clock(uint32_t *clock_hig
+ 	THREAD_LOCAL FILE		*state_f;
+ 	THREAD_LOCAL uint16_t		clock_seq;
+ 	struct timeval 			tv;
++#if 0
+ 	struct flock			fl;
++#endif
+ 	uint64_t			clock_reg;
+ 	mode_t				save_umask;
+ 
+@@ -323,6 +331,7 @@ static int get_clock(uint32_t *clock_hig
+ 			state_fd = -1;
+ 		}
+ 	}
++#if 0
+ 	fl.l_type = F_WRLCK;
+ 	fl.l_whence = SEEK_SET;
+ 	fl.l_start = 0;
+@@ -352,6 +361,7 @@ static int get_clock(uint32_t *clock_hig
+ 			adjustment = a;
+ 		}
+ 	}
++#endif
+ 
+ 	if ((last.tv_sec == 0) && (last.tv_usec == 0)) {
+ 		get_random_bytes(&clock_seq, sizeof(clock_seq));
+@@ -397,8 +407,10 @@ try_again:
+ 			clock_seq, last.tv_sec, last.tv_usec, adjustment);
+ 		fflush(state_f);
+ 		rewind(state_f);
++#if 0
+ 		fl.l_type = F_UNLCK;
+ 		fcntl(state_fd, F_SETLK, &fl);
++#endif
+ 	}
+ 
+ 	*clock_high = clock_reg >> 32;
+Index: e2fsprogs-1.41.3/e2fsck/ehandler.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/e2fsck/ehandler.c
++++ e2fsprogs-1.41.3/e2fsck/ehandler.c
+@@ -15,7 +15,7 @@
+ #include "e2fsck.h"
+ 
+ #include <sys/time.h>
+-#include <sys/resource.h>
++//#include <sys/resource.h>
+ 
+ static const char *operation;
+ 
+Index: e2fsprogs-1.41.3/e2fsck/rehash.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/e2fsck/rehash.c
++++ e2fsprogs-1.41.3/e2fsck/rehash.c
+@@ -561,7 +561,7 @@ static errcode_t calculate_tree(ext2_fil
+ 		root_info->indirect_levels = 1;
+ 		for (i=1; i < nblks; i++) {
+ 			if (c1 == 0)
+-				return ENOSPC;
++				return 28 /*ENOSPC*/;
+ 			if (c2 == 0) {
+ 				if (limit)
+ 					limit->limit = limit->count =
+Index: e2fsprogs-1.41.3/e2fsck/unix.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/e2fsck/unix.c
++++ e2fsprogs-1.41.3/e2fsck/unix.c
+@@ -611,7 +611,7 @@ static errcode_t PRS(int argc, char *arg
+ #endif
+ 	e2fsck_t	ctx;
+ 	errcode_t	retval;
+-#ifdef HAVE_SIGNAL_H
++#if 0
+ 	struct sigaction	sa;
+ #endif
+ 	char		*extended_opts = 0;
+@@ -818,7 +818,7 @@ static errcode_t PRS(int argc, char *arg
+ 				  "not be both used at the same time.\n"));
+ 		exit(FSCK_USAGE);
+ 	}
+-#ifdef HAVE_SIGNAL_H
++#if 0
+ 	/*
+ 	 * Set up signal action
+ 	 */
+@@ -1037,7 +1037,7 @@ restart:
+ 			       "r/o" : "r/w");
+ 		else if (retval == ENXIO)
+ 			printf(_("Possibly non-existent or swap device?\n"));
+-		else if (retval == EBUSY)
++		else if (retval == 16 /*EBUSY*/)
+ 			printf(_("Filesystem mounted or opened exclusively "
+ 				 "by another program?\n"));
+ #ifdef EROFS
+@@ -1077,7 +1077,7 @@ restart:
+ 		 * To handle this, we close the filesystem and then
+ 		 * reopen the filesystem after we get the device size.
+ 		 */
+-		if (pctx.errcode == EBUSY) {
++		if (pctx.errcode == 16 /*EBUSY*/) {
+ 			ext2fs_close(fs);
+ 			need_restart++;
+ 			pctx.errcode =
+Index: e2fsprogs-1.41.3/e2fsck/util.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/e2fsck/util.c
++++ e2fsprogs-1.41.3/e2fsck/util.c
+@@ -18,6 +18,8 @@
+ #include <sys/utsname.h>
+ #endif
+ 
++#define sbrk(x) 0
++
+ #ifdef HAVE_CONIO_H
+ #undef HAVE_TERMIOS_H
+ #include <conio.h>
+@@ -41,7 +43,7 @@
+ extern e2fsck_t e2fsck_global_ctx;   /* Try your very best not to use this! */
+ 
+ #include <sys/time.h>
+-#include <sys/resource.h>
++//#include <sys/resource.h>
+ 
+ void fatal_error(e2fsck_t ctx, const char *msg)
+ {
+Index: e2fsprogs-1.41.3/lib/ext2fs/bmap.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/ext2fs/bmap.c
++++ e2fsprogs-1.41.3/lib/ext2fs/bmap.c
+@@ -332,7 +332,7 @@ errcode_t ext2fs_bmap(ext2_filsys fs, ex
+ 	if (ret)
+ 		return ret;
+ 	if (ret_blk >= ((long long) 1 << 32))
+-		return EOVERFLOW;
++		return 75 /*EOVERFLOW*/;
+ 	*phys_blk = ret_blk;
+ 	return 0;
+ }
+Index: e2fsprogs-1.41.3/lib/ext2fs/getsize.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/ext2fs/getsize.c
++++ e2fsprogs-1.41.3/lib/ext2fs/getsize.c
+@@ -171,7 +171,7 @@ errcode_t ext2fs_get_device_size(const c
+ 	if (ioctl(fd, DKIOCGETBLOCKCOUNT, &size64) >= 0) {
+ 		if ((sizeof(*retblocks) < sizeof(unsigned long long))
+ 		    && ((size64 / (blocksize / 512)) > 0xFFFFFFFF)) {
+-			rc = EFBIG;
++			rc = 27 /*EFBIG*/;
+ 			goto out;
+ 		}
+ 		*retblocks = size64 / (blocksize / 512);
+@@ -190,7 +190,7 @@ errcode_t ext2fs_get_device_size(const c
+ 	    ioctl(fd, BLKGETSIZE64, &size64) >= 0) {
+ 		if ((sizeof(*retblocks) < sizeof(unsigned long long)) &&
+ 		    ((size64 / blocksize) > 0xFFFFFFFF)) {
+-			rc = EFBIG;
++			rc = 27 /*EFBIG*/;
+ 			goto out;
+ 		}
+ 		*retblocks = size64 / blocksize;
+@@ -255,7 +255,7 @@ errcode_t ext2fs_get_device_size(const c
+ 			if (S_ISREG(st.st_mode)) {
+ 				if ((sizeof(*retblocks) < sizeof(unsigned long long)) &&
+ 				    ((st.st_size / blocksize) > 0xFFFFFFFF)) {
+-					rc = EFBIG;
++					rc = 27 /*EFBIG*/;
+ 					goto out;
+ 				}
+ 				*retblocks = st.st_size / blocksize;
+@@ -284,7 +284,7 @@ errcode_t ext2fs_get_device_size(const c
+ 	size64 = low + 1;
+ 	if ((sizeof(*retblocks) < sizeof(unsigned long long))
+ 	    && ((size64 / blocksize) > 0xFFFFFFFF)) {
+-		rc = EFBIG;
++		rc = 27 /*EFBIG*/;
+ 		goto out;
+ 	}
+ 	*retblocks = size64 / blocksize;
+Index: e2fsprogs-1.41.3/lib/ext2fs/mkjournal.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/ext2fs/mkjournal.c
++++ e2fsprogs-1.41.3/lib/ext2fs/mkjournal.c
+@@ -513,7 +513,7 @@ errcode_t ext2fs_add_journal_inode(ext2_
+ 	} else {
+ 		if ((mount_flags & EXT2_MF_BUSY) &&
+ 		    !(fs->flags & EXT2_FLAG_EXCLUSIVE)) {
+-			retval = EBUSY;
++			retval = 16 /*EBUSY*/;
+ 			goto errout;
+ 		}
+ 		journal_ino = EXT2_JOURNAL_INO;
+Index: e2fsprogs-1.41.3/lib/ext2fs/tdb.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/ext2fs/tdb.c
++++ e2fsprogs-1.41.3/lib/ext2fs/tdb.c
+@@ -55,7 +55,30 @@ Last Changed Date: 2007-06-22 13:36:10 -
+ #include <utime.h>
+ #endif
+ #include <sys/stat.h>
++#if 0
+ #include <sys/file.h>
++#else
++
++enum {
++    F_RDLCK,
++    F_WRLCK,
++    F_SETLK,
++    F_SETLKW,
++    F_UNLCK,
++};
++
++struct flock {
++    short  l_type;
++    short  l_whence;
++    off_t  l_start;
++    off_t  l_len;
++    pid_t  l_pid;
++};
++
++#define O_ACCMODE 0
++#define EDEADLK 35
++
++#endif
+ #include <fcntl.h>
+ 
+ #ifdef HAVE_SYS_MMAN_H
+@@ -352,9 +375,11 @@ int tdb_brlock(struct tdb_context *tdb,
+ 	fl.l_len = len;
+ 	fl.l_pid = 0;
+ 
++#if 0
+ 	do {
+ 		ret = fcntl(tdb->fd,lck_type,&fl);
+ 	} while (ret == -1 && errno == EINTR);
++#endif
+ 
+ 	if (ret == -1) {
+ 		/* Generic lock error. errno set by fcntl.
+@@ -390,9 +415,13 @@ int tdb_brlock_upgrade(struct tdb_contex
+ 			break;
+ 		}
+ 		/* sleep for as short a time as we can - more portable than usleep() */
++#if 0
+ 		tv.tv_sec = 0;
+ 		tv.tv_usec = 1;
+ 		select(0, NULL, NULL, NULL, &tv);
++#else
++        yield();
++#endif
+ 	}
+ 	TDB_LOG((tdb, TDB_DEBUG_TRACE,"tdb_brlock_upgrade failed at offset %d\n", offset));
+ 	return -1;
+@@ -1019,6 +1048,7 @@ static int tdb_expand_file(struct tdb_co
+ 		return -1;
+ 	}
+ 
++#if 0
+ 	if (ftruncate(tdb->fd, size+addition) == -1) {
+ 		char b = 0;
+ 		if (pwrite(tdb->fd,  &b, 1, (size+addition) - 1) != 1) {
+@@ -1027,6 +1057,7 @@ static int tdb_expand_file(struct tdb_co
+ 			return -1;
+ 		}
+ 	}
++#endif
+ 
+ 	/* now fill the file with something. This ensures that the
+ 	   file isn't sparse, which would be very bad if we ran out of
+@@ -1744,11 +1775,13 @@ int tdb_transaction_cancel(struct tdb_co
+ */
+ static int transaction_sync(struct tdb_context *tdb, tdb_off_t offset, tdb_len_t length)
+ {
++#if 0
+ 	if (fsync(tdb->fd) != 0) {
+ 		tdb->ecode = TDB_ERR_IO;
+ 		TDB_LOG((tdb, TDB_DEBUG_FATAL, "tdb_transaction: fsync failed\n"));
+ 		return -1;
+ 	}
++#endif
+ #ifdef MS_SYNC
+ 	if (tdb->map_ptr) {
+ 		tdb_off_t moffset = offset & ~(tdb->page_size-1);
+@@ -2232,11 +2265,13 @@ int tdb_transaction_recover(struct tdb_c
+ 
+ 	/* reduce the file size to the old size */
+ 	tdb_munmap(tdb);
++#if 0
+ 	if (ftruncate(tdb->fd, recovery_eof) != 0) {
+ 		TDB_LOG((tdb, TDB_DEBUG_FATAL, "tdb_transaction_recover: failed to reduce to recovery size\n"));
+ 		tdb->ecode = TDB_ERR_IO;
+ 		return -1;
+ 	}
++#endif
+ 	tdb->map_size = recovery_eof;
+ 	tdb_mmap(tdb);
+ 
+@@ -3749,8 +3784,10 @@ static int tdb_new_database(struct tdb_c
+ 	if (lseek(tdb->fd, 0, SEEK_SET) == -1)
+ 		goto fail;
+ 
++#if 0
+ 	if (ftruncate(tdb->fd, 0) == -1)
+ 		goto fail;
++#endif
+ 
+ 	/* This creates an endian-converted header, as if read from disk */
+ 	CONVERT(*newdb);
+@@ -3887,12 +3924,14 @@ struct tdb_context *tdb_open_ex(const ch
+ 	if ((tdb_flags & TDB_CLEAR_IF_FIRST) &&
+ 	    (locked = (tdb->methods->tdb_brlock(tdb, ACTIVE_LOCK, F_WRLCK, F_SETLK, 0, 1) == 0))) {
+ 		open_flags |= O_CREAT;
++#if 0
+ 		if (ftruncate(tdb->fd, 0) == -1) {
+ 			TDB_LOG((tdb, TDB_DEBUG_FATAL, "tdb_open_ex: "
+ 				 "failed to truncate %s: %s\n",
+ 				 name, strerror(errno)));
+ 			goto fail; /* errno set by ftruncate */
+ 		}
++#endif
+ 	}
+ 
+ 	if (read(tdb->fd, &tdb->header, sizeof(tdb->header)) != sizeof(tdb->header)
+@@ -3929,7 +3968,7 @@ struct tdb_context *tdb_open_ex(const ch
+ 		TDB_LOG((tdb, TDB_DEBUG_ERROR, "tdb_open_ex: "
+ 			 "%s (%d,%d) is already open in this process\n",
+ 			 name, (int)st.st_dev, (int)st.st_ino));
+-		errno = EBUSY;
++		errno = 16 /*EBUSY*/;
+ 		goto fail;
+ 	}
+ 
+Index: e2fsprogs-1.41.3/misc/mke2fs.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/misc/mke2fs.c
++++ e2fsprogs-1.41.3/misc/mke2fs.c
+@@ -44,9 +44,9 @@ extern int optind;
+ #ifdef HAVE_MNTENT_H
+ #include <mntent.h>
+ #endif
+-#include <sys/ioctl.h>
++//#include <sys/ioctl.h>
+ #include <sys/types.h>
+-#include <libgen.h>
++//#include <libgen.h>
+ #include <limits.h>
+ 
+ #include "ext2fs/ext2_fs.h"
+@@ -194,6 +194,7 @@ static void read_bb_file(ext2_filsys fs,
+  */
+ static void test_disk(ext2_filsys fs, badblocks_list *bb_list)
+ {
++#if 0
+ 	FILE		*f;
+ 	errcode_t	retval;
+ 	char		buf[1024];
+@@ -216,6 +217,7 @@ static void test_disk(ext2_filsys fs, ba
+ 			_("while processing list of bad blocks from program"));
+ 		exit(1);
+ 	}
++#endif
+ }
+ 
+ static void handle_bad_blocks(ext2_filsys fs, badblocks_list bb_list)
+@@ -384,12 +386,14 @@ static void write_inode_tables(ext2_fils
+ 				num, blk, error_message(retval));
+ 			exit(1);
+ 		}
++#if 0
+ 		if (sync_kludge) {
+ 			if (sync_kludge == 1)
+ 				sync();
+ 			else if ((i % sync_kludge) == 0)
+ 				sync();
+ 		}
++#endif
+ 	}
+ 	ext2fs_zero_blocks(0, 0, 0, 0, 0);
+ 	progress_close(&progress);
+@@ -1255,7 +1259,7 @@ static void PRS(int argc, char *argv[])
+ 			strcpy(bad_blocks_filename, optarg);
+ 			break;
+ 		case 'm':
+-			reserved_ratio = strtod(optarg, &tmp);
++			reserved_ratio = strtoul(optarg, &tmp, 10);
+ 			if (reserved_ratio > 50 || *tmp) {
+ 				com_err(program_name, 0,
+ 					_("invalid reserved blocks percent - %s"),
+@@ -1425,7 +1429,7 @@ static void PRS(int argc, char *argv[])
+ 		retval = ext2fs_get_device_size(device_name,
+ 						EXT2_BLOCK_SIZE(&fs_param),
+ 						&dev_size);
+-		if ((retval == EFBIG) &&
++		if ((retval == 27 /*EFBIG*/) &&
+ 		    (blocksize == 0) &&
+ 		    (fs_param.s_log_block_size == 0)) {
+ 			fs_param.s_log_block_size = 2;
+@@ -1434,7 +1438,7 @@ static void PRS(int argc, char *argv[])
+ 		}
+ 	}
+ 
+-	if (retval == EFBIG) {
++	if (retval == 27 /*EFBIG*/) {
+ 		fprintf(stderr, _("%s: Size of device %s too big "
+ 				  "to be expressed in 32 bits\n\t"
+ 				  "using a blocksize of %d.\n"),
+@@ -1774,6 +1778,7 @@ open_err_out:
+ 	return retval;
+ }
+ 
++#define PATH_MAX 1024
+ static int mke2fs_setup_tdb(const char *name, io_manager *io_ptr)
+ {
+ 	errcode_t retval = 0;
+@@ -1795,7 +1800,7 @@ static int mke2fs_setup_tdb(const char *
+ 		return 0;
+ 
+ 	tmp_name = strdup(name);
+-	device_name = basename(tmp_name);
++	device_name = "FIXME"; //basename(tmp_name);
+ 	sprintf(tdb_file, "%s/mke2fs-%s.e2undo", tdb_dir, device_name);
+ 
+ 	if (!access(tdb_file, F_OK)) {
+Index: e2fsprogs-1.41.3/lib/blkid/devname.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/blkid/devname.c
++++ e2fsprogs-1.41.3/lib/blkid/devname.c
+@@ -39,6 +39,8 @@
+ 
+ #include "blkidP.h"
+ 
++#define makedev(x,y) 0
++
+ /*
+  * Find a dev struct in the cache by device name, if available.
+  *
+@@ -240,6 +242,7 @@ static dev_t lvm_get_devno(const char *l
+ 	int ma, mi;
+ 	dev_t ret = 0;
+ 
++#if 0
+ 	DBG(DEBUG_DEVNAME, printf("opening %s\n", lvm_device));
+ 	if ((lvf = fopen(lvm_device, "r")) == NULL) {
+ 		DBG(DEBUG_DEVNAME, printf("%s: (%d) %s\n", lvm_device, errno,
+@@ -254,6 +257,7 @@ static dev_t lvm_get_devno(const char *l
+ 		}
+ 	}
+ 	fclose(lvf);
++#endif
+ 
+ 	return ret;
+ }
+@@ -325,6 +329,8 @@ exit:
+ static int
+ evms_probe_all(blkid_cache cache, int only_if_new)
+ {
++    return 0;
++#if 0
+ 	char line[100];
+ 	int ma, mi, sz, num = 0;
+ 	FILE *procpt;
+@@ -347,6 +353,7 @@ evms_probe_all(blkid_cache cache, int on
+ 	}
+ 	fclose(procpt);
+ 	return num;
++#endif
+ }
+ 
+ /*
+@@ -354,6 +361,7 @@ evms_probe_all(blkid_cache cache, int on
+  */
+ static int probe_all(blkid_cache cache, int only_if_new)
+ {
++#if 0
+ 	FILE *proc;
+ 	char line[1024];
+ 	char ptname0[128], ptname1[128], *ptname = 0;
+@@ -443,6 +451,7 @@ static int probe_all(blkid_cache cache,
+ 
+ 	fclose(proc);
+ 	blkid_flush_cache(cache);
++#endif
+ 	return 0;
+ }
+ 
+Index: e2fsprogs-1.41.3/lib/ext2fs/unix_io.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/ext2fs/unix_io.c
++++ e2fsprogs-1.41.3/lib/ext2fs/unix_io.c
+@@ -749,7 +749,7 @@ static errcode_t unix_flush(io_channel c
+ #ifndef NO_IO_CACHE
+ 	retval = flush_cached_blocks(channel, data, 0);
+ #endif
+-	fsync(data->dev);
++//	fsync(data->dev);
+ 	return retval;
+ }
+ 
+Index: e2fsprogs-1.41.3/lib/ext2fs/read_bb_file.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/ext2fs/read_bb_file.c
++++ e2fsprogs-1.41.3/lib/ext2fs/read_bb_file.c
+@@ -39,7 +39,7 @@ errcode_t ext2fs_read_bb_FILE2(ext2_fils
+ {
+ 	errcode_t	retval;
+ 	blk_t		blockno;
+-	int		count;
++//	int		count;
+ 	char		buf[128];
+ 
+ 	if (fs)
+@@ -54,9 +54,11 @@ errcode_t ext2fs_read_bb_FILE2(ext2_fils
+ 	while (!feof (f)) {
+ 		if (fgets(buf, sizeof(buf), f) == NULL)
+ 			break;
+-		count = sscanf(buf, "%u", &blockno);
++		blockno = strtoull(buf, NULL, 10); //sscanf(buf, "%u", &blockno);
++#if 0
+ 		if (count <= 0)
+ 			continue;
++#endif
+ 		if (fs &&
+ 		    ((blockno < fs->super->s_first_data_block) ||
+ 		    (blockno >= fs->super->s_blocks_count))) {
+Index: e2fsprogs-1.41.3/lib/uuid/tst_uuid.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/uuid/tst_uuid.c
++++ e2fsprogs-1.41.3/lib/uuid/tst_uuid.c
+@@ -138,7 +138,7 @@ main(int argc ATTR((unused)) , char **ar
+ 	tv.tv_usec = 0;
+ 	time_reg = uuid_time(buf, &tv);
+ 	printf("UUID time is: (%ld, %ld): %s\n", tv.tv_sec, tv.tv_usec,
+-	       ctime(&time_reg));
++	       "[TODO ctime]"/*ctime(&time_reg)*/);
+ 	uuid_parse(str, tst);
+ 	if (!uuid_compare(buf, tst))
+ 		printf("UUID parse and compare succeeded.\n");
+Index: e2fsprogs-1.41.3/lib/uuid/uuid_time.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/uuid/uuid_time.c
++++ e2fsprogs-1.41.3/lib/uuid/uuid_time.c
+@@ -164,7 +164,7 @@ main(int argc, char **argv)
+ 		       "decoding will likely not work!\n");
+ 	}
+ 	printf("UUID time is: (%ld, %ld): %s\n", tv.tv_sec, tv.tv_usec,
+-	       ctime(&time_reg));
++	       "[TODO: ctime]" /*ctime(&time_reg)*/);
+ 
+ 	return 0;
+ }
+Index: e2fsprogs-1.41.3/lib/blkid/save.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/blkid/save.c
++++ e2fsprogs-1.41.3/lib/blkid/save.c
+@@ -146,7 +146,7 @@ int blkid_flush_cache(blkid_cache cache)
+ 				link(filename, backup);
+ 				free(backup);
+ 			}
+-			rename(opened, filename);
++			//rename(opened, filename);
+ 			DBG(DEBUG_SAVE,
+ 			    printf("moved temp cache %s\n", opened));
+ 		}
+Index: e2fsprogs-1.41.3/misc/badblocks.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/misc/badblocks.c
++++ e2fsprogs-1.41.3/misc/badblocks.c
+@@ -53,7 +53,7 @@ extern int optind;
+ #include <limits.h>
+ 
+ #include <sys/time.h>
+-#include <sys/ioctl.h>
++//#include <sys/ioctl.h>
+ #include <sys/types.h>
+ 
+ #include "et/com_err.h"
+@@ -1194,6 +1194,7 @@ int main (int argc, char ** argv)
+ 		exit (1);
+ 	}
+ 
++#if 0
+ 	if (in) {
+ 		for(;;) {
+ 			switch(fscanf (in, "%u\n", &next_bad)) {
+@@ -1216,6 +1217,7 @@ int main (int argc, char ** argv)
+ 		if (in != stdin)
+ 			fclose (in);
+ 	}
++#endif
+ 
+ 	do {
+ 		unsigned int bb_count;
+Index: e2fsprogs-1.41.3/e2fsck/badblocks.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/e2fsck/badblocks.c
++++ e2fsprogs-1.41.3/e2fsck/badblocks.c
+@@ -72,6 +72,8 @@ void read_bad_blocks_file(e2fsck_t ctx,
+ 			goto fatal;
+ 		}
+ 	} else {
++        goto fatal;
++#if 0
+ 		sprintf(buf, "badblocks -b %d -X %s%s%s %d", fs->blocksize,
+ 			(ctx->options & E2F_OPT_PREEN) ? "" : "-s ",
+ 			(ctx->options & E2F_OPT_WRITECHECK) ? "-n " : "",
+@@ -82,12 +84,15 @@ void read_bad_blocks_file(e2fsck_t ctx,
+ 				_("while trying popen '%s'"), buf);
+ 			goto fatal;
+ 		}
++#endif
+ 	}
+ 	retval = ext2fs_read_bb_FILE(fs, f, &bb_list, invalid_block);
+ 	if (bad_blocks_file)
+ 		fclose(f);
++#if 0
+ 	else
+ 		pclose(f);
++#endif
+ 	if (retval) {
+ 		com_err("ext2fs_read_bb_FILE", retval,
+ 			_("while reading in list of bad blocks from file"));
+Index: e2fsprogs-1.41.3/lib/ext2fs/flushb.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/lib/ext2fs/flushb.c
++++ e2fsprogs-1.41.3/lib/ext2fs/flushb.c
+@@ -57,8 +57,10 @@ errcode_t ext2fs_sync_device(int fd, int
+ 	 * still is a race condition for those kernels, but this
+ 	 * reduces it greatly.)
+ 	 */
++#if 0
+ 	if (fsync (fd) == -1)
+ 		return errno;
++#endif
+ 
+ 	if (flushb) {
+ 
+Index: e2fsprogs-1.41.3/misc/e2initrd_helper.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/misc/e2initrd_helper.c
++++ e2fsprogs-1.41.3/misc/e2initrd_helper.c
+@@ -92,7 +92,7 @@ static errcode_t get_file(ext2_filsys fs
+ 		return retval;
+ 
+ 	if (inode.i_size_high || (inode.i_size > 65536))
+-		return EFBIG;
++		return 27 /*EFBIG*/;
+ 
+ 	buf = malloc(inode.i_size + 1);
+ 	if (!buf)
+Index: e2fsprogs-1.41.3/misc/fsck.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/misc/fsck.c
++++ e2fsprogs-1.41.3/misc/fsck.c
+@@ -29,7 +29,7 @@
+ 
+ #include <sys/types.h>
+ #include <sys/wait.h>
+-#include <sys/signal.h>
++//#include <sys/signal.h>
+ #include <sys/stat.h>
+ #include <limits.h>
+ #include <stdio.h>
+@@ -58,6 +58,8 @@
+ #include <signal.h>
+ #endif
+ 
++#undef HAVE_SIGNAL_H
++
+ #include "../version.h"
+ #include "nls-enable.h"
+ #include "fsck.h"
+@@ -501,7 +503,9 @@ static int execute(const char *type, con
+ 	} else if (pid == 0) {
+ 		if (!interactive)
+ 			close(0);
++#if 0
+ 		(void) execv(s, argv);
++#endif
+ 		perror(argv[0]);
+ 		free(inst);
+ 		exit(EXIT_ERROR);
+@@ -587,8 +591,10 @@ static struct fsck_instance *wait_one(in
+ 			kill_all(SIGTERM);
+ 			kill_sent++;
+ 		}
++#if 0
+ 		if ((pid == 0) && (flags & WNOHANG))
+ 			return NULL;
++#endif
+ 		if (pid < 0) {
+ 			if ((errno == EINTR) || (errno == EAGAIN))
+ 				continue;
+@@ -685,9 +691,9 @@ static int wait_many(int flags)
+ #ifdef RANDOM_DEBUG
+ 		if (noexecute && (flags & WNOHANG) && !(random() % 3))
+ 			break;
+-#endif
+ 		if (flags & FLAG_WAIT_ATLEAST_ONE)
+ 			wait_flags = WNOHANG;
++#endif
+ 	}
+ 	return global_status;
+ }
+Index: e2fsprogs-1.41.3/misc/logsave.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/misc/logsave.c
++++ e2fsprogs-1.41.3/misc/logsave.c
+@@ -12,6 +12,8 @@
+ 
+ #define _XOPEN_SOURCE 600 /* for inclusion of sa_handler in Solaris */
+ 
++#undef HAVE_SIGNAL_H
++
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <unistd.h>
+@@ -155,7 +157,7 @@ static int run_program(char **argv)
+ 	child_pid = pid;
+ 	close(fds[1]);
+ 
+-	while (!(waitpid(pid, &status, WNOHANG ))) {
++	while (!(waitpid(pid, &status, 0 /*WNOHANG*/ ))) {
+ 		do_read(fds[0]);
+ 	}
+ 	child_pid = -1;
+@@ -275,7 +277,7 @@ int main(int argc, char **argv)
+ 				       outfn);
+ 			exit(rc);
+ 		}
+-		setsid();	/* To avoid getting killed by init */
++//		setsid();	/* To avoid getting killed by init */
+ 		while (outfd < 0) {
+ 			outfd = open(outfn, openflags, 0644);
+ 			sleep(1);
+Index: e2fsprogs-1.41.3/misc/tune2fs.c
+===================================================================
+--- e2fsprogs-1.41.3.orig/misc/tune2fs.c
++++ e2fsprogs-1.41.3/misc/tune2fs.c
+@@ -28,14 +28,14 @@
+ #define _XOPEN_SOURCE 600 /* for inclusion of strptime() */
+ #define _BSD_SOURCE /* for inclusion of strcasecmp() */
+ #include <fcntl.h>
+-#include <grp.h>
++//#include <grp.h>
+ #ifdef HAVE_GETOPT_H
+ #include <getopt.h>
+ #else
+ extern char *optarg;
+ extern int optind;
+ #endif
+-#include <pwd.h>
++//#include <pwd.h>
+ #include <stdio.h>
+ #ifdef HAVE_STDLIB_H
+ #include <stdlib.h>
+@@ -44,7 +44,7 @@ extern int optind;
+ #include <time.h>
+ #include <unistd.h>
+ #include <sys/types.h>
+-#include <libgen.h>
++//#include <libgen.h>
+ #include <limits.h>
+ 
+ #include "ext2fs/ext2_fs.h"
+@@ -59,6 +59,8 @@ extern int optind;
+ #include "../version.h"
+ #include "nls-enable.h"
+ 
++#define PATH_MAX 1024
++
+ const char * program_name = "tune2fs";
+ char * device_name;
+ char * new_label, *new_last_mounted, *new_UUID;
+@@ -649,6 +651,7 @@ static void parse_tune2fs_options(int ar
+ 			case 'f': /* Force */
+ 				f_flag = 1;
+ 				break;
++#if 0
+ 			case 'g':
+ 				resgid = strtoul (optarg, &tmp, 0);
+ 				if (*tmp) {
+@@ -669,6 +672,7 @@ static void parse_tune2fs_options(int ar
+ 				g_flag = 1;
+ 				open_flag = EXT2_FLAG_RW;
+ 				break;
++#endif
+ 			case 'i':
+ 				interval = strtoul (optarg, &tmp, 0);
+ 				switch (*tmp) {
+@@ -720,7 +724,7 @@ static void parse_tune2fs_options(int ar
+ 					EXT2_FLAG_JOURNAL_DEV_OK;
+ 				break;
+ 			case 'm':
+-				reserved_ratio = strtod(optarg, &tmp);
++			    reserved_ratio = strtoul(optarg, &tmp, 10);
+ 				if (*tmp || reserved_ratio > 50) {
+ 					com_err (program_name, 0,
+ 						 _("bad reserved block ratio - %s"),
+@@ -774,6 +778,7 @@ static void parse_tune2fs_options(int ar
+ 				last_check_time = parse_time(optarg);
+ 				open_flag = EXT2_FLAG_RW;
+ 				break;
++#if 0
+ 			case 'u':
+ 				resuid = strtoul (optarg, &tmp, 0);
+ 				if (*tmp) {
+@@ -794,6 +799,7 @@ static void parse_tune2fs_options(int ar
+ 				u_flag = 1;
+ 				open_flag = EXT2_FLAG_RW;
+ 				break;
++#endif
+ 			case 'U':
+ 				new_UUID = optarg;
+ 				U_flag = 1;
+@@ -993,7 +999,7 @@ static int get_move_bitmap(ext2_filsys f
+ 	}
+ 
+ 	if (needed_blocks > fs->super->s_free_blocks_count ) {
+-		return ENOSPC;
++		return 28 /*ENOSPC*/;
+ 	}
+ 
+ 	return 0;
+@@ -1383,7 +1389,7 @@ static int tune2fs_setup_tdb(const char
+ 					&tdb_dir);
+ #endif
+ 	tmp_name = strdup(name);
+-	dev_name = basename(tmp_name);
++	dev_name = "FIXME"; //basename(tmp_name);
+ 
+ 	tdb_dir = getenv("E2FSPROGS_UNDO_DIR");
+ 	if (!tdb_dir)
+Index: e2fsprogs-1.41.3/misc/Makefile.in
+===================================================================
+--- e2fsprogs-1.41.3.orig/misc/Makefile.in
++++ e2fsprogs-1.41.3/misc/Makefile.in
+@@ -28,7 +28,8 @@ FMANPAGES=	mke2fs.conf.5
+ UPROGS=		chattr lsattr uuidgen
+ UMANPAGES=	chattr.1 lsattr.1 uuidgen.1
+ 
+-LPROGS=		@E2INITRD_PROG@
++#LPROGS=		@E2INITRD_PROG@
++LPROGS=
+ 
+ TUNE2FS_OBJS=	tune2fs.o util.o
+ MKLPF_OBJS=	mklost+found.o
