@@ -18,7 +18,14 @@ src_unpack() {
 
 	lunpack fpc.zip
 	cd ${MY_S}
-	lpatch ${F}/fpc-${PV}-compiler.patch ${F}/fpc-${PV}-fpcmake.patch ${F}/fpc-${PV}-tyndur.patch || die "patching failed"
+
+    ln -s ${F} patches
+    [ -f ${F}/series ] && ln -s ${F}/series series
+    for i in ${F}/*.patch; do
+        [ -L series ] || echo `basename $i` >> series
+        (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
+    done
+    (which quilt > /dev/null 2>&1) && quilt push -a || die "Fehler beim Anwenden der Patches"
 
 	# LOST-Unitskopieren
 	mkdir -p rtl/units/i386-tyndur

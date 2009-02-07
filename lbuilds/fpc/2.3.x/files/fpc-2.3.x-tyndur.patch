@@ -2,7 +2,7 @@ Index: fpc/compiler/options.pas
 ===================================================================
 --- fpc.orig/compiler/options.pas
 +++ fpc/compiler/options.pas
-@@ -2223,10 +2223,16 @@ begin
+@@ -2274,10 +2274,16 @@ begin
         foundfn:=configpath+fn
       else
  {$ifndef Unix}

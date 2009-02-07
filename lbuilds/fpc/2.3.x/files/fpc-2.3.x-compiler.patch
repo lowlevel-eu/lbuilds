@@ -61,7 +61,7 @@ Index: compiler/systems/i_tyndur.pas
 +            system       : system_i386_tyndur;
 +            name         : 'tyndur/ELF for i386';
 +            shortname    : 'tyndur';
-+            flags        : [tf_pic_uses_got, tf_files_case_sensitive];
++            flags        : [tf_pic_uses_got, tf_files_case_sensitive, tf_smartlink_library];
 +            cpu          : cpu_i386;
 +            unit_env     : 'TYNDURUNITS';
 +            extradefines : 'TYNDUR';
@@ -1004,14 +1004,14 @@ Index: compiler/systems.pas
 @@ -145,7 +145,8 @@ interface
               system_x86_64_darwin,      { 61 }
               system_avr_embedded,       { 62 }
-              system_i386_haiku,         { 63 }    
+              system_i386_haiku,         { 63 }
 -             system_arm_darwin          { 64 }
 +             system_arm_darwin,         { 64 }
 +             system_i386_tyndur           { 65 }
         );
  
       type
-@@ -820,6 +821,9 @@ begin
+@@ -828,6 +829,9 @@ begin
      default_target(system_i386_linux);
      {$define default_target_set}
     {$endif}

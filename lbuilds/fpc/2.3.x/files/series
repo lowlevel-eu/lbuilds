@@ -1,0 +1,3 @@
+fpc-2.3.x-compiler.patch -p0
+fpc-2.3.x-fpcmake.patch -p0
+fpc-2.3.x-tyndur.patch
