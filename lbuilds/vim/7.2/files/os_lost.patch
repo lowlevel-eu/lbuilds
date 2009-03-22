@@ -3,10 +3,11 @@ Patch um vim fuer LOST zu kompilieren. Tut so zwar noch nicht, aber es ist immer
 Die Aenderungen unterliegen der vim-Lizenz.
 Autor: Antoine Kaufmann <toni@famkaufmann.info>
 
-diff -prNu ../vim72.orig/src/os_lost.c ./src/os_lost.c
---- ../vim72.orig/src/os_lost.c	1970-01-01 01:00:00.000000000 +0100
-+++ ./src/os_lost.c	2008-10-18 11:05:38.000000000 +0200
-@@ -0,0 +1,49 @@
+Index: vim72/src/os_lost.c
+===================================================================
+--- /dev/null
++++ vim72/src/os_lost.c
+@@ -0,0 +1,293 @@
 +/* vi:set ts=8 sts=4 sw=4 noexpandtab:
 + *
 + * VIM - Vi IMproved	by Bram Moolenaar
@@ -15,6 +16,10 @@ diff -prNu ../vim72.orig/src/os_lost.c ./src/os_lost.c
 + * Do ":help credits" in Vim to see a list of people who contributed.
 + * See README.txt for an overview of the Vim source code.
 + */
++
++
++#include <dir.h>
++#include <stdio.h>
 +
 +#include "os_lost.h"
 +
@@ -56,10 +61,251 @@ diff -prNu ../vim72.orig/src/os_lost.c ./src/os_lost.c
 +    /* STUB */
 +    return 1;
 +}
-diff -prNu ../vim72.orig/src/os_lost.h ./src/os_lost.h
---- ../vim72.orig/src/os_lost.h	1970-01-01 01:00:00.000000000 +0100
-+++ ./src/os_lost.h	2008-10-18 11:05:40.000000000 +0200
-@@ -0,0 +1,46 @@
++
++
++int mch_isdir(char_u* name)
++{
++    return is_directory(name);
++}
++
++long mch_getperm(char_u *name)
++{
++    return 0;
++}
++
++void mch_exit(int r)
++{
++    exit(r);
++}
++
++int mch_setperm(char_u *name, long perm)
++{
++    return OK;
++}
++
++int mch_has_wildcard(char_u* p)
++{
++    return FALSE;
++}
++
++void mch_init(void)
++{
++}
++
++void mch_early_init(void)
++{
++}
++
++long mch_get_pid(void)
++{
++    return (long)getpid();
++}
++
++void mch_write(char_u *s, int len)
++{
++    fwrite((char *)s, len, 1, stdout);
++    fflush(stdout);
++}
++
++int mch_isFullName(char_u *fname)
++{
++    // FIXME Erkennt nur servicerelative Pfade
++    return *fname == '/';
++}
++
++int mch_FullName(fname, buf, len, force)
++    char_u	*fname, *buf;
++    int		len;
++    int		force;		/* also expand when already absolute path */
++{
++    char* res = io_get_absolute_path(fname);
++
++    if (res) {
++	vim_strncpy(buf, res, len - 1);
++	free(res);
++	return OK;
++    }
++
++    return FAIL;
++}
++
++void mch_get_host_name(s, len)
++    char_u  *s;
++    int	    len;
++{
++    vim_strncpy(s, (char_u *) "localhost", len - 1);
++}
++
++void
++mch_hide(name)
++    char_u	*name;
++{
++    /* can't hide a file */
++}
++
++    int
++mch_rename(src, dest)
++    const char *src, *dest;
++{
++    return -1;
++}
++
++int
++mch_input_isatty()
++{
++    return TRUE;
++
++}
++
++void
++mch_delay(msec, ignoreinput)
++    long	msec;
++    int		ignoreinput;
++{
++    msleep(msec);
++}
++
++void
++mch_suspend(void)
++{
++    // FIXME
++}
++
++    int
++mch_get_user_name(s, len)
++    char_u  *s;
++    int	    len;
++{
++    vim_strncpy(s, (char_u *) "user", len - 1);
++    return OK;
++}
++
++    int
++mch_screenmode(arg)
++    char_u   *arg;
++{
++    return FAIL;
++}
++
++    int
++mch_nodetype(name)
++    char_u	*name;
++{
++    struct stat	st;
++
++    if (stat((char *)name, &st))
++	return NODE_NORMAL;
++    if (S_ISREG(st.st_mode) || S_ISDIR(st.st_mode))
++	return NODE_NORMAL;
++#ifndef OS2
++    if (S_ISBLK(st.st_mode))	/* block device isn't writable */
++	return NODE_OTHER;
++#endif
++    /* Everything else is writable? */
++    return NODE_WRITABLE;
++}
++
++    int
++mch_char_avail()
++{
++    // FIXME
++    int c;
++    mch_inchar(&c, 1, 0, 0);
++
++    if (c && c != EOF) {
++	ungetc(c, stdin);
++	return TRUE;
++    } else {
++	return FALSE;
++    }
++}
++
++int
++mch_check_win(argc, argv)
++    int	    argc;
++    char    **argv;
++{
++    return OK;
++}
++
++int
++mch_get_shellsize()
++{
++    Rows = 25;
++    Columns = 80;
++    return OK;
++}
++
++void
++mch_set_shellsize()
++{
++}
++
++
++void
++mch_new_shellsize()
++{
++    /* Nothing to do. */
++}
++
++int
++mch_inchar(buf, maxlen, wtime, tb_change_cnt)
++    char_u	*buf;
++    int		maxlen;
++    long	wtime;	    /* don't use "time", MIPS cannot handle it */
++    int		tb_change_cnt;
++{
++    int c;
++    uint64_t timeout;
++    int n = 0;
++
++    switch (wtime) {
++	case -1: timeout = 0; break;
++	case  0: timeout = get_tick_count(); break;
++	default: timeout = get_tick_count() + 500; break;
++    }
++
++    do {
++	c = fgetc(stdin);
++	if (c && c != EOF) {
++	    n++;
++	    *buf = (char_u) c;
++	    buf++;
++	} else if (n > 0) {
++	    break;
++	}
++    } while ((n < maxlen) && (!timeout || get_tick_count() < timeout));
++
++    return n;
++}
++
++    void
++mch_settmode(tmode)
++    int		tmode;
++{
++}
++
++    int
++mch_has_exp_wildcard(p)
++    char_u  *p;
++{
++    return FALSE;
++}
++
++    int
++mch_expandpath(gap, path, flags)
++    garray_T	*gap;
++    char_u	*path;
++    int		flags;		/* EW_* flags */
++{
++    // FIXME
++    return FAIL;
++}
+Index: vim72/src/os_lost.h
+===================================================================
+--- /dev/null
++++ vim72/src/os_lost.h
+@@ -0,0 +1,48 @@
 +/* vi:set ts=8 sts=4 sw=4:
 + *
 + * VIM - Vi IMproved	by Bram Moolenaar
@@ -74,6 +320,8 @@ diff -prNu ../vim72.orig/src/os_lost.h ./src/os_lost.h
 +#include <stdlib.h>
 +#include <sys/stat.h>
 +#include <fcntl.h>
++
++#define HAVE_PUTENV
 +
 +#define __LOST_VIMDIR       "/packages/vim/7.2"
 +#define __LOST_CFG_PATH     __LOST_VIMDIR"/config"
@@ -106,9 +354,10 @@ diff -prNu ../vim72.orig/src/os_lost.h ./src/os_lost.h
 +#define mch_getenv(x)       (char_u *)getenv((char *)(x))
 +#define mch_remove(x)       unlink((char *)(x))
 +#define mch_chdir(s)        chdir(s)
-diff -prNu ../vim72.orig/src/vim.h ./src/vim.h
---- ../vim72.orig/src/vim.h	2008-08-09 18:03:38.000000000 +0200
-+++ ./src/vim.h	2008-10-14 19:34:13.000000000 +0200
+Index: vim72/src/vim.h
+===================================================================
+--- vim72.orig/src/vim.h
++++ vim72/src/vim.h
 @@ -240,6 +240,11 @@
  # define __ARGS(x)  x
  #endif
@@ -121,3 +370,87 @@ diff -prNu ../vim72.orig/src/vim.h ./src/vim.h
  #if (defined(UNIX) || defined(__EMX__) || defined(VMS)) \
  	&& (!defined(MACOS_X) || defined(HAVE_CONFIG_H))
  # include "os_unix.h"	    /* bring lots of system header files */
+Index: vim72/src/term.c
+===================================================================
+--- vim72.orig/src/term.c
++++ vim72/src/term.c
+@@ -474,6 +474,45 @@ static struct builtin_term builtin_termc
+ #  endif
+ # endif
+ 
++
++
++# if defined(__LOST__)
++/*
++ * LOST terminal, default for tyndur
++ */
++    {(int)KS_NAME,	"lost"},
++    {(int)KS_CE,	"\033[K"},
++    {(int)KS_CL,	"\033[H\033[2J"},
++    {(int)KS_CD,	"\033J"},
++    {(int)KS_ME,	"\033[0m"},
++    {(int)KS_MD,	"\033[1m"},
++    {(int)KS_MR,	"\033[7m"},
++    {(int)KS_OP,	"\033[0m\033[40;37m"},
++    {(int)KS_SE,	"\033[0m"},
++    {(int)KS_MS,	"y"},
++    {(int)KS_UT,	"y"},		/* guessed */
++    {(int)KS_LE,	"\033[D"},
++    {(int)KS_ND,	"\033[C"},
++    {(int)KS_CM,	"\033[%i%d;%dH"},
++    {(int)KS_CRI,	"\033[%dC"},
++    {(int)KS_VB,	""},
++    {(int)KS_CAB,	"\033[4%dm"},	/* set background color */
++    {(int)KS_CAF,	"\033[3%dm"},	/* set foreground color */
++    {(int)KS_CCO,	"16"},		/* allow 16 colors */
++
++    {K_UP,		"\033[A"},
++    {K_DOWN,		"\033[B"},
++    {K_LEFT,		"\033[D"},
++    {K_RIGHT,		"\033[C"},
++    {K_HOME,		"\033[H"},
++    {K_END,		"\033[F"},
++    {K_PAGEUP,		"\033[5~"},
++    {K_PAGEDOWN,	"\033[6~"},
++    {K_DEL,		"\033[3~"},
++    {K_INS,	        "\033[2~"},
++    {K_BS,		"\010"},
++# endif
++
+ # if defined(MSDOS) || defined(ALL_BUILTIN_TCAPS) || defined(__EMX__)
+ /*
+  * These codes are valid when nansi.sys or equivalent has been installed.
+@@ -1198,7 +1237,7 @@ static struct builtin_term builtin_termc
+     {K_PAGEDOWN,	"\033[154q"},
+ # endif
+ 
+-# if defined(DEBUG) || defined(ALL_BUILTIN_TCAPS)
++# if defined(DEBUG) || defined(ALL_BUILTIN_TCAPS) || defined(__LOST__)
+ /*
+  * for debugging
+  */
+@@ -1436,6 +1475,11 @@ static struct builtin_term builtin_termc
+ # define DEFAULT_TERM	(char_u *)"beos-ansi"
+ #endif
+ 
++#ifdef __LOST__
++# undef DEFAULT_TERM
++# define DEFAULT_TERM	(char_u *)"ansi"
++#endif
++
+ #ifndef DEFAULT_TERM
+ # define DEFAULT_TERM	(char_u *)"dumb"
+ #endif
+Index: vim72/src/misc1.c
+===================================================================
+--- vim72.orig/src/misc1.c
++++ vim72/src/misc1.c
+@@ -3365,6 +3365,8 @@ vim_beep()
+ 	    }
+ 	    else
+ 		++beep_count;
++#elif __LOST__
++            /* Kein Gepiepse unter tyndur */
+ #else
+ 	    out_char(BELL);
+ #endif

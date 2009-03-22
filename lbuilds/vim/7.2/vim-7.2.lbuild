@@ -17,7 +17,15 @@ MY_S="${S}/${MY_P}"
 src_unpack() {
 	lunpack ${P}.tar.bz2 || die "unpacking failed"
 	lunpack ${P}-extra.tar.gz || die "unpacking extra failed"
-	cd ${MY_S} && lpatch ${F}/build.patch ${F}/os_lost.patch || die "patching failed"
+	cd ${MY_S}
+
+    ln -s ${F} patches
+    [ -f ${F}/series ] && ln -s ${F}/series series
+    for i in ${F}/*.patch; do
+        [ -L series ] || echo `basename $i` >> series
+        (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
+    done
+    (which quilt > /dev/null 2>&1) && quilt push -a || die "Fehler beim Anwenden der Patches"
 }
 
 src_compile() {
@@ -28,5 +36,7 @@ src_compile() {
 
 src_install() {
 	cd ${MY_S}/src
-	lmake -f Make_lost.mak DESTDIR="${D}" install || die "make install failed"
+	# lmake -f Make_lost.mak DESTDIR="${D}" install || die "make install failed"
+    mkdir -p ${D}/packages/vim/7.2/bin
+    cp lostout/vim ${D}/packages/vim/7.2/bin
 }
