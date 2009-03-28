@@ -152,9 +152,10 @@ die() {
 
 # Quellcode entpacken
 src_unpack_default() {
+    include lutils
     local u
     for u in $SRC_URI; do
-        unpack "${DISTDIR}/`basename ${u}`"
+        lunpack "`basename ${u}`"
    done
 }
 
