@@ -6,7 +6,7 @@ diff -ur ../diffutils-2.8.1.orig/config/config.sub ./config/config.sub
  	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
  	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
 -	      | -morphos* | -superux* | -rtmk* | -rtmk-nova*)
-+	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -lost*)
++	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -tyndur*)
  	# Remember, each alternative MUST END IN *, to match a version number.
  		;;
  	-qnx*)

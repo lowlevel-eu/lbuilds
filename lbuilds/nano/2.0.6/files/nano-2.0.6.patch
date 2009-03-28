@@ -6,7 +6,7 @@ diff -ur ../nano-2.0.6.orig/config.sub ./config.sub
  	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
  	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
 -	      | -skyos* | -haiku*)
-+	      | -skyos* | -haiku* | -lost*)
++	      | -skyos* | -haiku* | -tyndur*)
  	# Remember, each alternative MUST END IN *, to match a version number.
  		;;
  	-qnx*)

@@ -6,7 +6,7 @@ diff -ur ../ncurses-5.6.orig/config.sub ./config.sub
  	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
  	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
 -	      | -skyos* | -haiku* | -rdos* | -toppers*)
-+	      | -skyos* | -haiku* | -rdos* | -toppers* | -lost*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -tyndur*)
  	# Remember, each alternative MUST END IN *, to match a version number.
  		;;
  	-qnx*)
@@ -18,7 +18,7 @@ diff -ur ../ncurses-5.6.orig/misc/terminfo.src ./misc/terminfo.src
  	rmir=\E[4l, rmkx=\E>, rmso=\E[m, rmul=\E[m, sgr0=\E[m,
  	smam=\E[?7h, smir=\E[4h, smkx=\E=, smso=\E[7m, smul=\E[4m,
 +
-+lost|LOST Terminal(allmost vt100),
++tyndur|TYNDUR Terminal(allmost vt100),
 +	OTbs, am,
 +	cols#80, lines#25,
 +	clear=\E[H\E[J$<50>,
@@ -82,7 +82,7 @@ diff -ur ../ncurses-5.6.orig/ncurses/tty/lib_twait.c ./ncurses/tty/lib_twait.c
  #include <OS.h>
  #endif
  
-+#ifdef __LOST__
++#ifdef __TYNDUR__
 +#include <stdint.h>
 +#include <sys/time.h>
 +extern uint64_t get_tick_count();
@@ -95,7 +95,7 @@ diff -ur ../ncurses-5.6.orig/ncurses/tty/lib_twait.c ./ncurses/tty/lib_twait.c
      }
  #endif
  
-+#elif defined(__LOST__)
++#elif defined(__TYNDUR__)
 +    int ch;
 +    uint64_t timeout = 0;
 +    uint64_t time;
@@ -125,7 +125,7 @@ diff -ur ../ncurses-5.6.orig/ncurses/tty/lib_twait.c ./ncurses/tty/lib_twait.c
  	    }
  #elif defined(__BEOS__)
  	    result = 1;		/* redundant, but simple */
-+#elif defined(__LOST__)
++#elif defined(__TYNDUR__)
 +	    result = 1;		/* redundant, but simple */
  #elif HAVE_SELECT
  	    if ((mode & 2)
@@ -138,7 +138,7 @@ diff -ur ../ncurses-5.6.orig/test/bs.c ./test/bs.c
      CATCHALL(uninitgame);
  
 -    if ((tmpname = getlogin()) != 0) {
-+    if ((tmpname = "lost") != 0) {
++    if ((tmpname = "tyndur") != 0) {
  	(void) strcpy(name, tmpname);
  	name[0] = toupper(name[0]);
      } else

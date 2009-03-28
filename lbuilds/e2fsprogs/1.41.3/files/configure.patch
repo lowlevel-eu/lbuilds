@@ -7,7 +7,7 @@ Index: e2fsprogs-1.41.3/config/config.sub
  	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
  	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
 -	      | -skyos* | -haiku* | -rdos*)
-+	      | -skyos* | -haiku* | -rdos* | -lost* )
++	      | -skyos* | -haiku* | -rdos* | -tyndur* )
  	# Remember, each alternative MUST END IN *, to match a version number.
  		;;
  	-qnx*)
