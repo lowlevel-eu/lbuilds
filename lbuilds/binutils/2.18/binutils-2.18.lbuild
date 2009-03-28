@@ -12,11 +12,6 @@ RUN_DEPEND=""
 
 MY_S="${S}/${P}"
 
-src_unpack() {
-	lunpack binutils-${PV}.tar.bz2
-	cd ${MY_S} && lpatch ${F}/${P}.patch || die "patching failed"
-}
-
 src_compile() {
 	mkdir build
 	cd build

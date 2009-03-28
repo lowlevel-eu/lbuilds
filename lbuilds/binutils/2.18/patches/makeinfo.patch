@@ -1,0 +1,23 @@
+Index: src/binutils-2.18/configure
+===================================================================
+--- src.orig/binutils-2.18/configure
++++ src/binutils-2.18/configure
+@@ -6127,12 +6127,12 @@ case " $build_configdirs " in
+ 
+     # For an installed makeinfo, we require it to be from texinfo 4.4 or
+     # higher, else we use the "missing" dummy.
+-    if ${MAKEINFO} --version \
+-       | egrep 'texinfo[^0-9]*([1-3][0-9]|4\.[4-9]|[5-9])' >/dev/null 2>&1; then
+-      :
+-    else
+-      MAKEINFO="$MISSING makeinfo"
+-    fi
++    #if ${MAKEINFO} --version \
++    #   | egrep 'texinfo[^0-9]*([1-3][0-9]|4\.[4-9]|[5-9])' >/dev/null 2>&1; then
++    #  :
++    #else
++    #  MAKEINFO="$MISSING makeinfo"
++    #fi
+     ;;
+ 
+ esac
