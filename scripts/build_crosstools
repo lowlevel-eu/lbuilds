@@ -1,6 +1,6 @@
 #!/bin/bash
 PREFIX=`pwd`/env
-TARGET=i386-pc-lost
+TARGET=i386-pc-tyndur
 PATCHES=`pwd`/patches
 TMP=`pwd`/tmp
 LOGS=${TMP}

@@ -29,7 +29,7 @@ ln -s -f ${ENV}/lib64 ${ENV}/system/links/lib64
 rm -f ${ENV}/system/links/include
 ln -s -f ${ENV}/include ${ENV}/system/links/include
 
-cp ${LOST_SRC}/src/modules/lib/crt0.o ${ENV}/lib/crtlost.o
+cp ${LOST_SRC}/src/modules/lib/crt0.o ${ENV}/lib/crttyndur.o
 
 # Header verlinken
 for h in ${LOST_SRC}/src/include/* ${LOST_SRC}/src/include/arch/${ARCH}/* ${LOST_SRC}/src/modules/include/* ${LOST_SRC}/src/modules/include/arch/${ARCH}/*; do
