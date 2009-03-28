@@ -58,6 +58,8 @@ init_env() {
     export R="/packages/${PN}/${PV}/"
     # Das Verzeichnis mit Dateien zu diesem Paket
     export F="`dirname ${PACKAGE_PATH}`/files"
+    # Das Verzeichnis mit den Patches
+    export PD="`dirname ${PACKAGE_PATH}`/patches"
 
 
     export ENVDIR="${WORKDIR}/env"
@@ -91,6 +93,11 @@ internal_prepare_dirs() {
     mkdir -p ${S}
     mkdir -p ${T}
     mkdir -p ${D}
+
+    # Patches und series verlinken
+    if [ -d ${PD} ]; then
+        ln -s ${PD} ${S}/patches
+    fi
 
     internal_prepare_env
     return 0
@@ -192,6 +199,11 @@ internal_src_unpack() {
     cd ${S}
     lstatus "Entpacke Quelldateien..."
     call_if_exists src_unpack src_unpack_default
+
+    # Jetzt koennen wir allfaellige Patches anwenden
+    if [ -f "${S}/patches/series" ]; then
+        cd "${S}" && quilt push -a -q
+    fi
 }
 
 # Quellcode konfigurieren
