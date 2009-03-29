@@ -1,0 +1,49 @@
+Index: src/ncurses-5.6/test/bs.c
+===================================================================
+--- src.orig/ncurses-5.6/test/bs.c
++++ src/ncurses-5.6/test/bs.c
+@@ -220,7 +220,7 @@ intro(void)
+ 
+     CATCHALL(uninitgame);
+ 
+-    if ((tmpname = getlogin()) != 0) {
++    if ((tmpname = "tyndur") != 0) {
+ 	(void) strcpy(name, tmpname);
+ 	name[0] = toupper(name[0]);
+     } else
+Index: src/ncurses-5.6/test/cardfile.c
+===================================================================
+--- src.orig/ncurses-5.6/test/cardfile.c
++++ src/ncurses-5.6/test/cardfile.c
+@@ -36,7 +36,7 @@
+ 
+ #include <test.priv.h>
+ 
+-#if USE_LIBFORM && USE_LIBPANEL
++#if 0
+ 
+ #include <form.h>
+ #include <panel.h>
+Index: src/ncurses-5.6/test/tclock.c
+===================================================================
+--- src.orig/ncurses-5.6/test/tclock.c
++++ src/ncurses-5.6/test/tclock.c
+@@ -1,7 +1,7 @@
+ /* $Id: tclock.c,v 1.25 2005/04/16 16:39:27 tom Exp $ */
+-
+ #include <test.priv.h>
+ 
++#if 0
+ #include <math.h>
+ 
+ #if TIME_WITH_SYS_TIME
+@@ -256,3 +256,9 @@ main(int argc GCC_UNUSED, char *argv[]GC
+     endwin();
+     ExitProgram(EXIT_SUCCESS);
+ }
++#endif
++int main(int argc, char* argv[])
++{
++    ExitProgram(EXIT_SUCCESS);
++}
++

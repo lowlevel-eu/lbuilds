@@ -1,0 +1,47 @@
+Index: src/ncurses-5.6/misc/terminfo.src
+===================================================================
+--- src.orig/ncurses-5.6/misc/terminfo.src
++++ src/ncurses-5.6/misc/terminfo.src
+@@ -19545,6 +19545,42 @@ v3220|LANPAR Vision II model 3220/3221/3
+ 	kf8=\E[OR, kf9=\E[OS, khome=\E[H, ri=\EM, rmam=\E[?7l,
+ 	rmir=\E[4l, rmkx=\E>, rmso=\E[m, rmul=\E[m, sgr0=\E[m,
+ 	smam=\E[?7h, smir=\E[4h, smkx=\E=, smso=\E[7m, smul=\E[4m,
++
++tyndur|TYNDUR Terminal(allmost vt100),
++	OTbs, am,
++	cols#80, lines#25,
++	clear=\E[H\E[J$<50>,
++	ed=\E[J,
++	cuf1=\E[C,
++	cub1=\E[D,
++	cud1=\E[B,
++	cuu1=\E[A,
++ 	cuf=\E[%p1%dC,
++	cud=\E[%p1%dB,
++	cuu=\E[%p1%dA,
++	cup=\E[%i%p1%d;%p2%dH,
++	sc=\E[s,
++	rc=\E[u,
++	ht=^I,
++	cr=^M,
++	ind=^J,
++	rev=\E[7m,
++	smso=\E[7m,
++	rmso=\E[0m,
++	smul=\E[4m,
++	rmul=\E[0m,
++	sgr0=\E[0m,
++	kbs=^H,
++	kent=^J,
++	kcuf1=\E[C,
++	kcub1=\E[D,
++	kcud1=\E[B,
++	kcuu1=\E[A,
++
++
++# Vermutlich unnoetig: home=\E[H, lf1=pf1,
++
++
+ ######## ICH/ICH1 VERSUS RMIR/SMIR
+ #
+ # Some non-curses applications get confused if both ich/ich1 and rmir/smir

@@ -1,0 +1,26 @@
+Index: src/ncurses-5.6/config.sub
+===================================================================
+--- src.orig/ncurses-5.6/config.sub
++++ src/ncurses-5.6/config.sub
+@@ -1218,7 +1218,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -tyndur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: src/ncurses-5.6/test/configure
+===================================================================
+--- src.orig/ncurses-5.6/test/configure
++++ src/ncurses-5.6/test/configure
+@@ -6,7 +6,7 @@
+ #
+ # This configure script is free software; the Free Software Foundation
+ # gives unlimited permission to copy, distribute and modify it.
+-
++exit 0
+ # Defaults:
+ ac_help=
+ ac_default_prefix=/usr/local
