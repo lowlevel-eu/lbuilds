@@ -1,0 +1,33 @@
+include toolchain
+include lutils
+
+DESCRIPTION="Einfaches Hilfesystem für tyndur"
+HOMEPAGE=""
+SRC_URI=""
+
+LICENSE="none"
+
+BUILD_DEPEND="=ncurses-5.6 =libnxml-0.18.3"
+RUN_DEPEND=""
+
+src_unpack() {
+	cd ${S}
+
+	git init -q
+	git pull -q git://git.tyndur.org/help.git tag 0.1
+}
+
+src_compile() {
+	cd ${S}
+
+	`tc-cc` -c -I include -I `tc-incdir` -I `tc-incdir`/ncurses -Wall -O2 *.c
+	`tc-cc` -o help *.o -L `tc-libdir` -lnxml -lncurses
+}
+
+src_install() {
+	cd ${S}
+
+	mkdir -p "${D}${R}/doc"
+	cp help ${D}${R}
+	cp help.xml "${D}${R}/doc/"
+}
