@@ -2,7 +2,7 @@ Index: src/ncurses-5.6/misc/terminfo.src
 ===================================================================
 --- src.orig/ncurses-5.6/misc/terminfo.src
 +++ src/ncurses-5.6/misc/terminfo.src
-@@ -19545,6 +19545,42 @@ v3220|LANPAR Vision II model 3220/3221/3
+@@ -19545,6 +19545,46 @@ v3220|LANPAR Vision II model 3220/3221/3
  	kf8=\E[OR, kf9=\E[OS, khome=\E[H, ri=\EM, rmam=\E[?7l,
  	rmir=\E[4l, rmkx=\E>, rmso=\E[m, rmul=\E[m, sgr0=\E[m,
  	smam=\E[?7h, smir=\E[4h, smkx=\E=, smso=\E[7m, smul=\E[4m,
@@ -37,6 +37,10 @@ Index: src/ncurses-5.6/misc/terminfo.src
 +	kcub1=\E[D,
 +	kcud1=\E[B,
 +	kcuu1=\E[A,
++	smso=\E[7m,
++	blink=\E[5m,
++	bold=\E[1m,
++	use=ecma+color,
 +
 +
 +# Vermutlich unnoetig: home=\E[H, lf1=pf1,
