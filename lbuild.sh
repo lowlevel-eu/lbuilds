@@ -256,6 +256,14 @@ internal_src_install() {
             >> "$PIS"
         lstatus "    addinc $hdr"
     done
+    for i in ${D}/${R}/doc/*; do
+        test -e "$i" || continue
+        doc="`basename $i`"
+        echo "lpt cfg-adddoc file:/packages/${PN}/${PV}/doc/$doc $doc" \
+            >> "$PIS"
+        lstatus "    adddoc $doc"
+    done
+
 
     if has_feature "nostrip"; then
         lstatus "Ueberspringe das Strippen der Binaries"
