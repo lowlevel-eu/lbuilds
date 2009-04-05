@@ -23,7 +23,7 @@ src_compile() {
 		--prefix="${R}" \
 		--enable-debug \
 		--with-trace \
-		--with-fallbacks=tyndur \
+		--with-fallbacks=tyndur,lost \
 		--without-progs \
 		--without-cxx \
 		--without-cxx-binding \
