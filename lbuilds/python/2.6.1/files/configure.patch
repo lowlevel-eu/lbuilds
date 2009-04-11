@@ -1,0 +1,335 @@
+Index: Python-2.6.1/configure
+===================================================================
+--- Python-2.6.1.orig/configure
++++ Python-2.6.1/configure
+@@ -4575,7 +4575,7 @@ echo $ECHO_N "checking whether $CC accep
+      ac_save_cc="$CC"
+      CC="$CC -fno-strict-aliasing"
+      if test "$cross_compiling" = yes; then
+-  ac_cv_no_strict_aliasing_ok=no
++  ac_cv_no_strict_aliasing_ok=yes
+ else
+   cat >conftest.$ac_ext <<_ACEOF
+ /* confdefs.h.  */
+@@ -17046,143 +17046,6 @@ fi
+ fi
+ 
+ 
+-# On Tru64, chflags seems to be present, but calling it will
+-# exit Python
+-{ echo "$as_me:$LINENO: checking for chflags" >&5
+-echo $ECHO_N "checking for chflags... $ECHO_C" >&6; }
+-if test "$cross_compiling" = yes; then
+-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&5
+-echo "$as_me: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&2;}
+-   { (exit 1); exit 1; }; }
+-else
+-  cat >conftest.$ac_ext <<_ACEOF
+-/* confdefs.h.  */
+-_ACEOF
+-cat confdefs.h >>conftest.$ac_ext
+-cat >>conftest.$ac_ext <<_ACEOF
+-/* end confdefs.h.  */
+-
+-#include <sys/stat.h>
+-#include <unistd.h>
+-int main(int argc, char*argv[])
+-{
+-  if(chflags(argv[0], 0) != 0)
+-    return 1;
+-  return 0;
+-}
+-
+-_ACEOF
+-rm -f conftest$ac_exeext
+-if { (ac_try="$ac_link"
+-case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_link") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+-  { (case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_try") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); }; }; then
+-
+-cat >>confdefs.h <<\_ACEOF
+-#define HAVE_CHFLAGS 1
+-_ACEOF
+-
+-  { echo "$as_me:$LINENO: result: yes" >&5
+-echo "${ECHO_T}yes" >&6; }
+-else
+-  echo "$as_me: program exited with status $ac_status" >&5
+-echo "$as_me: failed program was:" >&5
+-sed 's/^/| /' conftest.$ac_ext >&5
+-
+-( exit $ac_status )
+-{ echo "$as_me:$LINENO: result: no" >&5
+-echo "${ECHO_T}no" >&6; }
+-
+-fi
+-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+-fi
+-
+-
+-
+-{ echo "$as_me:$LINENO: checking for lchflags" >&5
+-echo $ECHO_N "checking for lchflags... $ECHO_C" >&6; }
+-if test "$cross_compiling" = yes; then
+-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&5
+-echo "$as_me: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&2;}
+-   { (exit 1); exit 1; }; }
+-else
+-  cat >conftest.$ac_ext <<_ACEOF
+-/* confdefs.h.  */
+-_ACEOF
+-cat confdefs.h >>conftest.$ac_ext
+-cat >>conftest.$ac_ext <<_ACEOF
+-/* end confdefs.h.  */
+-
+-#include <sys/stat.h>
+-#include <unistd.h>
+-int main(int argc, char*argv[])
+-{
+-  if(lchflags(argv[0], 0) != 0)
+-    return 1;
+-  return 0;
+-}
+-
+-_ACEOF
+-rm -f conftest$ac_exeext
+-if { (ac_try="$ac_link"
+-case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_link") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+-  { (case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_try") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); }; }; then
+-
+-cat >>confdefs.h <<\_ACEOF
+-#define HAVE_LCHFLAGS 1
+-_ACEOF
+-
+-  { echo "$as_me:$LINENO: result: yes" >&5
+-echo "${ECHO_T}yes" >&6; }
+-else
+-  echo "$as_me: program exited with status $ac_status" >&5
+-echo "$as_me: failed program was:" >&5
+-sed 's/^/| /' conftest.$ac_ext >&5
+-
+-( exit $ac_status )
+-{ echo "$as_me:$LINENO: result: no" >&5
+-echo "${ECHO_T}no" >&6; }
+-
+-fi
+-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+-fi
+-
+-
+ 
+ case $ac_sys_system/$ac_sys_release in
+ Darwin/*)
+@@ -24417,95 +24280,6 @@ else
+ echo "${ECHO_T}no" >&6; }
+ fi
+ 
+-{ echo "$as_me:$LINENO: checking for %zd printf() format support" >&5
+-echo $ECHO_N "checking for %zd printf() format support... $ECHO_C" >&6; }
+-if test "$cross_compiling" = yes; then
+-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&5
+-echo "$as_me: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&2;}
+-   { (exit 1); exit 1; }; }
+-else
+-  cat >conftest.$ac_ext <<_ACEOF
+-/* confdefs.h.  */
+-_ACEOF
+-cat confdefs.h >>conftest.$ac_ext
+-cat >>conftest.$ac_ext <<_ACEOF
+-/* end confdefs.h.  */
+-#include <stdio.h>
+-#include <stddef.h>
+-#include <string.h>
+-
+-#ifdef HAVE_SYS_TYPES_H
+-#include <sys/types.h>
+-#endif
+-
+-#ifdef HAVE_SSIZE_T
+-typedef ssize_t Py_ssize_t;
+-#elif SIZEOF_VOID_P == SIZEOF_LONG
+-typedef long Py_ssize_t;
+-#else
+-typedef int Py_ssize_t;
+-#endif
+-
+-int main()
+-{
+-    char buffer[256];
+-
+-    if(sprintf(buffer, "%zd", (size_t)123) < 0)
+-       	return 1;
+-
+-    if (strcmp(buffer, "123"))
+-	return 1;
+-
+-    if (sprintf(buffer, "%zd", (Py_ssize_t)-123) < 0)
+-       	return 1;
+-
+-    if (strcmp(buffer, "-123"))
+-	return 1;
+-
+-    return 0;
+-}
+-_ACEOF
+-rm -f conftest$ac_exeext
+-if { (ac_try="$ac_link"
+-case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_link") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+-  { (case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_try") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); }; }; then
+-  { echo "$as_me:$LINENO: result: yes" >&5
+-echo "${ECHO_T}yes" >&6; }
+-
+-cat >>confdefs.h <<\_ACEOF
+-#define PY_FORMAT_SIZE_T "z"
+-_ACEOF
+-
+-else
+-  echo "$as_me: program exited with status $ac_status" >&5
+-echo "$as_me: failed program was:" >&5
+-sed 's/^/| /' conftest.$ac_ext >&5
+-
+-( exit $ac_status )
+-{ echo "$as_me:$LINENO: result: no" >&5
+-echo "${ECHO_T}no" >&6; }
+-fi
+-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+-fi
+-
+ 
+ 
+ { echo "$as_me:$LINENO: checking for socklen_t" >&5
+Index: Python-2.6.1/Makefile.pre.in
+===================================================================
+--- Python-2.6.1.orig/Makefile.pre.in
++++ Python-2.6.1/Makefile.pre.in
+@@ -32,6 +32,7 @@ CC=		@CC@
+ CXX=		@CXX@
+ MAINCC=		@MAINCC@
+ LINKCC=		@LINKCC@
++HOSTCC=gcc -DWITHOUT_COMPLEX -m32
+ AR=		@AR@
+ RANLIB=		@RANLIB@
+ SVNVERSION=	@SVNVERSION@
+@@ -170,7 +171,7 @@ DLINCLDIR=	@DLINCLDIR@
+ DYNLOADFILE=	@DYNLOADFILE@
+ MACHDEP_OBJS=	@MACHDEP_OBJS@
+ LIBOBJDIR=	Python/
+-LIBOBJS=	@LIBOBJS@
++LIBOBJS=	#@LIBOBJS@
+ UNICODE_OBJS=   @UNICODE_OBJS@
+ 
+ PYTHON=		python$(EXE)
+@@ -352,7 +353,7 @@ LIBRARY_OBJS=	\
+ 
+ # Default target
+ all:		build_all
+-build_all:	$(BUILDPYTHON) oldsharedmods sharedmods
++build_all:	$(BUILDPYTHON)
+ 
+ # Compile a binary with gcc profile guided optimization.
+ profile-opt:
+@@ -516,7 +517,7 @@ $(GRAMMAR_H) $(GRAMMAR_C): $(PGEN) $(GRA
+ 		-$(PGEN) $(GRAMMAR_INPUT) $(GRAMMAR_H) $(GRAMMAR_C)
+ 
+ $(PGEN):	$(PGENOBJS)
+-		$(CC) $(OPT) $(LDFLAGS) $(PGENOBJS) $(LIBS) -o $(PGEN)
++		$(HOSTCC) $(OPT) $(PGENOBJS) $(LIBS) -o $(PGEN)
+ 
+ Parser/grammar.o:	$(srcdir)/Parser/grammar.c \
+ 				$(srcdir)/Include/token.h \
+@@ -878,6 +879,9 @@ libinstall:	build_all $(srcdir)/Lib/$(PL
+ 		done; \
+ 	done
+ 	$(INSTALL_DATA) $(srcdir)/LICENSE $(DESTDIR)$(LIBDEST)/LICENSE.txt
++
++dontdothis:
++	# Das funktioniert so nicht, weil man ein tyndur-Python nicht auf Linux ausfuehren kann
+ 	PYTHONPATH=$(DESTDIR)$(LIBDEST)  $(RUNSHARED) \
+ 		./$(BUILDPYTHON) -Wi -tt $(DESTDIR)$(LIBDEST)/compileall.py \
+ 		-d $(LIBDEST) -f \
+@@ -993,6 +997,10 @@ libainstall:	all
+ # Install the dynamically loadable modules
+ # This goes into $(exec_prefix)
+ sharedinstall:
++
++
++nosharedinstall:
++	# Host != Target
+ 	$(RUNSHARED) ./$(BUILDPYTHON) -E $(srcdir)/setup.py install \
+ 	   	--prefix=$(prefix) \
+ 		--install-scripts=$(BINDIR) \
+Index: Python-2.6.1/Modules/Setup.dist
+===================================================================
+--- Python-2.6.1.orig/Modules/Setup.dist
++++ Python-2.6.1/Modules/Setup.dist
+@@ -112,9 +112,9 @@ PYTHONPATH=$(COREPYTHONPATH)
+ # This only contains the minimal set of modules required to run the 
+ # setup.py script in the root of the Python source tree.
+ 
+-posix posixmodule.c		# posix (UNIX) system calls
++#posix posixmodule.c		# posix (UNIX) system calls
+ errno errnomodule.c		# posix (UNIX) errno values
+-pwd pwdmodule.c			# this is needed to find out the user's home dir
++#pwd pwdmodule.c			# this is needed to find out the user's home dir
+ 				# if $HOME is not set
+ _sre _sre.c			# Fredrik Lundh's new regular expressions
+ _codecs _codecsmodule.c		# access to the builtin codecs and codec registry
+@@ -492,4 +492,4 @@ GLHACK=-Dclear=__GLclear
+ # xx xxmodule.c
+ 
+ # Another example -- the 'xxsubtype' module shows C-level subtyping in action
+-xxsubtype xxsubtype.c
++#xxsubtype xxsubtype.c
