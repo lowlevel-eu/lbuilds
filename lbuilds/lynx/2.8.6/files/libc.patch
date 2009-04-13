@@ -1,0 +1,132 @@
+Index: lynx2-8-6/WWW/Library/Implementation/www_tcp.h
+===================================================================
+--- lynx2-8-6.orig/WWW/Library/Implementation/www_tcp.h
++++ lynx2-8-6/WWW/Library/Implementation/www_tcp.h
+@@ -56,6 +56,64 @@ Default values
+ #define INVSOC (-1)		/* Unix invalid socket */
+ 		/* NB: newer libwww has something different for Windows */
+ 
++
++
++#ifdef __TYNDUR__
++#undef IOCTL
++#define IOCTL(a,b,c) -1		/* disables ioctl function            */
++#define NO_IOCTL		/* flag to check if ioctl is disabled */
++
++static inline double strtod(const char *nptr, char **endptr)
++{
++    return (double) strtol(nptr, endptr, 10);
++}
++
++static inline int gethostname(char* buf, size_t len)
++{
++    strncpy(buf, "tyndur", len);
++    return 0;
++}
++
++#include <errno.h>
++static inline ssize_t readlink(const char *path, char *buf, size_t bufsiz)
++{
++    ssize_t len;
++
++    FILE* file = fopen(path, "lr");
++    if (file == NULL) {
++        errno = EIO;
++        return -1;
++    }
++    len = fread(buf, 1, bufsiz, file);
++    fclose(file);
++
++    return len;
++}
++
++static inline void *bsearch(const void *key, const void *base, size_t nel,
++    size_t width, int (*compar)(const void *, const void *))
++{
++    size_t i;
++    const void* obj;
++
++    for (i = 0; i < nel; i++) {
++        obj = base + (width * i);
++        if (compar(key, obj) == 0) {
++            return (void*) obj;
++        }
++    }
++
++    return NULL;
++}
++
++static inline void LYmsec_delay(unsigned msec)
++{
++    msleep(1000 * msec);
++}
++
++#endif
++
++
+ #ifndef VMS
+ 
+ #include <sys/types.h>
+@@ -94,7 +152,8 @@ Default values
+ # endif
+ #endif /* HAVE_DIRENT_H */
+ 
+-#if !(defined(DOSPATH) || defined(__EMX__) || defined(__CYGWIN__))
++#if !(defined(DOSPATH) || defined(__EMX__) || defined(__CYGWIN__)) && \
++    !defined(__TYNDUR__)
+ #define STRUCT_DIRENT__D_INO 1
+ #endif
+ 
+@@ -910,4 +969,52 @@ typedef struct sockaddr_in SockA;
+ #define MAXHOSTNAMELEN 128	/* Max label is 63. Should handle 2 of those */
+ #endif /* MAXHOSTNAMELEN */
+ 
++
++#ifdef __TYNDUR__
++
++#undef NETREAD
++#define NETREAD(s,b,l)  tyndur_netread((s),(b),(l))
++
++static ssize_t tyndur_netread(int fd, void* buf, size_t n)
++{
++    ssize_t ret;
++    uint64_t timeout = get_tick_count() + 1000000;
++
++    do {
++        ret = read(fd, buf, n);
++    } while ((ret == 0) && (get_tick_count() < timeout));
++
++    return ret;
++}
++
++static int select(int nfds, fd_set *readfds, fd_set *writefds,
++                  fd_set *exceptfds, struct timeval *timeout)
++{
++    uint32_t* rd = (uint32_t*) readfds;
++    uint32_t* wr = (uint32_t*) writefds;
++    uint32_t* err = (uint32_t*) exceptfds;
++    int c;
++    FILE* f;
++
++    int ret = 0;
++    int i;
++    for (i = 0; i < 32; i++) {
++        if (*rd & (1 << i)) {
++            f = fdopen(*rd, NULL);
++            c = fgetc(f);
++            if (c == 0 || c == EOF) {
++                *rd &= ~(1 << i);
++            } else {
++                ungetc(c, f);
++                ret++;
++            }
++        }
++        if (*wr & (1 << i)) ret++;
++        if (*err & (1 << i)) ret++;
++    }
++
++    return ret;
++}
++#endif
++
+ #endif /* TCP_H */

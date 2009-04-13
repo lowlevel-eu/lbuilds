@@ -1,0 +1,56 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Lynx"
+SRC_URI="http://lynx.isc.org/lynx2.8.6/lynx2.8.6.tar.bz2"
+
+LICENSE="GPL"
+
+RUN_DEPEND=""
+BUILD_DEPEND="=ncurses-5.6 =zlib-1.2.3"
+
+MY_S="${S}/${PN}2-8-6"
+
+src_unpack() {
+	lunpack ${PN}${PV}.tar.bz2
+	cd ${MY_S}
+
+    ln -s ${F} patches
+    [ -f ${F}/series ] && ln -s ${F}/series series
+    for i in ${F}/*.patch; do
+        [ -L series ] || echo `basename $i` >> series
+        (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
+    done
+    (which quilt > /dev/null 2>&1) && quilt push -a || die "Fehler beim Anwenden der Patches"
+}
+
+src_configure() {
+	cd ${MY_S}
+
+	./configure \
+		CC=`tc-cc` \
+		CFLAGS="-I `tc-incdir`/ncurses -I `tc-incdir` -L `tc-libdir` -lncurses" \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+        --disable-ftp \
+        --disable-dired \
+        --with-zlib \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake DESTDIR="${D}" install || die "make install failed"
+    mv ${D}/${R}/etc/lynx.cfg ${D}/${R}/etc/lynx.cfg.tmp
+    grep -v '^#' ${D}/${R}/etc/lynx.cfg.tmp > ${D}/${R}/etc/lynx.cfg
+    rm ${D}/${R}/etc/lynx.cfg.tmp
+}
