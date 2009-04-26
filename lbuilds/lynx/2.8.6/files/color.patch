@@ -1,0 +1,26 @@
+Index: lynx2-8-6/src/LYReadCFG.h
+===================================================================
+--- lynx2-8-6.orig/src/LYReadCFG.h
++++ lynx2-8-6/src/LYReadCFG.h
+@@ -24,8 +24,8 @@ extern "C" {
+ #   define DEFAULT_FG DEFAULT_COLOR
+ #   define DEFAULT_BG DEFAULT_COLOR
+ #  else
+-#   define DEFAULT_FG COLOR_BLACK
+-#   define DEFAULT_BG COLOR_WHITE
++#   define DEFAULT_FG COLOR_WHITE
++#   define DEFAULT_BG COLOR_BLACK
+ #  endif
+ # endif
+ #else
+@@ -33,8 +33,8 @@ extern "C" {
+ #  define DEFAULT_FG "black"
+ #  define DEFAULT_BG "white"
+ # else
+-#  define DEFAULT_FG COLOR_BLACK
+-#  define DEFAULT_BG COLOR_WHITE
++#  define DEFAULT_FG COLOR_WHITE
++#  define DEFAULT_BG COLOR_BLACK
+ # endif
+ #endif				/* USE_DEFAULT_COLORS */
+     extern int default_fg;

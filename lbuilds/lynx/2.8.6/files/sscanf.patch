@@ -1,0 +1,36 @@
+Index: lynx2-8-6/WWW/Library/Implementation/HTTP.c
+===================================================================
+--- lynx2-8-6.orig/WWW/Library/Implementation/HTTP.c
++++ lynx2-8-6/WWW/Library/Implementation/HTTP.c
+@@ -1464,9 +1464,30 @@ static int HTLoadHTTP(const char *arg,
+ 
+ 	server_version[0] = 0;
+ 
++/*
+ 	fields = sscanf(line_buffer, "%20s %d",
+ 			server_version,
+ 			&server_status);
++*/
++    {
++        char* space = strchr(line_buffer, ' ');
++
++        if (space == NULL) {
++            server_version[0] = '\0';
++            server_status = 0;
++            fields = 0;
++        } else {
++            int n = space - line_buffer;
++            if (n > 20) {
++                n = 20;
++            }
++            strncpy(server_version, line_buffer, n);
++
++            space++;
++            server_status = strtoul(space, NULL, 10);
++            fields = 2;
++        }
++    }
+ 
+ 	CTRACE((tfp, "HTTP: Scanned %d fields from line_buffer\n", fields));
+ 
+

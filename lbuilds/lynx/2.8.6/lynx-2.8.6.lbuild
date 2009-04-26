@@ -38,6 +38,7 @@ src_configure() {
         --disable-ftp \
         --disable-dired \
         --with-zlib \
+        --disable-color-style \
 		|| die "configure failed"
 }
 
