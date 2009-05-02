@@ -4,6 +4,7 @@ include toolchain
 DESCRIPTION=""
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/ncurses"
 SRC_URI="http://ftp.gnu.org/gnu/ncurses/${P}.tar.gz"
+PS="lib"
 
 LICENSE="GPL-2"
 

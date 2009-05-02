@@ -4,6 +4,7 @@ include toolchain
 DESCRIPTION=""
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/libnxml"
 SRC_URI="http://www.autistici.org/bakunin/libnxml/${P}.tar.gz"
+PS="lib"
 
 LICENSE="LGPL-2.1"
 

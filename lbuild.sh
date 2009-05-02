@@ -44,6 +44,8 @@ init_env() {
     export PN=`expr match "${P}" '^\([^\-]*\)-.*$'`
     # Paketversion
     export PV=`expr match "${P}" '[^0-9]*\-\([0-9].*\)$'`
+    # Paketsektion (standardmäßig bin)
+    export PS="bin"
 
     # Das Arbeitsverzeichnis wird nach Kategorien und Paketen unterteilt
     export WORKDIR="${WORKDIR_BASE}/${P}"
@@ -235,7 +237,7 @@ internal_src_install() {
     call_if_exists src_install
 
     lstatus "Erstelle oder erweitere postinstall-Skript"
-    PIS="${D}/${R}/postinstall-bin"
+    PIS="${D}/${R}/postinstall-${PS}"
     test -f "$PIS" || echo "#!file:/apps/sh" >> "$PIS"
     for b in ${D}/${R}/bin/*; do
         test -f "$b" || continue
@@ -264,6 +266,11 @@ internal_src_install() {
         lstatus "    adddoc $doc"
     done
 
+    lstatus "Schreibe Metadaten"
+    echo $PN >> ${D}/${R}/packageinfo-${PS}
+    echo $PV >> ${D}/${R}/packageinfo-${PS}
+    echo $PS >> ${D}/${R}/packageinfo-${PS}
+    echo "i386" >> ${D}/${R}/packageinfo-${PS}
 
     if has_feature "nostrip"; then
         lstatus "Ueberspringe das Strippen der Binaries"

@@ -4,6 +4,7 @@ include lutils
 DESCRIPTION=""
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/zlib"
 SRC_URI="http://www.gzip.org/zlib/${P}.tar.gz"
+PS="lib"
 
 LICENSE="zlib"
 
