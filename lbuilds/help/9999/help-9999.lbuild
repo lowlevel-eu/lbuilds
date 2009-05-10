@@ -30,5 +30,5 @@ src_install() {
 	mkdir -p "${D}${R}/bin"
 	cp help "${D}${R}/bin/thelp"
 	mkdir -p "${D}${R}/doc"
-	cp help.xml "${D}${R}/doc/"
+	cp *.xml "${D}${R}/doc/"
 }
