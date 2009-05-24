@@ -1,0 +1,98 @@
+Index: subversion-1.5.6/subversion/libsvn_subr/cmdline.c
+===================================================================
+--- subversion-1.5.6.orig/subversion/libsvn_subr/cmdline.c
++++ subversion-1.5.6/subversion/libsvn_subr/cmdline.c
+@@ -126,6 +126,7 @@ svn_cmdline_init(const char *progname, F
+   /* C programs default to the "C" locale. But because svn is supposed
+      to be i18n-aware, it should inherit the default locale of its
+      environment.  */
++#if 0
+   if (!setlocale(LC_ALL, "")
+       && !setlocale(LC_CTYPE, ""))
+     {
+@@ -155,6 +156,7 @@ svn_cmdline_init(const char *progname, F
+                   progname, progname, *env_var, env_val, progname);
+         }
+     }
++#endif
+ 
+   /* Initialize the APR subsystem, and register an atexit() function
+      to Uninitialize that subsystem at program exit. */
+Index: subversion-1.5.6/subversion/libsvn_subr/io.c
+===================================================================
+--- subversion-1.5.6.orig/subversion/libsvn_subr/io.c
++++ subversion-1.5.6/subversion/libsvn_subr/io.c
+@@ -1574,6 +1574,7 @@ do_io_file_wrapper_cleanup(apr_file_t *f
+ svn_error_t *svn_io_file_flush_to_disk(apr_file_t *file,
+                                        apr_pool_t *pool)
+ {
++#if 0
+   apr_os_file_t filehand;
+ 
+   /* First make sure that any user-space buffered data is flushed. */
+@@ -1612,6 +1613,7 @@ svn_error_t *svn_io_file_flush_to_disk(a
+ 
+ #endif
+   }
++#endif
+   return SVN_NO_ERROR;
+ }
+ 
+Index: subversion-1.5.6/subversion/libsvn_subr/prompt.c
+===================================================================
+--- subversion-1.5.6.orig/subversion/libsvn_subr/prompt.c
++++ subversion-1.5.6/subversion/libsvn_subr/prompt.c
+@@ -50,10 +50,9 @@ static apr_status_t wait_for_input(apr_f
+  * on Windows it returns APR_EBADF instead.  So just return APR_ENOTIMPL
+  * ourselves here.
+  */
+-#ifdef WIN32
+   return APR_ENOTIMPL;
+-#endif /* WIN32 */
+ 
++#if 0
+   pollset.desc_type = APR_POLL_FILE;
+   pollset.desc.f = f;
+   pollset.p = pool;
+@@ -70,6 +69,7 @@ static apr_status_t wait_for_input(apr_f
+     return APR_SUCCESS;
+ 
+   return srv;
++#endif
+ }
+ 
+ /* Set @a *result to the result of prompting the user with @a
+Index: subversion-1.5.6/subversion/libsvn_ra_svn/streams.c
+===================================================================
+--- subversion-1.5.6.orig/subversion/libsvn_ra_svn/streams.c
++++ subversion-1.5.6/subversion/libsvn_ra_svn/streams.c
+@@ -51,6 +51,7 @@ typedef struct {
+ /* Returns TRUE if PFD has pending data, FALSE otherwise. */
+ static svn_boolean_t pending(apr_pollfd_t *pfd, apr_pool_t *pool)
+ {
++#if 0
+   apr_status_t status;
+   int n;
+ 
+@@ -62,6 +63,9 @@ static svn_boolean_t pending(apr_pollfd_
+   status = apr_poll(pfd, 1, &n, 0);
+ #endif
+   return (status == APR_SUCCESS && n);
++#else
++  return 1;
++#endif
+ }
+ 
+ /* Functions to implement a file backed svn_ra_svn__stream_t. */
+Index: subversion-1.5.6/subversion/libsvn_ra_svn/client.c
+===================================================================
+--- subversion-1.5.6.orig/subversion/libsvn_ra_svn/client.c
++++ subversion-1.5.6/subversion/libsvn_ra_svn/client.c
+@@ -132,6 +132,7 @@ static svn_error_t *make_connection(cons
+   if (status)
+     return svn_error_createf(status, NULL, _("Unknown hostname '%s'"),
+                              hostname);
++
+   /* Iterate through the returned list of addresses attempting to
+    * connect to each in turn. */
+   do

@@ -1,0 +1,24 @@
+Index: subversion-1.5.6/link.sh
+===================================================================
+--- /dev/null
++++ subversion-1.5.6/link.sh
+@@ -0,0 +1,19 @@
++#!/bin/bash
++
++i386-pc-tyndur-gcc \
++    -o svn subversion/svn/*.o \
++    --begin-group \
++        subversion/libsvn_client/.libs/libsvn_client-1.a \
++        subversion/libsvn_wc/.libs/libsvn_wc-1.a \
++        subversion/libsvn_ra/.libs/libsvn_ra-1.a \
++        subversion/libsvn_diff/.libs/libsvn_diff-1.a \
++        subversion/libsvn_subr/.libs/libsvn_subr-1.a \
++        subversion/libsvn_ra_svn/.libs/libsvn_ra_svn-1.a \
++        subversion/libsvn_ra_local/.libs/libsvn_ra_local-1.a \
++        subversion/libsvn_repos/.libs/libsvn_repos-1.a \
++        subversion/libsvn_fs/.libs/libsvn_fs-1.a \
++        subversion/libsvn_fs_fs/.libs/libsvn_fs_fs-1.a \
++        subversion/libsvn_fs_util/.libs/libsvn_fs_util-1.a \
++        subversion/libsvn_delta/.libs/libsvn_delta-1.a \
++        ../../env/lib/libapr-1.a ../../env/lib/libaprutil-1.a ../../env/lib/libz.a ../../env/lib/libexpat.a \
++    --end-group

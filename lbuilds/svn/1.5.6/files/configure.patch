@@ -1,0 +1,224 @@
+Index: subversion-1.5.6/build/config.sub
+===================================================================
+--- subversion-1.5.6.orig/build/config.sub
++++ subversion-1.5.6/build/config.sub
+@@ -1226,7 +1226,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -tyndur* )
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: subversion-1.5.6/configure
+===================================================================
+--- subversion-1.5.6.orig/configure
++++ subversion-1.5.6/configure
+@@ -4333,88 +4333,7 @@ echo "$as_me: Apache Portable Runtime Ut
+     esac
+   done
+ 
+-  { echo "$as_me:$LINENO: checking for APR-util" >&5
+-echo $ECHO_N "checking for APR-util... $ECHO_C" >&6; }
+-
+-# Check whether --with-apr-util was given.
+-if test "${with_apr_util+set}" = set; then
+-  withval=$with_apr_util;
+-    if test "$withval" = "no" || test "$withval" = "yes"; then
+-      { { echo "$as_me:$LINENO: error: --with-apr-util requires a directory or file to be provided" >&5
+-echo "$as_me: error: --with-apr-util requires a directory or file to be provided" >&2;}
+-   { (exit 1); exit 1; }; }
+-    fi
+-
+-    for apu_temp_apu_config_file in $apu_temp_acceptable_apu_config
+-    do
+-      for lookdir in "$withval/bin" "$withval"
+-      do
+-        if $TEST_X "$lookdir/$apu_temp_apu_config_file"; then
+-          apu_found="yes"
+-          apu_config="$lookdir/$apu_temp_apu_config_file"
+-          break 2
+-        fi
+-      done
+-    done
+-
+-    if test "$apu_found" != "yes" && $TEST_X "$withval" && $withval --help > /dev/null 2>&1 ; then
+-      apu_found="yes"
+-      apu_config="$withval"
+-    fi
+-
+-            if test "$apu_found" != "yes"; then
+-      { { echo "$as_me:$LINENO: error: the --with-apr-util parameter is incorrect. It must specify an install prefix, a build directory, or an apu-config file." >&5
+-echo "$as_me: error: the --with-apr-util parameter is incorrect. It must specify an install prefix, a build directory, or an apu-config file." >&2;}
+-   { (exit 1); exit 1; }; }
+-    fi
+-
+-else
+-
+-        if test -d ""$abs_srcdir/apr-util""; then
+-      apu_temp_abs_srcdir="`cd "$abs_srcdir/apr-util" && pwd`"
+-      apu_found="reconfig"
+-      apu_bundled_major="`sed -n '/#define.*APU_MAJOR_VERSION/s/^[^0-9]*\([0-9]*\).*$/\1/p' \""$abs_srcdir/apr-util"/include/apu_version.h\"`"
+-      case $apu_bundled_major in
+-        "")
+-          { { echo "$as_me:$LINENO: error: failed to find major version of bundled APU" >&5
+-echo "$as_me: error: failed to find major version of bundled APU" >&2;}
+-   { (exit 1); exit 1; }; }
+-        ;;
+-        0)
+-          apu_temp_apu_config_file="apu-config"
+-        ;;
+-        *)
+-          apu_temp_apu_config_file="apu-$apu_bundled_major-config"
+-        ;;
+-      esac
+-      if test -n ""$abs_builddir/apr-util""; then
+-        apu_config=""$abs_builddir/apr-util"/$apu_temp_apu_config_file"
+-      else
+-        apu_config=""$abs_srcdir/apr-util"/$apu_temp_apu_config_file"
+-      fi
+-    fi
+-    if test "$apu_found" = "no" && test -n "1" && test "1" = "1"; then
+-      for apu_temp_apu_config_file in $apu_temp_acceptable_apu_config
+-      do
+-        if $apu_temp_apu_config_file --help > /dev/null 2>&1 ; then
+-          apu_found="yes"
+-          apu_config="$apu_temp_apu_config_file"
+-          break
+-        else
+-                    for lookdir in /usr /usr/local /opt/apr /usr/local/apache2 ; do
+-            if $TEST_X "$lookdir/bin/$apu_temp_apu_config_file"; then
+-              apu_found="yes"
+-              apu_config="$lookdir/bin/$apu_temp_apu_config_file"
+-              break 2
+-            fi
+-          done
+-        fi
+-      done
+-    fi
+-
+-fi
+-
+-
++apu_found="yes"
+   { echo "$as_me:$LINENO: result: $apu_found" >&5
+ echo "${ECHO_T}$apu_found" >&6; }
+ 
+@@ -4579,66 +4498,6 @@ echo "$as_me: WARNING: not running confi
+   fi
+ 
+ 
+-  { echo "$as_me:$LINENO: checking APR-UTIL version" >&5
+-echo $ECHO_N "checking APR-UTIL version... $ECHO_C" >&6; }
+-  apu_version="`$apu_config --version`"
+-  if test $? -ne 0; then
+-    # This is a hack as suggested by Ben Collins-Sussman.  It can be
+-    # removed after apache 2.0.44 has been released.  (The apu-config
+-    # shipped in 2.0.43 contains a correct version number, but
+-    # stupidly doesn't understand the --version switch.)
+-    apu_version=`grep "APRUTIL_DOTTED_VERSION=" $(which $apu_config) | tr -d "APRUTIL_DOTTED_VERSION="| tr -d '"'`
+-    #AC_MSG_ERROR([
+-    #    apu-config --version failed.
+-    #    Your apu-config doesn't support the --version switch, please upgrade
+-    #    to APR-UTIL more recent than 2002-Nov-05.])
+-  fi
+-  { echo "$as_me:$LINENO: result: $apu_version" >&5
+-echo "${ECHO_T}$apu_version" >&6; }
+-
+-  APU_WANTED_REGEX_MATCH=0
+-  for apu_wanted_regex in $APRUTIL_WANTED_REGEXES; do
+-    if test `expr $apu_version : $apu_wanted_regex` -ne 0; then
+-      APU_WANTED_REGEX_MATCH=1
+-      break
+-    fi
+-  done
+-
+-  if test $APU_WANTED_REGEX_MATCH -eq 0; then
+-    echo "wanted regexes are $APRUTIL_WANTED_REGEXES"
+-    { { echo "$as_me:$LINENO: error: invalid apr-util version found" >&5
+-echo "$as_me: error: invalid apr-util version found" >&2;}
+-   { (exit 1); exit 1; }; }
+-  fi
+-
+-
+-  LDFLAGS="$LDFLAGS `$apu_config --ldflags`"
+-  if test $? -ne 0; then
+-    { { echo "$as_me:$LINENO: error: apu-config --ldflags failed" >&5
+-echo "$as_me: error: apu-config --ldflags failed" >&2;}
+-   { (exit 1); exit 1; }; }
+-  fi
+-
+-  SVN_APRUTIL_INCLUDES="`$apu_config --includes`"
+-  if test $? -ne 0; then
+-    { { echo "$as_me:$LINENO: error: apu-config --includes failed" >&5
+-echo "$as_me: error: apu-config --includes failed" >&2;}
+-   { (exit 1); exit 1; }; }
+-  fi
+-
+-      SVN_APRUTIL_LIBS="`$apu_config --link-libtool --libs`"
+-  if test $? -ne 0; then
+-    { { echo "$as_me:$LINENO: error: apu-config --link-libtool --libs failed" >&5
+-echo "$as_me: error: apu-config --link-libtool --libs failed" >&2;}
+-   { (exit 1); exit 1; }; }
+-  fi
+-
+-  SVN_APRUTIL_EXPORT_LIBS="`$apu_config --link-ld --libs`"
+-  if test $? -ne 0; then
+-    { { echo "$as_me:$LINENO: error: apu-config --link-ld --libs failed" >&5
+-echo "$as_me: error: apu-config --link-ld --libs failed" >&2;}
+-   { (exit 1); exit 1; }; }
+-  fi
+ 
+ 
+ 
+@@ -24408,14 +24267,6 @@ rm -f conftest*
+       fi
+ 
+ fi
+-{ echo "$as_me:$LINENO: result: $svn_cv_pycfmt_apr_int64_t" >&5
+-echo "${ECHO_T}$svn_cv_pycfmt_apr_int64_t" >&6; }
+-    CPPFLAGS="$SVN_PYCFMT_SAVE_CPPFLAGS"
+-    if test "x$svn_cv_pycfmt_apr_int64_t" = "x"; then
+-      { { echo "$as_me:$LINENO: error: failed to recognize APR_INT64_T_FMT on this platform" >&5
+-echo "$as_me: error: failed to recognize APR_INT64_T_FMT on this platform" >&2;}
+-   { (exit 1); exit 1; }; }
+-    fi
+ 
+ cat >>confdefs.h <<_ACEOF
+ #define SVN_APR_INT64_T_PYCFMT "$svn_cv_pycfmt_apr_int64_t"
+@@ -24857,14 +24708,6 @@ rm -f conftest*
+       fi
+ 
+ fi
+-{ echo "$as_me:$LINENO: result: $svn_cv_pycfmt_apr_int64_t" >&5
+-echo "${ECHO_T}$svn_cv_pycfmt_apr_int64_t" >&6; }
+-    CPPFLAGS="$SVN_PYCFMT_SAVE_CPPFLAGS"
+-    if test "x$svn_cv_pycfmt_apr_int64_t" = "x"; then
+-      { { echo "$as_me:$LINENO: error: failed to recognize APR_INT64_T_FMT on this platform" >&5
+-echo "$as_me: error: failed to recognize APR_INT64_T_FMT on this platform" >&2;}
+-   { (exit 1); exit 1; }; }
+-    fi
+ 
+ cat >>confdefs.h <<_ACEOF
+ #define SVN_APR_INT64_T_PYCFMT "$svn_cv_pycfmt_apr_int64_t"
+@@ -25758,14 +25581,6 @@ rm -f conftest*
+       fi
+ 
+ fi
+-{ echo "$as_me:$LINENO: result: $svn_cv_pycfmt_apr_int64_t" >&5
+-echo "${ECHO_T}$svn_cv_pycfmt_apr_int64_t" >&6; }
+-    CPPFLAGS="$SVN_PYCFMT_SAVE_CPPFLAGS"
+-    if test "x$svn_cv_pycfmt_apr_int64_t" = "x"; then
+-      { { echo "$as_me:$LINENO: error: failed to recognize APR_INT64_T_FMT on this platform" >&5
+-echo "$as_me: error: failed to recognize APR_INT64_T_FMT on this platform" >&2;}
+-   { (exit 1); exit 1; }; }
+-    fi
+ 
+ cat >>confdefs.h <<_ACEOF
+ #define SVN_APR_INT64_T_PYCFMT "$svn_cv_pycfmt_apr_int64_t"
+@@ -27877,4 +27692,3 @@ Berkeley DB here:
+ " >&2;}
+ ;;
+ esac
+-

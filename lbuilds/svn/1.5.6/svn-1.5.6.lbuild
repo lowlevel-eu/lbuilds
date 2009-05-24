@@ -1,0 +1,54 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/SVN"
+SRC_URI="http://subversion.tigris.org/downloads/subversion-1.5.6.tar.bz2"
+
+LICENSE="GPL"
+
+RUN_DEPEND=""
+BUILD_DEPEND="=apr-1.3.3 =apr-util-1.3.4 =zlib-1.2.3"
+
+MY_S="${S}/subversion-${PV}"
+
+src_unpack() {
+	lunpack subversion-${PV}.tar.bz2
+	cd ${MY_S}
+
+    ln -s ${F} patches
+    [ -f ${F}/series ] && ln -s ${F}/series series
+    for i in ${F}/*.patch; do
+        [ -L series ] || echo `basename $i` >> series
+        (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
+    done
+    (which quilt > /dev/null 2>&1) && quilt push -a || die "Fehler beim Anwenden der Patches"
+}
+
+src_configure() {
+	cd ${MY_S}
+
+	./configure \
+        CC=`tc-cc` \
+		CFLAGS="-I `tc-incdir`/apr-1 -I `tc-incdir` -L `tc-libdir` -lz" \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+        --disable-nls \
+        --with-berkeley-db=no \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+	lmake
+    sh link.sh
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+	mkdir -p ${D}/${R}/bin/
+	cp svn ${D}/${R}/bin/
+}
