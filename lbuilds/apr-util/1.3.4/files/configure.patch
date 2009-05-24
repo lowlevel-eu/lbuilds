@@ -1,0 +1,56 @@
+Index: apr-util-1.3.4/build/config.sub
+===================================================================
+--- apr-util-1.3.4.orig/build/config.sub
++++ apr-util-1.3.4/build/config.sub
+@@ -1214,7 +1214,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -tyndur* )
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: apr-util-1.3.4/xml/expat/conftools/config.sub
+===================================================================
+--- apr-util-1.3.4.orig/xml/expat/conftools/config.sub
++++ apr-util-1.3.4/xml/expat/conftools/config.sub
+@@ -1130,7 +1130,7 @@ case $os in
+ 	      | -openstep* | -oskit* | -conix* | -pw32* | -nonstopux* \
+ 	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+-	      | -morphos* | -superux* | -rtmk* | -rtmk-nova*)
++	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -tyndur* )
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: apr-util-1.3.4/configure
+===================================================================
+--- apr-util-1.3.4.orig/configure
++++ apr-util-1.3.4/configure
+@@ -3756,12 +3756,13 @@ echo "$as_me: error: APR could not be lo
+    { (exit 1); exit 1; }; }
+   fi
+ 
+-  APR_BUILD_DIR="`$apr_config --installbuilddir`"
++  APR_BUILD_DIR="$with_apr/`$apr_config --installbuilddir`"
+ 
+       APR_BUILD_DIR="`cd $APR_BUILD_DIR && pwd`"
+ 
+   APR_INCLUDES="`$apr_config --includes`"
+-  APR_LIBS="`$apr_config --link-libtool --libs`"
++#  APR_LIBS="`$apr_config --link-libtool --libs`"
++  APR_LIBS="`$apr_config --libs`"
+   APR_SO_EXT="`$apr_config --apr-so-ext`"
+   APR_LIB_TARGET="`$apr_config --apr-lib-target`"
+ 
+@@ -46772,6 +46773,9 @@ if test ! -d ./build; then
+    $mkdir_p build
+ fi
+ cp $APR_BUILD_DIR/apr_rules.mk $abs_builddir/build/rules.mk
++sed -i -e "s#^apr_builddir=.*\$#apr_builddir=$APR_BUILD_DIR#" $abs_builddir/build/rules.mk
++sed -i -e "s#^apr_builders=.*\$#apr_builders=$APR_BUILD_DIR#" $abs_builddir/build/rules.mk
++sed -i -e "s#^CPPFLAGS=.*\$#CPPFLAGS=-I$with_apr/include -I$with_apr/include/apr-1 #" $abs_builddir/build/rules.mk
+ 
+ case "$host_alias" in
+ *bsdi* | BSD/OS)

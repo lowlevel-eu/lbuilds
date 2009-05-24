@@ -1,0 +1,1442 @@
+Index: apr-1.3.3/build/config.sub
+===================================================================
+--- apr-1.3.3.orig/build/config.sub
++++ apr-1.3.3/build/config.sub
+@@ -1214,7 +1214,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -tyndur* )
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: apr-1.3.3/configure
+===================================================================
+--- apr-1.3.3.orig/configure
++++ apr-1.3.3/configure
+@@ -30140,735 +30140,93 @@ _ACEOF
+ 
+   fi
+ 
+-{ echo "$as_me:$LINENO: checking for /dev/zero" >&5
+-echo $ECHO_N "checking for /dev/zero... $ECHO_C" >&6; }
+-if test "${ac_cv_file__dev_zero+set}" = set; then
+-  echo $ECHO_N "(cached) $ECHO_C" >&6
+-else
+-  test "$cross_compiling" = yes &&
+-  { { echo "$as_me:$LINENO: error: cannot check for file existence when cross compiling" >&5
+-echo "$as_me: error: cannot check for file existence when cross compiling" >&2;}
+-   { (exit 1); exit 1; }; }
+-if test -r "/dev/zero"; then
+-  ac_cv_file__dev_zero=yes
+-else
+-  ac_cv_file__dev_zero=no
+-fi
+-fi
+-{ echo "$as_me:$LINENO: result: $ac_cv_file__dev_zero" >&5
+-echo "${ECHO_T}$ac_cv_file__dev_zero" >&6; }
+-
+-
+-# Not all systems can mmap /dev/zero (such as HP-UX).  Check for that.
+-if test "$ac_cv_func_mmap" = "yes" &&
+-   test "$ac_cv_file__dev_zero" = "yes"; then
+-    { echo "$as_me:$LINENO: checking for mmap that can map /dev/zero" >&5
+-echo $ECHO_N "checking for mmap that can map /dev/zero... $ECHO_C" >&6; }
+-    if test "$cross_compiling" = yes; then
+-  ac_cv_file__dev_zero=no
+-else
+-  cat >conftest.$ac_ext <<_ACEOF
+-/* confdefs.h.  */
+-_ACEOF
+-cat confdefs.h >>conftest.$ac_ext
+-cat >>conftest.$ac_ext <<_ACEOF
+-/* end confdefs.h.  */
+-
+-#include <sys/types.h>
+-#include <sys/stat.h>
+-#include <fcntl.h>
+-#ifdef HAVE_SYS_MMAN_H
+-#include <sys/mman.h>
+-#endif
+-    int main()
+-    {
+-        int fd;
+-        void *m;
+-        fd = open("/dev/zero", O_RDWR);
+-        if (fd < 0) {
+-            return 1;
+-        }
+-        m = mmap(0, sizeof(void*), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+-        if (m == (void *)-1) {  /* aka MAP_FAILED */
+-            return 2;
+-        }
+-        if (munmap(m, sizeof(void*)) < 0) {
+-            return 3;
+-        }
+-        return 0;
+-    }
+-_ACEOF
+-rm -f conftest$ac_exeext
+-if { (ac_try="$ac_link"
+-case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_link") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+-  { (case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_try") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); }; }; then
+-  :
+-else
+-  echo "$as_me: program exited with status $ac_status" >&5
+-echo "$as_me: failed program was:" >&5
+-sed 's/^/| /' conftest.$ac_ext >&5
+-
+-( exit $ac_status )
+-ac_cv_file__dev_zero=no
+-fi
+-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+-fi
+-
+-
+-
+-    { echo "$as_me:$LINENO: result: $ac_cv_file__dev_zero" >&5
+-echo "${ECHO_T}$ac_cv_file__dev_zero" >&6; }
+-fi
+-
+-# Now we determine which one is our anonymous shmem preference.
+-haveshmgetanon="0"
+-havemmapzero="0"
+-havemmapanon="0"
+-ac_decision_item='anonymous shared memory allocation method'
+-ac_decision_msg='FAILED'
+-ac_decision=''
+-
+-ac_rc=yes
+-for ac_spec in header:sys/ipc.h header:sys/shm.h header:sys/file.h              func:shmget func:shmat func:shmdt func:shmctl; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    haveshmgetanon="1"
+-
+-
+-ac_decision='USE_SHMEM_SHMGET_ANON'
+-ac_decision_msg='SysV IPC shmget()'
+-ac_decision_USE_SHMEM_SHMGET_ANON=yes
+-ac_decision_USE_SHMEM_SHMGET_ANON_msg='SysV IPC shmget()'
+-
+-else
+-    :
+-
+-fi
+-
+-ac_rc=yes
+-for ac_spec in header:sys/mman.h func:mmap func:munmap file:/dev/zero; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    havemmapzero="1"
+-
+-
+-ac_decision='USE_SHMEM_MMAP_ZERO'
+-ac_decision_msg='SVR4-style mmap() on /dev/zero'
+-ac_decision_USE_SHMEM_MMAP_ZERO=yes
+-ac_decision_USE_SHMEM_MMAP_ZERO_msg='SVR4-style mmap() on /dev/zero'
+-
+-else
+-    :
+-
+-fi
+-
+-ac_rc=yes
+-for ac_spec in header:sys/mman.h func:mmap func:munmap define:MAP_ANON; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    havemmapanon="1"
+-
+-
+-ac_decision='USE_SHMEM_MMAP_ANON'
+-ac_decision_msg='4.4BSD-style mmap() via MAP_ANON'
+-ac_decision_USE_SHMEM_MMAP_ANON=yes
+-ac_decision_USE_SHMEM_MMAP_ANON_msg='4.4BSD-style mmap() via MAP_ANON'
+-
+-else
+-    :
+-
+-fi
+-
+-ac_rc=yes
+-for ac_spec in header:os2.h; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    haveos2shm="1"
+-
+-
+-ac_decision='USE_SHMEM_OS2_ANON'
+-ac_decision_msg='OS/2 DosAllocSharedMem()'
+-ac_decision_USE_SHMEM_OS2_ANON=yes
+-ac_decision_USE_SHMEM_OS2_ANON_msg='OS/2 DosAllocSharedMem()'
+-
+-else
+-    :
+-
+-fi
+-
+-ac_rc=yes
+-for ac_spec in header:kernel/OS.h func:create_area; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    havebeosshm="1"
+-
+-
+-ac_decision='USE_SHMEM_BEOS_ANON'
+-ac_decision_msg='BeOS areas'
+-ac_decision_USE_SHMEM_BEOS_ANON=yes
+-ac_decision_USE_SHMEM_BEOS_ANON_msg='BeOS areas'
+-
+-else
+-    :
+-
+-fi
+-
+-ac_rc=yes
+-for ac_spec in header:windows.h func:CreateFileMapping; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    havewin32shm="1"
+-
+-
+-ac_decision='USE_SHMEM_WIN32_ANON'
+-ac_decision_msg='Windows CreateFileMapping()'
+-ac_decision_USE_SHMEM_WIN32_ANON=yes
+-ac_decision_USE_SHMEM_WIN32_ANON_msg='Windows CreateFileMapping()'
+-
+-else
+-    :
+-
+-fi
+-
+-case $host in
+-    *linux* )
+-        # Linux has problems with MM_SHMT_MMANON even though it reports
+-        # that it has it.
+-        # FIXME - find exact 2.3 version that MMANON was fixed in.  It is
+-        # confirmed fixed in 2.4 series.
+-        if test $os_version -le "240"; then
+-                ac_decision=''
+-    for ac_item in USE_SHMEM_MMAP_ZERO USE_SHMEM_SHMGET_ANON; do
+-         eval "ac_decision_this=\$ac_decision_${ac_item}"
+-         if test ".$ac_decision_this" = .yes; then
+-             ac_decision=$ac_item
+-             eval "ac_decision_msg=\$ac_decision_${ac_item}_msg"
+-         fi
+-    done
+-
+-        fi
+-        ;;
+-    *hpux11* )
+-            ac_decision=''
+-    for ac_item in USE_SHMEM_SHMGET_ANON; do
+-         eval "ac_decision_this=\$ac_decision_${ac_item}"
+-         if test ".$ac_decision_this" = .yes; then
+-             ac_decision=$ac_item
+-             eval "ac_decision_msg=\$ac_decision_${ac_item}_msg"
+-         fi
+-    done
+-
+-        ;;
+-esac
+-if test ".$ac_decision" = .; then
+-    echo "$0:Error: decision on $ac_decision_item failed" 1>&2
+-    exit 1
+-else
+-    if test ".$ac_decision_msg" = .; then
+-        ac_decision_msg="$ac_decision"
+-    fi
+-    cat >>confdefs.h <<_ACEOF
+-#define ${ac_decision_item} 1
+-_ACEOF
+-
+-    { echo "$as_me:$LINENO: result: decision on $ac_decision_item... $ac_decision_msg" >&5
+-echo "${ECHO_T}decision on $ac_decision_item... $ac_decision_msg" >&6; }
+-fi
+-
+-cat >>confdefs.h <<_ACEOF
+-#define $ac_decision 1
+-_ACEOF
+-
+-
+-useshmgetanon="0"
+-usemmapzero="0"
+-usemmapanon="0"
+-
+-case $ac_decision in
+-    USE_SHMEM_SHMGET_ANON )
+-        useshmgetanon="1"
+-        ;;
+-    USE_SHMEM_MMAP_ZERO )
+-        usemmapzero="1"
+-        ;;
+-    USE_SHMEM_MMAP_ANON )
+-        usemmapanon="1"
+-        ;;
+-esac
+-
+-
+-
+-
+-
+-
+-
+-
+-# Now we determine which one is our name-based shmem preference.
+-havemmaptmp="0"
+-havemmapshm="0"
+-haveshmget="0"
+-havebeosarea="0"
+-haveos2shm="0"
+-havewin32shm="0"
+-ac_decision_item='namebased memory allocation method'
+-ac_decision_msg='FAILED'
+-ac_decision=''
+-
+-ac_rc=yes
+-for ac_spec in header:sys/mman.h func:mmap func:munmap; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    havemmaptmp="1"
+-
+-
+-ac_decision='USE_SHMEM_MMAP_TMP'
+-ac_decision_msg='Classical mmap() on temporary file'
+-ac_decision_USE_SHMEM_MMAP_TMP=yes
+-ac_decision_USE_SHMEM_MMAP_TMP_msg='Classical mmap() on temporary file'
+-
+-else
+-    :
+-
+-fi
+-
+-ac_rc=yes
+-for ac_spec in header:sys/mman.h func:mmap func:munmap func:shm_open              func:shm_unlink; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    havemmapshm="1"
+-
+-
+-ac_decision='USE_SHMEM_MMAP_SHM'
+-ac_decision_msg='mmap() via POSIX.1 shm_open() on temporary file'
+-ac_decision_USE_SHMEM_MMAP_SHM=yes
+-ac_decision_USE_SHMEM_MMAP_SHM_msg='mmap() via POSIX.1 shm_open() on temporary file'
+-
+-else
+-    :
+-
+-fi
+-
+-ac_rc=yes
+-for ac_spec in header:sys/ipc.h header:sys/shm.h header:sys/file.h              func:shmget func:shmat func:shmdt func:shmctl; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    haveshmget="1"
+-
+-
+-ac_decision='USE_SHMEM_SHMGET'
+-ac_decision_msg='SysV IPC shmget()'
+-ac_decision_USE_SHMEM_SHMGET=yes
+-ac_decision_USE_SHMEM_SHMGET_msg='SysV IPC shmget()'
+-
+-else
+-    :
+-
+-fi
+-
+-ac_rc=yes
+-for ac_spec in header:kernel/OS.h func:create_area; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    havebeosshm="1"
+-
+-
+-ac_decision='USE_SHMEM_BEOS'
+-ac_decision_msg='BeOS areas'
+-ac_decision_USE_SHMEM_BEOS=yes
+-ac_decision_USE_SHMEM_BEOS_msg='BeOS areas'
+-
+-else
+-    :
+-
+-fi
+-
+-ac_rc=yes
+-for ac_spec in header:os2.h; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    haveos2shm="1"
+-
+-
+-ac_decision='USE_SHMEM_OS2'
+-ac_decision_msg='OS/2 DosAllocSharedMem()'
+-ac_decision_USE_SHMEM_OS2=yes
+-ac_decision_USE_SHMEM_OS2_msg='OS/2 DosAllocSharedMem()'
+-
+-else
+-    :
+-
+-fi
+-
+-ac_rc=yes
+-for ac_spec in header:windows.h; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    havewin32shm="1"
++ac_cv_file__dev_zero=no
++{ echo "$as_me:$LINENO: result: $ac_cv_file__dev_zero" >&5
++echo "${ECHO_T}$ac_cv_file__dev_zero" >&6; }
+ 
+ 
+-ac_decision='USE_SHMEM_WIN32'
+-ac_decision_msg='Windows shared memory'
+-ac_decision_USE_SHMEM_WIN32=yes
+-ac_decision_USE_SHMEM_WIN32_msg='Windows shared memory'
++# Not all systems can mmap /dev/zero (such as HP-UX).  Check for that.
++if test "$ac_cv_func_mmap" = "yes" &&
++   test "$ac_cv_file__dev_zero" = "yes"; then
++    { echo "$as_me:$LINENO: checking for mmap that can map /dev/zero" >&5
++echo $ECHO_N "checking for mmap that can map /dev/zero... $ECHO_C" >&6; }
++    if test "$cross_compiling" = yes; then
++  ac_cv_file__dev_zero=no
++else
++  cat >conftest.$ac_ext <<_ACEOF
++/* confdefs.h.  */
++_ACEOF
++cat confdefs.h >>conftest.$ac_ext
++cat >>conftest.$ac_ext <<_ACEOF
++/* end confdefs.h.  */
+ 
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++#ifdef HAVE_SYS_MMAN_H
++#include <sys/mman.h>
++#endif
++    int main()
++    {
++        int fd;
++        void *m;
++        fd = open("/dev/zero", O_RDWR);
++        if (fd < 0) {
++            return 1;
++        }
++        m = mmap(0, sizeof(void*), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
++        if (m == (void *)-1) {  /* aka MAP_FAILED */
++            return 2;
++        }
++        if (munmap(m, sizeof(void*)) < 0) {
++            return 3;
++        }
++        return 0;
++    }
++_ACEOF
++rm -f conftest$ac_exeext
++if { (ac_try="$ac_link"
++case "(($ac_try" in
++  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
++  *) ac_try_echo=$ac_try;;
++esac
++eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
++  (eval "$ac_link") 2>&5
++  ac_status=$?
++  echo "$as_me:$LINENO: \$? = $ac_status" >&5
++  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  { (case "(($ac_try" in
++  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
++  *) ac_try_echo=$ac_try;;
++esac
++eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
++  (eval "$ac_try") 2>&5
++  ac_status=$?
++  echo "$as_me:$LINENO: \$? = $ac_status" >&5
++  (exit $ac_status); }; }; then
++  :
+ else
+-    :
++  echo "$as_me: program exited with status $ac_status" >&5
++echo "$as_me: failed program was:" >&5
++sed 's/^/| /' conftest.$ac_ext >&5
+ 
++( exit $ac_status )
++ac_cv_file__dev_zero=no
++fi
++rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+ fi
+ 
+-case $host in
+-    *linux* )
+-        # Linux has problems with MM_SHMT_MMANON even though it reports
+-        # that it has it.
+-        # FIXME - find exact 2.3 version that MMANON was fixed in.  It is
+-        # confirmed fixed in 2.4 series.
+-        if test $os_version -le "240"; then
+-                ac_decision=''
+-    for ac_item in USE_SHMEM_MMAP_TMP USE_SHMEM_MMAP_SHM                                   USE_SHMEM_SHMGET; do
+-         eval "ac_decision_this=\$ac_decision_${ac_item}"
+-         if test ".$ac_decision_this" = .yes; then
+-             ac_decision=$ac_item
+-             eval "ac_decision_msg=\$ac_decision_${ac_item}_msg"
+-         fi
+-    done
+ 
+-        fi
+-        ;;
+-esac
+-if test ".$ac_decision" = .; then
+-    echo "$0:Error: decision on $ac_decision_item failed" 1>&2
+-    exit 1
+-else
+-    if test ".$ac_decision_msg" = .; then
+-        ac_decision_msg="$ac_decision"
+-    fi
+-    cat >>confdefs.h <<_ACEOF
+-#define ${ac_decision_item} 1
+-_ACEOF
+ 
+-    { echo "$as_me:$LINENO: result: decision on $ac_decision_item... $ac_decision_msg" >&5
+-echo "${ECHO_T}decision on $ac_decision_item... $ac_decision_msg" >&6; }
++    { echo "$as_me:$LINENO: result: $ac_cv_file__dev_zero" >&5
++echo "${ECHO_T}$ac_cv_file__dev_zero" >&6; }
+ fi
+ 
+-cat >>confdefs.h <<_ACEOF
+-#define $ac_decision 1
+-_ACEOF
+ 
+ 
+-usemmaptmp="0"
+-usemmapshm="0"
+-useshmget="0"
+-usebeosarea="0"
+-useos2shm="0"
+-usewin32shm="0"
+ 
+-case $ac_decision in
+-    USE_SHMEM_MMAP_TMP )
+-        usemmaptmp="1"
+-        ;;
+-    USE_SHMEM_MMAP_SHM )
+-        usemmapshm="1"
+-        ;;
+-    USE_SHMEM_SHMGET )
+-        useshmget="1"
+-        ;;
+-    USE_SHMEM_BEOS )
+-        usebeosarea="1"
+-        ;;
+-    USE_SHMEM_OS2 )
+-        useos2shm="1"
+-        ;;
+-    USE_SHMEM_WIN32 )
+-        usewin32shm="1"
+-        ;;
+-esac
+ 
+-# Do we have any shared memory support?
+-if test "$usemmaptmp$usemmapshm$usemmapzero$useshmget$usemmapanon$usebeosarea$useos2shm$usewin32shm" = "00000000"; then
+-  sharedmem="0"
+-else
+-  sharedmem="1"
+-fi
++
+ 
+ 
+ 
+@@ -34463,68 +33821,7 @@ _ACEOF
+ 
+ fi
+ 
+-{ echo "$as_me:$LINENO: checking whether setpgrp takes no argument" >&5
+-echo $ECHO_N "checking whether setpgrp takes no argument... $ECHO_C" >&6; }
+-if test "${ac_cv_func_setpgrp_void+set}" = set; then
+-  echo $ECHO_N "(cached) $ECHO_C" >&6
+-else
+-  if test "$cross_compiling" = yes; then
+-  { { echo "$as_me:$LINENO: error: cannot check setpgrp when cross compiling" >&5
+-echo "$as_me: error: cannot check setpgrp when cross compiling" >&2;}
+-   { (exit 1); exit 1; }; }
+-else
+-  cat >conftest.$ac_ext <<_ACEOF
+-/* confdefs.h.  */
+-_ACEOF
+-cat confdefs.h >>conftest.$ac_ext
+-cat >>conftest.$ac_ext <<_ACEOF
+-/* end confdefs.h.  */
+-$ac_includes_default
+-int
+-main ()
+-{
+-/* If this system has a BSD-style setpgrp which takes arguments,
+-  setpgrp(1, 1) will fail with ESRCH and return -1, in that case
+-  exit successfully. */
+-  return setpgrp (1,1) != -1;
+-  ;
+-  return 0;
+-}
+-_ACEOF
+-rm -f conftest$ac_exeext
+-if { (ac_try="$ac_link"
+-case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_link") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+-  { (case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_try") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); }; }; then
+-  ac_cv_func_setpgrp_void=no
+-else
+-  echo "$as_me: program exited with status $ac_status" >&5
+-echo "$as_me: failed program was:" >&5
+-sed 's/^/| /' conftest.$ac_ext >&5
+-
+-( exit $ac_status )
+-ac_cv_func_setpgrp_void=yes
+-fi
+-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+-fi
+-
+-
+-fi
++ac_cv_func_setpgrp_void=no
+ { echo "$as_me:$LINENO: result: $ac_cv_func_setpgrp_void" >&5
+ echo "${ECHO_T}$ac_cv_func_setpgrp_void" >&6; }
+ if test $ac_cv_func_setpgrp_void = yes; then
+@@ -41225,144 +40522,15 @@ if test "$apr_cv_mutex_robust_shared" =
+ cat >>confdefs.h <<\_ACEOF
+ #define HAVE_PTHREAD_MUTEX_ROBUST 1
+ _ACEOF
+-
+-fi
+-
+-    fi
+-fi
+-
+-# See which lock mechanisms we can support on this system.
+-ac_rc=yes
+-for ac_spec in header:semaphore.h func:sem_open func:sem_close              func:sem_unlink func:sem_post func:sem_wait; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    hasposixser="1"
+-else
+-    :
+-    hasposixser="0"
+-fi
+-
+-ac_rc=yes
+-for ac_spec in func:semget func:semctl define:SEM_UNDO; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    hassysvser="1"
+-else
+-    :
+-    hassysvser="0"
+-fi
+-
+-ac_rc=yes
+-for ac_spec in func:flock define:LOCK_EX; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+-    fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    hasflockser="1"
+-else
+-    :
+-    hasflockser="0"
++
+ fi
+ 
+-ac_rc=yes
+-for ac_spec in header:fcntl.h define:F_SETLK; do
+-    ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+-    ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+-    case $ac_type in
+-        header )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_header_$ac_item"
+-            ;;
+-        file )
+-            ac_item=`echo "$ac_item" | sed 'y%./+-%__p_%'`
+-            ac_var="ac_cv_file_$ac_item"
+-            ;;
+-        func )   ac_var="ac_cv_func_$ac_item"   ;;
+-        struct ) ac_var="ac_cv_struct_$ac_item" ;;
+-        define ) ac_var="ac_cv_define_$ac_item" ;;
+-        custom ) ac_var="$ac_item" ;;
+-    esac
+-    eval "ac_val=\$$ac_var"
+-    if test ".$ac_val" != .yes; then
+-        ac_rc=no
+-        break
+     fi
+-done
+-if test ".$ac_rc" = .yes; then
+-    :
+-    hasfcntlser="1"
+-else
+-    :
+-    hasfcntlser="0"
+ fi
+ 
+-# note: the current APR use of shared mutex requires /dev/zero
++# See which lock mechanisms we can support on this system.
+ ac_rc=yes
+-for ac_spec in header:pthread.h define:PTHREAD_PROCESS_SHARED              func:pthread_mutexattr_setpshared              file:/dev/zero; do
++for ac_spec in header:semaphore.h func:sem_open func:sem_close              func:sem_unlink func:sem_post func:sem_wait; do
+     ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+     ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+     case $ac_type in
+@@ -41387,14 +40555,14 @@ for ac_spec in header:pthread.h define:P
+ done
+ if test ".$ac_rc" = .yes; then
+     :
+-    hasprocpthreadser="1"
++    hasposixser="1"
+ else
+     :
+-    hasprocpthreadser="0"
++    hasposixser="0"
+ fi
+ 
+ ac_rc=yes
+-for ac_spec in header:OS.h func:create_sem; do
++for ac_spec in func:semget func:semctl define:SEM_UNDO; do
+     ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+     ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+     case $ac_type in
+@@ -41419,27 +40587,12 @@ for ac_spec in header:OS.h func:create_s
+ done
+ if test ".$ac_rc" = .yes; then
+     :
+-    hasbeossem="1"
++    hassysvser="1"
+ else
+     :
+-    hasbeossem="0"
++    hassysvser="0"
+ fi
+ 
+-
+-# See which lock mechanism we'll select by default on this system.
+-# The last APR_DECIDE to execute sets the default.
+-# At this stage, we match the ordering in Apache 1.3
+-# which is (highest to lowest): sysvsem -> fcntl -> flock.
+-# POSIX semaphores and cross-process pthread mutexes are not
+-# used by default since they have less desirable behaviour when
+-# e.g. a process holding the mutex segfaults.
+-# The BEOSSEM decision doesn't require any substitutions but is
+-# included here to prevent the fcntl() branch being selected
+-# from the decision making.
+-ac_decision_item='apr_lock implementation method'
+-ac_decision_msg='FAILED'
+-ac_decision=''
+-
+ ac_rc=yes
+ for ac_spec in func:flock define:LOCK_EX; do
+     ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+@@ -41466,16 +40619,10 @@ for ac_spec in func:flock define:LOCK_EX
+ done
+ if test ".$ac_rc" = .yes; then
+     :
+-
+-
+-ac_decision='USE_FLOCK_SERIALIZE'
+-ac_decision_msg='4.2BSD-style flock()'
+-ac_decision_USE_FLOCK_SERIALIZE=yes
+-ac_decision_USE_FLOCK_SERIALIZE_msg='4.2BSD-style flock()'
+-
++    hasflockser="1"
+ else
+     :
+-
++    hasflockser="0"
+ fi
+ 
+ ac_rc=yes
+@@ -41504,20 +40651,15 @@ for ac_spec in header:fcntl.h define:F_S
+ done
+ if test ".$ac_rc" = .yes; then
+     :
+-
+-
+-ac_decision='USE_FCNTL_SERIALIZE'
+-ac_decision_msg='SVR4-style fcntl()'
+-ac_decision_USE_FCNTL_SERIALIZE=yes
+-ac_decision_USE_FCNTL_SERIALIZE_msg='SVR4-style fcntl()'
+-
++    hasfcntlser="1"
+ else
+     :
+-
++    hasfcntlser="0"
+ fi
+ 
++# note: the current APR use of shared mutex requires /dev/zero
+ ac_rc=yes
+-for ac_spec in func:semget func:semctl define:SEM_UNDO; do
++for ac_spec in header:pthread.h define:PTHREAD_PROCESS_SHARED              func:pthread_mutexattr_setpshared              file:/dev/zero; do
+     ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
+     ac_item=`echo "$ac_spec" | sed -e 's/^.*://'`
+     case $ac_type in
+@@ -41542,16 +40684,10 @@ for ac_spec in func:semget func:semctl d
+ done
+ if test ".$ac_rc" = .yes; then
+     :
+-
+-
+-ac_decision='USE_SYSVSEM_SERIALIZE'
+-ac_decision_msg='SysV IPC semget()'
+-ac_decision_USE_SYSVSEM_SERIALIZE=yes
+-ac_decision_USE_SYSVSEM_SERIALIZE_msg='SysV IPC semget()'
+-
++    hasprocpthreadser="1"
+ else
+     :
+-
++    hasprocpthreadser="0"
+ fi
+ 
+ ac_rc=yes
+@@ -41580,179 +40716,12 @@ for ac_spec in header:OS.h func:create_s
+ done
+ if test ".$ac_rc" = .yes; then
+     :
+-
+-
+-ac_decision='USE_BEOSSEM'
+-ac_decision_msg='BeOS Semaphores'
+-ac_decision_USE_BEOSSEM=yes
+-ac_decision_USE_BEOSSEM_msg='BeOS Semaphores'
+-
++    hasbeossem="1"
+ else
+     :
+-
+-fi
+-
+-if test "x$apr_lock_method" != "x"; then
+-    ac_decision="$apr_lock_method"
+-eval "ac_decision_msg=\"\$ac_decision_${ac_decision}_msg\""
+-
+-fi
+-if test ".$ac_decision" = .; then
+-    echo "$0:Error: decision on $ac_decision_item failed" 1>&2
+-    exit 1
+-else
+-    if test ".$ac_decision_msg" = .; then
+-        ac_decision_msg="$ac_decision"
+-    fi
+-    cat >>confdefs.h <<_ACEOF
+-#define ${ac_decision_item} 1
+-_ACEOF
+-
+-    { echo "$as_me:$LINENO: result: decision on $ac_decision_item... $ac_decision_msg" >&5
+-echo "${ECHO_T}decision on $ac_decision_item... $ac_decision_msg" >&6; }
+-fi
+-
+-cat >>confdefs.h <<_ACEOF
+-#define $ac_decision 1
+-_ACEOF
+-
+-
+-flockser="0"
+-sysvser="0"
+-posixser="0"
+-procpthreadser="0"
+-fcntlser="0"
+-case $ac_decision in
+-    USE_FLOCK_SERIALIZE )
+-        flockser="1"
+-        ;;
+-    USE_FCNTL_SERIALIZE )
+-        fcntlser="1"
+-        ;;
+-    USE_SYSVSEM_SERIALIZE )
+-        sysvser="1"
+-        ;;
+-    USE_POSIXSEM_SERIALIZE )
+-        posixser="1"
+-        ;;
+-    USE_PROC_PTHREAD_SERIALIZE )
+-        procpthreadser="1"
+-        ;;
+-    USE_BEOSSEM )
+-        beossem="1"
+-        ;;
+-esac
+-
+-if test $hasfcntlser = "1"; then
+-{ echo "$as_me:$LINENO: checking if fcntl returns EACCES when F_SETLK is already held" >&5
+-echo $ECHO_N "checking if fcntl returns EACCES when F_SETLK is already held... $ECHO_C" >&6; }
+-if test "$cross_compiling" = yes; then
+-  apr_fcntl_tryacquire_eacces=0
+-else
+-  cat >conftest.$ac_ext <<_ACEOF
+-/* confdefs.h.  */
+-_ACEOF
+-cat confdefs.h >>conftest.$ac_ext
+-cat >>conftest.$ac_ext <<_ACEOF
+-/* end confdefs.h.  */
+-
+-#ifdef HAVE_STDLIB_H
+-#include <stdlib.h>
+-#endif
+-#ifdef HAVE_SYS_TYPES_H
+-#include <sys/types.h>
+-#endif
+-#ifdef HAVE_SYS_STAT_H
+-#include <sys/stat.h>
+-#endif
+-#ifdef HAVE_SYS_WAIT_H
+-#include <sys/wait.h>
+-#endif
+-#if defined(HAVE_UNISTD_H)
+-#include <unistd.h>
+-#endif
+-#include <fcntl.h>
+-#include <errno.h>
+-
+-int fd;
+-struct flock proc_mutex_lock_it = {0};
+-const char *fname = "conftest.fcntl";
+-
+-int main()
+-{
+-    int rc, status;;
+-    proc_mutex_lock_it.l_whence = SEEK_SET;   /* from current point */
+-    proc_mutex_lock_it.l_type = F_WRLCK;      /* set exclusive/write lock */
+-
+-    fd = creat(fname, S_IRWXU);
+-    unlink(fname);
+-
+-    if (rc = lockit()) {
+-        exit(-1);
+-    }
+-
+-    if (fork()) {
+-        wait(&status);
+-    }
+-    else {
+-      return(lockit());
+-    }
+-
+-    close(fd);
+-    exit(WEXITSTATUS(status) != EACCES);
+-}
+-
+-int lockit() {
+-    int rc;
+-    do {
+-        rc = fcntl(fd, F_SETLK, &proc_mutex_lock_it);
+-    } while ( rc < 0 && errno == EINTR);
+-
+-    return (rc < 0) ? errno : 0;
+-}
+-_ACEOF
+-rm -f conftest$ac_exeext
+-if { (ac_try="$ac_link"
+-case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_link") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+-  { (case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_try") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); }; }; then
+-  apr_fcntl_tryacquire_eacces=1
+-else
+-  echo "$as_me: program exited with status $ac_status" >&5
+-echo "$as_me: failed program was:" >&5
+-sed 's/^/| /' conftest.$ac_ext >&5
+-
+-( exit $ac_status )
+-apr_fcntl_tryacquire_eacces=0
+-fi
+-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+-fi
+-
+-
++    hasbeossem="0"
+ fi
+ 
+-if test "$apr_fcntl_tryacquire_eacces" = "1"; then
+-
+-cat >>confdefs.h <<\_ACEOF
+-#define FCNTL_TRYACQUIRE_EACCES 1
+-_ACEOF
+-
+-fi
+ 
+ 
+ 
+@@ -44934,105 +43903,7 @@ else
+ fi
+ 
+ 
+-{ echo "$as_me:$LINENO: checking whether TCP_NODELAY and TCP_CORK can both be enabled" >&5
+-echo $ECHO_N "checking whether TCP_NODELAY and TCP_CORK can both be enabled... $ECHO_C" >&6; }
+-if test "${apr_cv_tcp_nodelay_with_cork+set}" = set; then
+-  echo $ECHO_N "(cached) $ECHO_C" >&6
+-else
+-  if test "$cross_compiling" = yes; then
+-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&5
+-echo "$as_me: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&2;}
+-   { (exit 1); exit 1; }; }
+-else
+-  cat >conftest.$ac_ext <<_ACEOF
+-/* confdefs.h.  */
+-_ACEOF
+-cat confdefs.h >>conftest.$ac_ext
+-cat >>conftest.$ac_ext <<_ACEOF
+-/* end confdefs.h.  */
+-
+-#ifdef HAVE_SYS_TYPES_H
+-#include <sys/types.h>
+-#endif
+-#ifdef HAVE_SYS_SOCKET_H
+-#include <sys/socket.h>
+-#endif
+-#ifdef HAVE_NETINET_IN_H
+-#include <netinet/in.h>
+-#endif
+-#ifdef HAVE_NETINET_TCP_H
+-#include <netinet/tcp.h>
+-#endif
+-#include <stdio.h>
+-#include <stdlib.h>
+-
+-int
+-main ()
+-{
+-
+-    int fd, flag, rc;
+-
+-    fd = socket(AF_INET, SOCK_STREAM, 0);
+-    if (fd < 0) {
+-       exit(1);
+-    }
+-
+-    flag = 1;
+-    rc = setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof flag);
+-    if (rc < 0) {
+-        perror("setsockopt TCP_NODELAY");
+-        exit(2);
+-    }
+-
+-    flag = 1;
+-    rc = setsockopt(fd, IPPROTO_TCP, TCP_CORK, &flag, sizeof flag);
+-    if (rc < 0) {
+-        perror("setsockopt TCP_CORK");
+-        exit(3);
+-    }
+-
+-    exit(0);
+-
+-  ;
+-  return 0;
+-}
+-_ACEOF
+-rm -f conftest$ac_exeext
+-if { (ac_try="$ac_link"
+-case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_link") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+-  { (case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_try") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); }; }; then
+-  apr_cv_tcp_nodelay_with_cork=yes
+-else
+-  echo "$as_me: program exited with status $ac_status" >&5
+-echo "$as_me: failed program was:" >&5
+-sed 's/^/| /' conftest.$ac_ext >&5
+-
+-( exit $ac_status )
+ apr_cv_tcp_nodelay_with_cork=no
+-fi
+-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+-fi
+-
+-
+-fi
+ { echo "$as_me:$LINENO: result: $apr_cv_tcp_nodelay_with_cork" >&5
+ echo "${ECHO_T}$apr_cv_tcp_nodelay_with_cork" >&6; }
+ 
