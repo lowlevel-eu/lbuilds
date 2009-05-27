@@ -13,34 +13,51 @@ RUN_DEPEND=""
 
 MY_S="${S}/${P}"
 
+src_configure() {
+	for d in build build-utf8; do
+		mkdir $d
+		cd $d
+
+		widec=""
+		if [ "$d" == "build-utf8" ]; then
+			widec="--enable-widec"
+		fi
+		${MY_S}/configure \
+			CC=`tc-cc` \
+			--build=`tc-build` \
+			--target=`tc-host` \
+			--host=`tc-host` \
+			--prefix="${R}" \
+			--enable-debug \
+			$widec \
+			--with-trace \
+			--with-fallbacks=tyndur,lost \
+			--without-progs \
+			--without-cxx \
+			--without-cxx-binding \
+			|| die "configure failed"
+		cd ..
+	done
+}
+
 src_compile() {
-	cd ${MY_S}
-
-	./configure \
-		CC=`tc-cc` \
-		--build=`tc-build` \
-		--target=`tc-host` \
-		--host=`tc-host` \
-		--prefix="${R}" \
-		--enable-debug \
-		--with-trace \
-		--with-fallbacks=tyndur,lost \
-		--without-progs \
-		--without-cxx \
-		--without-cxx-binding \
-		|| die "configure failed"
-
-	lmake || die "make failed"
-	cd ..
+	for d in build build-utf8; do
+		cd $d
+		lmake || die "make failed"
+		cd ..
+	done
 }
 
 src_install() {
-	cd ${MY_S}
-
 	# Sonst gibts Fehler
 	mkdir -p "${D}${R}/bin"
-	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+
+	for d in build build-utf8; do
+		cd $d
+		lmake -j1 DESTDIR="${D}" install || die "make install failed"
+		cd ..
+	done
 
 	# Noch ein Bisschen Speicher sparen
-	rm -rf "${D}${R}/share/terminfo" "${D}${R}/bin"
+	rm -rf "${D}${R}/share/terminfo" "${D}${R}/lib/terminfo" "${D}${R}/bin"
 }

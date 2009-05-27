@@ -1,0 +1,12 @@
+Index: src/ncurses-5.6/ncurses/curses.priv.h
+===================================================================
+--- src.orig/ncurses-5.6/ncurses/curses.priv.h
++++ src/ncurses-5.6/ncurses/curses.priv.h
+@@ -63,6 +63,7 @@ extern "C" {
+ #include <stdlib.h>
+ #include <string.h>
+ #include <sys/types.h>
++#include <wchar.h>
+ 
+ #if HAVE_UNISTD_H
+ #include <unistd.h>

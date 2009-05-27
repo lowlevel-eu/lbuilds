@@ -3,4 +3,4 @@ hacks.patch
 tests.patch
 terminfo.patch
 term_lost.patch
-disable-locale.patch
+utf8.patch
