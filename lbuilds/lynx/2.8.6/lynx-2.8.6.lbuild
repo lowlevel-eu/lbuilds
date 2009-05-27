@@ -30,7 +30,7 @@ src_configure() {
 
 	./configure \
 		CC=`tc-cc` \
-		CFLAGS="-I `tc-incdir`/ncurses -I `tc-incdir` -L `tc-libdir` -lncurses" \
+		CFLAGS="-I `tc-incdir`/ncurses -I `tc-incdir` -L `tc-libdir`" \
 		--build=`tc-build` \
 		--target=`tc-host` \
 		--host=`tc-host` \
@@ -39,6 +39,8 @@ src_configure() {
         --disable-dired \
         --with-zlib \
         --disable-color-style \
+	--enable-widec \
+	--with-screen=ncursesw \
 		|| die "configure failed"
 }
 
