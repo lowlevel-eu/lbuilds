@@ -21,7 +21,7 @@ src_compile() {
 	cd ${S}
 
 	`tc-cc` -c -I include -I `tc-incdir` -I `tc-incdir`/ncurses -Wall -O2 *.c
-	`tc-cc` -o help *.o -L `tc-libdir` -lnxml -lncurses
+	`tc-cc` -o help *.o -L `tc-libdir` -lnxml -lncursesw
 }
 
 src_install() {
