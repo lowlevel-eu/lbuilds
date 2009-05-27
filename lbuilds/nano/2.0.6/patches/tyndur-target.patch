@@ -1,0 +1,13 @@
+Index: src/nano-2.0.6/config.sub
+===================================================================
+--- src.orig/nano-2.0.6/config.sub
++++ src/nano-2.0.6/config.sub
+@@ -1188,7 +1188,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku*)
++	      | -skyos* | -haiku* | -tyndur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)

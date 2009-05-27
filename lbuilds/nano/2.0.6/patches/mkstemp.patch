@@ -1,0 +1,13 @@
+Index: src/nano-2.0.6/src/files.c
+===================================================================
+--- src.orig/nano-2.0.6/src/files.c
++++ src/nano-2.0.6/src/files.c
+@@ -1119,7 +1119,7 @@ char *safe_tempfile(FILE **f)
+     original_umask = umask(0);
+     umask(S_IRWXG | S_IRWXO);
+ 
+-    fd = mkstemp(full_tempdir);
++    fd = open(full_tempdir, O_RDWR | O_CREAT | O_EXCL);
+ 
+     if (fd != -1)
+ 	*f = fdopen(fd, "r+b");

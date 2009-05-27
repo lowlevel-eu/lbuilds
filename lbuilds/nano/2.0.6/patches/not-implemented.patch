@@ -1,0 +1,70 @@
+Index: src/nano-2.0.6/src/nano.c
+===================================================================
+--- src.orig/nano-2.0.6/src/nano.c
++++ src/nano-2.0.6/src/nano.c
+@@ -967,6 +967,7 @@ void do_exit(void)
+ /* Initialize the signal handlers. */
+ void signal_init(void)
+ {
++#if 0
+     /* Trap SIGINT and SIGQUIT because we want them to do useful
+      * things. */
+     memset(&act, 0, sizeof(struct sigaction));
+@@ -1001,6 +1002,7 @@ void signal_init(void)
+ 	act.sa_handler = do_continue;
+ 	sigaction(SIGCONT, &act, NULL);
+     }
++#endif
+ }
+ 
+ /* Handler for SIGHUP (hangup) and SIGTERM (terminate). */
+@@ -1012,6 +1014,7 @@ RETSIGTYPE handle_hupterm(int signal)
+ /* Handler for SIGTSTP (suspend). */
+ RETSIGTYPE do_suspend(int signal)
+ {
++#if 0
+ #ifndef DISABLE_MOUSE
+     /* Turn mouse support off. */
+     disable_mouse_support();
+@@ -1038,6 +1041,7 @@ RETSIGTYPE do_suspend(int signal)
+ 
+     /* Do what mutt does: send ourselves a SIGSTOP. */
+     kill(0, SIGSTOP);
++#endif
+ }
+ 
+ /* Handler for SIGCONT (continue after suspend). */
+@@ -1836,11 +1840,11 @@ int main(int argc, char **argv)
+ 		break;
+ #endif
+ 	    case 'T':
+-		if (!parse_num(optarg, &tabsize) || tabsize <= 0) {
++		/*if (!parse_num(optarg, &tabsize) || tabsize <= 0) {
+ 		    fprintf(stderr, _("Requested tab size \"%s\" is invalid"), optarg);
+ 		    fprintf(stderr, "\n");
+ 		    exit(1);
+-		}
++		}*/
+ 		break;
+ #ifndef NANO_TINY
+ 	    case 'U':
+Index: src/nano-2.0.6/src/files.c
+===================================================================
+--- src.orig/nano-2.0.6/src/files.c
++++ src/nano-2.0.6/src/files.c
+@@ -2011,13 +2011,13 @@ char *real_dir_from_tilde(const char *bu
+ 	    tilde_dir = mallocstrncpy(NULL, buf, i + 1);
+ 	    tilde_dir[i] = '\0';
+ 
+-	    do {
++	    /*do {
+ 		userdata = getpwent();
+ 	    } while (userdata != NULL && strcmp(userdata->pw_name,
+ 		tilde_dir + 1) != 0);
+ 	    endpwent();
+ 	    if (userdata != NULL)
+-		tilde_dir = mallocstrcpy(tilde_dir, userdata->pw_dir);
++		tilde_dir = mallocstrcpy(tilde_dir, userdata->pw_dir);*/
+ 	}
+ 
+ 	retval = charalloc(strlen(tilde_dir) + strlen(buf + i) + 1);

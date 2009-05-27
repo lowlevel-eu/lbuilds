@@ -12,22 +12,18 @@ BUILD_DEPEND="=ncurses-5.6"
 
 MY_S="${S}/${P}"
 
-src_unpack() {
-	lunpack ${P}.tar.gz
-	cd ${MY_S} && lpatch ${F}/${P}.patch || die "patching failed"
-}
-
 src_compile() {
 	cd ${MY_S}
 
 	./configure \
 		CC=`tc-cc` \
-		CFLAGS="-I `tc-incdir`/ncurses -I `tc-incdir` -L `tc-libdir` -lncurses" \
+		CFLAGS="-I `tc-incdir`/ncurses -I `tc-incdir` -L `tc-libdir` -lncursesw" \
 		--build=`tc-build` \
 		--target=`tc-host` \
 		--host=`tc-host` \
 		--prefix="${R}" \
 		--enable-tiny \
+		--enable-utf8 \
 		|| die "configure failed"
 
 	lmake || die "make failed"
