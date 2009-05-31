@@ -1021,3 +1021,16 @@ Index: compiler/systems.pas
     {$ifdef freebsd}
      default_target(system_i386_freebsd);
      {$define default_target_set}
+Index: compiler/ogelf.pas
+===================================================================
+--- compiler/ogelf.pas.orig
++++ compiler/ogelf.pas
+@@ -1127,7 +1127,7 @@ implementation
+             idtxt  : 'ELF';
+             asmbin : '';
+             asmcmd : '';
+-            supported_targets : [system_i386_linux,system_i386_beos,system_i386_freebsd,system_i386_haiku,system_i386_Netware,system_i386_netwlibc];
++            supported_targets : [system_i386_linux,system_i386_beos,system_i386_freebsd,system_i386_haiku,system_i386_Netware,system_i386_netwlibc,system_i386_tyndur];
+             flags : [af_outputbinary,af_smartlink_sections,af_supports_dwarf];
+             labelprefix : '.L';
+             comment : '';
