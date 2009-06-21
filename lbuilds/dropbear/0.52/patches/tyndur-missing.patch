@@ -1,0 +1,44 @@
+Index: src/dropbear-0.52/dbutil.c
+===================================================================
+--- src.orig/dropbear-0.52/dbutil.c
++++ src/dropbear-0.52/dbutil.c
+@@ -65,6 +65,7 @@ void (*_dropbear_exit)(int exitcode, con
+ 						= generic_dropbear_exit;
+ void (*_dropbear_log)(int priority, const char* format, va_list param)
+ 						= generic_dropbear_log;
++#define LOG_INFO 1
+ 
+ #ifdef DEBUG_TRACE
+ int debug_trace = 0;
+Index: src/dropbear-0.52/includes.h
+===================================================================
+--- src.orig/dropbear-0.52/includes.h
++++ src/dropbear-0.52/includes.h
+@@ -31,14 +31,15 @@
+ #include "debug.h"
+ 
+ #include <sys/types.h>
+-#include <sys/ioctl.h>
++//#include <sys/ioctl.h>
+ #include <sys/param.h> /* required for BSD4_4 define */
+ #include <sys/socket.h>
+ #include <sys/stat.h>
+ #include <sys/time.h>
+-#include <sys/un.h>
++//#include <sys/un.h>
+ #include <sys/wait.h>
+-#include <sys/resource.h>
++//#include <sys/resource.h>
++#include <sys/select.h>
+ 
+ #include <stdio.h>
+ #include <errno.h>
+@@ -51,7 +52,7 @@
+ #include <string.h>
+ #include <termios.h>
+ #include <unistd.h>
+-#include <syslog.h>
++//#include <syslog.h>
+ #include <netdb.h>
+ #include <ctype.h>
+ #include <stdarg.h>

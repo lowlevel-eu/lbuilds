@@ -1,0 +1,491 @@
+Index: src/dropbear-0.52/dbutil.c
+===================================================================
+--- src.orig/dropbear-0.52/dbutil.c
++++ src/dropbear-0.52/dbutil.c
+@@ -65,7 +65,116 @@ void (*_dropbear_exit)(int exitcode, con
+ 						= generic_dropbear_exit;
+ void (*_dropbear_log)(int priority, const char* format, va_list param)
+ 						= generic_dropbear_log;
+-#define LOG_INFO 1
++
++#undef AF_INET6
++struct linger {
++    int l_onoff;
++    int l_linger;
++};
++
++int setsockopt(int sockfd, int level, int optname, const void* optval,
++    socklen_t optlen)
++{
++    return 0;
++}
++
++int getsockopt(int sockfd, int level, int optname, void* optval,
++    socklen_t* optlen)
++{
++    return 0;
++}
++
++int fcntl(int fd, int cmd, ...)
++{
++    return 0;
++}
++
++int bind(int sockfd, struct sockaddr* my_addr, int addrlen)
++{
++    return -1;
++}
++
++int listen(int s, int backlog)
++{
++    return -1;
++}
++
++struct hostent* gethostbyaddr(const char* addr, int len, int type)
++{
++    return NULL;
++}
++
++int setsid(void)
++{
++    return -1;
++}
++
++typedef unsigned int rlim_t;
++enum {
++    RLIMIT_CORE,
++    RLIMIT_CPU,
++    RLIMIT_DATA,
++    RLIMIT_FSIZE,
++    RLIMIT_NOFILE,
++    RLIMIT_STACK,
++    RLIMIT_AS,
++};
++struct rlimit {
++    rlim_t rlim_cur;
++    rlim_t rlim_max;
++};
++
++int setrlimit(int limit, const struct rlimit* rlimit) {
++    return 0;
++}
++
++int accept(int s, struct sockaddr *addr, int *addrlen)
++{
++    return -1;
++}
++
++char* getpass(char* prompt) {
++    static char pass[129];
++    int i;
++    char c;
++
++    printf("%s", prompt);
++    fflush(stdout);
++
++    for (i = 0; (i < sizeof(pass) - 1); i++) {
++        while (((c = fgetc(stdin)) == EOF) && !feof(stdin)) {}
++        if (feof(stdin)) {
++            return NULL;
++        }
++
++        if (c == '\b') {
++            printf("\033[1D \033[1D");
++            fflush(stdout);
++            i--;
++        } else if (c == '\n') {
++            pass[i] = 0;
++            break;
++        } else {
++            pass[i] = c;
++            putchar('*');
++            fflush(stdout);
++        }
++    }
++
++    puts("");
++    return pass;
++}
++
++int ioctl(int fd, int request, ...)
++{
++    return -1;
++}
++
++int shutdown(int s, int how)
++{
++    return 0;
++}
++
+ 
+ #ifdef DEBUG_TRACE
+ int debug_trace = 0;
+@@ -197,7 +306,7 @@ int dropbear_listen(const char* address,
+ 	TRACE(("enter dropbear_listen"))
+ 	
+ 	memset(&hints, 0, sizeof(hints));
+-	hints.ai_family = AF_UNSPEC; /* TODO: let them flag v4 only etc */
++	hints.ai_family = AF_INET; /* TODO: let them flag v4 only etc */
+ 	hints.ai_socktype = SOCK_STREAM;
+ 
+ 	/* for calling getaddrinfo:
+@@ -316,7 +425,7 @@ int connect_remote(const char* remotehos
+ 
+ 	memset(&hints, 0, sizeof(hints));
+ 	hints.ai_socktype = SOCK_STREAM;
+-	hints.ai_family = PF_UNSPEC;
++	hints.ai_family = AF_INET;
+ 
+ 	err = getaddrinfo(remotehost, remoteport, &hints, &res0);
+ 	if (err) {
+@@ -431,10 +540,12 @@ int spawn_command(void(*exec_fn)(void *u
+ 		/* child */
+ 
+ 		TRACE(("back to normal sigchld"))
++#ifndef __TYNDUR__
+ 		/* Revert to normal sigchld handling */
+ 		if (signal(SIGCHLD, SIG_DFL) == SIG_ERR) {
+ 			dropbear_exit("signal() error");
+ 		}
++#endif
+ 
+ 		/* redirect stdin/stdout */
+ 
+@@ -488,6 +599,9 @@ int spawn_command(void(*exec_fn)(void *u
+  * re-enabled SIGPIPE. If cmd is NULL, will run a login shell.
+  */
+ void run_shell_command(const char* cmd, unsigned int maxfd, char* usershell) {
++#if defined(__TYNDUR__)
++    system(cmd);
++#else
+ 	char * argv[4];
+ 	char * baseshell = NULL;
+ 	unsigned int i;
+@@ -524,6 +638,7 @@ void run_shell_command(const char* cmd, 
+ 	}
+ 
+ 	execv(usershell, argv);
++#endif
+ }
+ 
+ /* Return a string representation of the socket address passed. The return
+Index: src/dropbear-0.52/includes.h
+===================================================================
+--- src.orig/dropbear-0.52/includes.h
++++ src/dropbear-0.52/includes.h
+@@ -87,7 +87,7 @@
+ #include <netinet/in_systm.h>
+ #endif
+ 
+-#include <netinet/ip.h>
++//#include <netinet/ip.h>
+ 
+ #ifdef HAVE_NETINET_TCP_H
+ #include <netinet/tcp.h>
+@@ -148,4 +148,37 @@ typedef u_int16_t uint16_t;
+ # define UNUSED(x) x 
+ #endif
+ 
++#define LOG_ERR 1
++#define LOG_WARNING 2
++#define LOG_INFO 3
++#define LOG_NOTICE 4
++
++#define SOL_SOCKET 0
++#define SO_LINGER 0
++#define SO_REUSEADDR 0
++#define SO_ERROR 0
++#define F_SETFL 0
++#define O_NONBLOCK 0
++
++#define IXANY 0004000
++#define TOSTOP 0000400
++#define ECHOCTL 0001000
++#define ECHOKE 0004000
++#define ONLCR 0000004
++
++/* Fuer ioctl(), abholen der Fenstergroesse */
++#define TIOCGWINSZ 0
++struct winsize {
++    int ws_row;
++    int ws_col;
++    int ws_xpixel;
++    int ws_ypixel;
++};
++
++/* Fuer shutdown() */
++#define SHUT_RD 0
++#define SHUT_WR 1
++#define SHUT_RDWR 2
++
++
+ #endif /* _INCLUDES_H_ */
+Index: src/dropbear-0.52/cli-chansession.c
+===================================================================
+--- src.orig/dropbear-0.52/cli-chansession.c
++++ src/dropbear-0.52/cli-chansession.c
+@@ -208,6 +208,8 @@ static void put_termcodes() {
+ 
+ 			case TERMCODE_LOCAL:
+ 				value = tio.c_lflag & mapcode;
++                if (mapcode == ECHO) value = ECHO;
++                if (mapcode == ECHONL) value = ECHONL;
+ 				break;
+ 
+ 			case TERMCODE_CONTROL:
+@@ -307,10 +309,12 @@ static void send_chansess_pty_req(struct
+ 
+ 	encrypt_packet();
+ 
++#ifndef __TYNDUR__
+ 	/* Set up a window-change handler */
+ 	if (signal(SIGWINCH, sigwinch_handler) == SIG_ERR) {
+ 		dropbear_exit("signal error");
+ 	}
++#endif
+ 	TRACE(("leave send_chansess_pty_req"))
+ }
+ 
+Index: src/dropbear-0.52/cli-session.c
+===================================================================
+--- src.orig/dropbear-0.52/cli-session.c
++++ src/dropbear-0.52/cli-session.c
+@@ -115,12 +115,18 @@ static void cli_session_init() {
+ 
+ 	/* We store std{in,out,err}'s flags, so we can set them back on exit
+ 	 * (otherwise busybox's ash isn't happy */
++#if defined(__TYNDUR__)
++	cli_ses.stdincopy = STDIN_FILENO;
++	cli_ses.stdoutcopy = STDOUT_FILENO;
++	cli_ses.stderrcopy = STDERR_FILENO;
++#else
+ 	cli_ses.stdincopy = dup(STDIN_FILENO);
+ 	cli_ses.stdinflags = fcntl(STDIN_FILENO, F_GETFL, 0);
+ 	cli_ses.stdoutcopy = dup(STDOUT_FILENO);
+ 	cli_ses.stdoutflags = fcntl(STDOUT_FILENO, F_GETFL, 0);
+ 	cli_ses.stderrcopy = dup(STDERR_FILENO);
+ 	cli_ses.stderrflags = fcntl(STDERR_FILENO, F_GETFL, 0);
++#endif
+ 
+ 	cli_ses.retval = EXIT_SUCCESS; /* Assume it's clean if we don't get a
+ 									  specific exit status */
+Index: src/dropbear-0.52/common-channel.c
+===================================================================
+--- src.orig/dropbear-0.52/common-channel.c
++++ src/dropbear-0.52/common-channel.c
+@@ -633,14 +633,18 @@ static void send_msg_channel_data(struct
+ 	buf_putint(ses.writepayload, 0);
+ 
+ 	/* read the data */
+-	len = read(fd, buf_getwriteptr(ses.writepayload, maxlen), maxlen);
++    void* ptr = buf_getwriteptr(ses.writepayload, maxlen);
++	len = read(fd, ptr,
++       maxlen);
+ 	if (len <= 0) {
++#ifndef __TYNDUR__
+ 		if (len == 0 || errno != EINTR) {
+ 			/* This will also get hit in the case of EAGAIN. The only
+ 			time we expect to receive EAGAIN is when we're flushing a FD,
+ 			in which case it can be treated the same as EOF */
+ 			close_chan_fd(channel, fd, SHUT_RD);
+ 		}
++#endif
+ 		ses.writepayload->len = ses.writepayload->pos = 0;
+ 		TRACE(("leave send_msg_channel_data: len %d read err %d or EOF for fd %d", 
+ 					len, errno, fd))
+@@ -928,7 +932,10 @@ static void close_chan_fd(struct Channel
+ 		}
+ 	} else {
+ 		TRACE(("CLOSE some fd %d", fd))
++        // Sonst gibts rot
++        if (fd > 2) {
+ 		close(fd);
++        }
+ 		closein = closeout = 1;
+ 	}
+ 
+@@ -951,7 +958,10 @@ static void close_chan_fd(struct Channel
+ 	if (channel->type->sepfds && channel->readfd == FD_CLOSED 
+ 		&& channel->writefd == FD_CLOSED && channel->errfd == FD_CLOSED) {
+ 		TRACE(("CLOSE (finally) of %d", fd))
++        // Sonst gibts rot
++        if (fd > 2) {
+ 		close(fd);
++        }
+ 	}
+ }
+ 
+Index: src/dropbear-0.52/common-session.c
+===================================================================
+--- src.orig/dropbear-0.52/common-session.c
++++ src/dropbear-0.52/common-session.c
+@@ -66,11 +66,13 @@ void common_session_init(int sock_in, in
+ 	ses.last_trx_packet_time = 0;
+ 	ses.last_packet_time = 0;
+ 	
++#ifndef __TYNDUR__
+ 	if (pipe(ses.signal_pipe) < 0) {
+ 		dropbear_exit("signal pipe failed");
+ 	}
+ 	setnonblocking(ses.signal_pipe[0]);
+ 	setnonblocking(ses.signal_pipe[1]);
++#endif
+ 	
+ 	kexfirstinitialise(); /* initialise the kex state */
+ 
+@@ -148,16 +150,19 @@ void session_loop(void(*loophandler)()) 
+ 			FD_SET(ses.sock_out, &writefd);
+ 		}
+ 		
++#ifndef __TYNDUR__
+ 		/* We get woken up when signal handlers write to this pipe.
+ 		   SIGCHLD in svr-chansession is the only one currently. */
+ 		FD_SET(ses.signal_pipe[0], &readfd);
++#endif
+ 
+ 		/* set up for channels which require reading/writing */
+ 		if (ses.dataallowed) {
+ 			setchannelfds(&readfd, &writefd);
+ 		}
+-		val = select(ses.maxfd+1, &readfd, &writefd, NULL, &timeout);
+-
++        // FIXME
++		// val = select(ses.maxfd+1, &readfd, &writefd, NULL, &timeout);
++        val = 1;
+ 		if (exitflag) {
+ 			dropbear_exit("Terminated by signal");
+ 		}
+@@ -175,6 +180,7 @@ void session_loop(void(*loophandler)()) 
+ 			FD_ZERO(&readfd);
+ 		}
+ 		
++#ifndef __TYNDUR__
+ 		/* We'll just empty out the pipe if required. We don't do
+ 		any thing with the data, since the pipe's purpose is purely to
+ 		wake up the select() above. */
+@@ -182,6 +188,7 @@ void session_loop(void(*loophandler)()) 
+ 			char x;
+ 			while (read(ses.signal_pipe[0], &x, 1) > 0) {}
+ 		}
++#endif
+ 
+ 		/* check for auth timeout, rekeying required etc */
+ 		checktimeouts();
+@@ -453,6 +460,6 @@ void fill_passwd(const char* username) {
+ 	ses.authstate.pw_name = m_strdup(pw->pw_name);
+ 	ses.authstate.pw_dir = m_strdup(pw->pw_dir);
+ 	ses.authstate.pw_shell = m_strdup(pw->pw_shell);
+-	ses.authstate.pw_passwd = m_strdup(pw->pw_passwd);
++	//ses.authstate.pw_passwd = m_strdup(pw->pw_passwd);
+ }
+ 
+Index: src/dropbear-0.52/random.c
+===================================================================
+--- src.orig/dropbear-0.52/random.c
++++ src/dropbear-0.52/random.c
+@@ -50,6 +50,9 @@ static void readrand(unsigned char* buf,
+  *
+  */
+ 
++#undef DROPBEAR_PRNGD_SOCKET
++#undef DROPBEAR_RANDOM_DEV
++
+ static void readrand(unsigned char* buf, unsigned int buflen) {
+ 
+ 	static int already_blocked = 0;
+@@ -95,6 +98,13 @@ static void readrand(unsigned char* buf,
+ 	/* read the actual random data */
+ 	readpos = 0;
+ 	do {
++#if defined(__TYNDUR__)
++        int dat = rand();
++        readlen = (buflen - readpos > sizeof(dat) ? sizeof(dat) :
++            buflen - readpos);
++
++		memcpy(&buf[readpos], &dat, readlen);
++#else
+ 		if (!already_blocked)
+ 		{
+ 			int ret;
+@@ -120,10 +130,10 @@ static void readrand(unsigned char* buf,
+ 			}
+ 			dropbear_exit("error reading random source");
+ 		}
++#endif
+ 		readpos += readlen;
+ 	} while (readpos < buflen);
+ 
+-	close (readfd);
+ }
+ 
+ /* initialise the prng from /dev/(u)random or prngd */
+Index: src/dropbear-0.52/sshpty.c
+===================================================================
+--- src.orig/dropbear-0.52/sshpty.c
++++ src/dropbear-0.52/sshpty.c
+@@ -269,9 +269,11 @@ pty_make_controlling_tty(int *ttyfd, con
+ 	void *old;
+ #endif /* USE_VHANGUP */
+ 
++#ifndef __TYNDUR__
+ 	/* Solaris has a problem with TIOCNOTTY for a bg process, so
+ 	 * we disable the signal which would STOP the process - matt */
+ 	signal(SIGTTOU, SIG_IGN);
++#endif
+ 
+ 	/* First disconnect from the old controlling tty. */
+ #ifdef TIOCNOTTY
+Index: src/dropbear-0.52/cli-kex.c
+===================================================================
+--- src.orig/dropbear-0.52/cli-kex.c
++++ src/dropbear-0.52/cli-kex.c
+@@ -136,7 +136,9 @@ static void ask_to_confirm(unsigned char
+ 		response = getc(tty);
+ 		fclose(tty);
+ 	} else {
+-		response = getc(stdin);
++        do {
++    		response = getc(stdin);
++        } while ((response != 'n') && (response != 'y'));
+ 	}
+ 
+ 	if (response == 'y') {
+Index: src/dropbear-0.52/packet.c
+===================================================================
+--- src.orig/dropbear-0.52/packet.c
++++ src/dropbear-0.52/packet.c
+@@ -126,7 +126,9 @@ void read_packet() {
+ 	len = read(ses.sock_in, buf_getptr(ses.readbuf, maxlen), maxlen);
+ 
+ 	if (len == 0) {
+-		ses.remoteclosed();
++        // FIXME: Da das select deaktiviert ist, werden wir hier auch
++        // aufgerufen, wenn eigentlich nichts da ist.
++		// ses.remoteclosed();
+ 	}
+ 
+ 	if (len < 0) {
+@@ -175,7 +177,9 @@ static void read_packet_init() {
+ 	len = read(ses.sock_in, buf_getwriteptr(ses.readbuf, maxlen),
+ 			maxlen);
+ 	if (len == 0) {
+-		ses.remoteclosed();
++        // FIXME: Da das select deaktiviert ist, werden wir hier auch
++        // aufgerufen, wenn eigentlich nichts da ist.
++		// ses.remoteclosed();
+ 	}
+ 	if (len < 0) {
+ 		if (errno == EINTR) {
+Index: src/dropbear-0.52/cli-main.c
+===================================================================
+--- src.orig/dropbear-0.52/cli-main.c
++++ src/dropbear-0.52/cli-main.c
+@@ -46,6 +46,8 @@ int main(int argc, char ** argv) {
+ 	char* hostandport;
+ 	int len;
+ 
++    setvbuf(stdout, NULL, _IONBF, 0);
++
+ 	_dropbear_exit = cli_dropbear_exit;
+ 	_dropbear_log = cli_dropbear_log;
+ 
