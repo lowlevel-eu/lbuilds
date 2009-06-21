@@ -182,7 +182,7 @@ Index: src/dropbear-0.52/includes.h
  
  #ifdef HAVE_NETINET_TCP_H
  #include <netinet/tcp.h>
-@@ -148,4 +148,37 @@ typedef u_int16_t uint16_t;
+@@ -148,4 +148,39 @@ typedef u_int16_t uint16_t;
  # define UNUSED(x) x 
  #endif
  
@@ -218,6 +218,8 @@ Index: src/dropbear-0.52/includes.h
 +#define SHUT_WR 1
 +#define SHUT_RDWR 2
 +
++/* Fuer (get|set)sockopt() */
++#define TCP_NODELAY 0
 +
  #endif /* _INCLUDES_H_ */
 Index: src/dropbear-0.52/cli-chansession.c
