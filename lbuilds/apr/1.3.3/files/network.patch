@@ -61,7 +61,48 @@ Index: apr-1.3.3/support/unix/waitio.c
 ===================================================================
 --- apr-1.3.3.orig/support/unix/waitio.c
 +++ apr-1.3.3/support/unix/waitio.c
-@@ -79,7 +79,7 @@ apr_status_t apr_wait_for_io_or_timeout(
+@@ -61,6 +61,40 @@ apr_status_t apr_wait_for_io_or_timeout(
+     }
+ }
+ 
++#elif defined(TYNDUR)
++
++#include <sys/select.h>
++
++apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
++                                        int for_read)
++{
++    int ret;
++    int fd = f ? f->filedes : s->socketdes;
++    struct timeval timeout = {
++        .tv_sec = (f ? f->timeout : s->timeout) / 1000,
++        .tv_usec = ((f ? f->timeout : s->timeout) % 1000) * 1000,
++    };
++    fd_set fds;
++
++    FD_ZERO(&fds);
++    FD_SET(fd, &fds);
++
++    ret = select(fd,
++        for_read ? &fds : NULL,
++        for_read ? NULL : &fds,
++        NULL,
++        &timeout);
++
++    if (ret < 0) {
++        return errno;
++    } else if (ret) {
++        return APR_SUCCESS;
++    } else {
++        return APR_TIMEUP;
++    }
++}
++
++
+ #else /* !WAITIO_USES_POLL */
+ 
+ apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
+@@ -79,7 +113,7 @@ apr_status_t apr_wait_for_io_or_timeout(
  
          pollset = f->pollset;
          if (pollset == NULL) {
@@ -70,7 +111,7 @@ Index: apr-1.3.3/support/unix/waitio.c
              if (status != APR_SUCCESS) {
                  return status;
              }
-@@ -96,6 +96,7 @@ apr_status_t apr_wait_for_io_or_timeout(
+@@ -96,6 +130,7 @@ apr_status_t apr_wait_for_io_or_timeout(
      }
      pfd.reqevents = type;
  
@@ -78,7 +119,7 @@ Index: apr-1.3.3/support/unix/waitio.c
      /* Remove the object if it was in the pollset, then add in the new
       * object with the correct reqevents value. Ignore the status result
       * on the remove, because it might not be in there (yet).
-@@ -115,6 +116,7 @@ apr_status_t apr_wait_for_io_or_timeout(
+@@ -115,6 +150,7 @@ apr_status_t apr_wait_for_io_or_timeout(
              return APR_SUCCESS;
          }
      } while (APR_STATUS_IS_EINTR(status));
