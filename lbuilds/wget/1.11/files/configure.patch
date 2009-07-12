@@ -1,0 +1,13 @@
+Index: wget-1.11/config.sub
+===================================================================
+--- wget-1.11.orig/config.sub
++++ wget-1.11/config.sub
+@@ -1188,7 +1188,7 @@ case $os in
+ 	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+-	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* | -skyos*)
++	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* | -skyos* | -tyndur* )
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)

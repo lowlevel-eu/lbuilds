@@ -1,0 +1,179 @@
+Index: wget-1.11/src/connect.c
+===================================================================
+--- wget-1.11.orig/src/connect.c
++++ wget-1.11/src/connect.c
+@@ -523,7 +523,7 @@ socket_ip_address (int sock, ip_address
+   if (endpoint == ENDPOINT_LOCAL)
+     ret = getsockname (sock, sockaddr, &addrlen);
+   else if (endpoint == ENDPOINT_PEER)
+-    ret = getpeername (sock, sockaddr, &addrlen);
++    ret = -1; //getpeername (sock, sockaddr, &addrlen);
+   else
+     abort ();
+   if (ret < 0)
+@@ -712,13 +712,25 @@ sock_poll (int fd, double timeout, int w
+   return select_fd (fd, timeout, wait_for);
+ }
+ 
++#define MSG_PEEK 0
+ static int
+ sock_peek (int fd, char *buf, int bufsize)
+ {
+   int res;
++  fprintf(stderr, "sock_peek!\n");
+   do
+     res = recv (fd, buf, bufsize, MSG_PEEK);
+   while (res == -1 && errno == EINTR);
++
++  if (res > 0) {
++      int i;
++      FILE* f = fdopen(fd, NULL);
++      for (i = res - 1; i >= 0; i--) {
++          ungetc(buf[i], f);
++      }
++  }
++
++
+   return res;
+ }
+ 
+Index: wget-1.11/src/ftp.c
+===================================================================
+--- wget-1.11.orig/src/ftp.c
++++ wget-1.11/src/ftp.c
+@@ -1464,7 +1464,7 @@ The sizes do not match (local %s) -- ret
+              follow them.  */
+           if (!opt.retr_symlinks)
+             {
+-#ifdef HAVE_SYMLINK
++#if defined(HAVE_SYMLINK) && !defined(TYNDUR)
+               if (!f->linkto)
+                 logputs (LOG_NOTQUIET,
+                          _("Invalid name of the symlink, skipping.\n"));
+Index: wget-1.11/src/host.c
+===================================================================
+--- wget-1.11.orig/src/host.c
++++ wget-1.11/src/host.c
+@@ -47,6 +47,10 @@ as that of the covered work.  */
+ # define SET_H_ERRNO(err) WSASetLastError (err)
+ #endif /* WINDOWS */
+ 
++#ifdef TYNDUR
++#include <network.h>
++#endif
++
+ #include <errno.h>
+ 
+ #include "wget.h"
+@@ -312,6 +316,7 @@ gethostbyname_with_timeout_callback (voi
+ {
+   struct ghbnwt_context *ctx = (struct ghbnwt_context *)arg;
+   ctx->hptr = gethostbyname (ctx->host_name);
++  logprintf (LOG_VERBOSE, ("Resolved: %s => %x... "), ctx->host_name, ctx->hptr);
+ }
+ 
+ /* Just like gethostbyname, except it times out after TIMEOUT seconds.
+@@ -322,6 +327,7 @@ gethostbyname_with_timeout_callback (voi
+ static struct hostent *
+ gethostbyname_with_timeout (const char *host_name, double timeout)
+ {
++    /*
+   struct ghbnwt_context ctx;
+   ctx.host_name = host_name;
+   if (run_with_timeout (timeout, gethostbyname_with_timeout_callback, &ctx))
+@@ -333,6 +339,8 @@ gethostbyname_with_timeout (const char *
+   if (!ctx.hptr)
+     errno = 0;
+   return ctx.hptr;
++  */
++  return gethostbyname (host_name);
+ }
+ 
+ /* Print error messages for host errors.  */
+@@ -663,8 +671,8 @@ lookup_host (const char *host, int flags
+      (e.g. the Ultrix one and possibly Winsock) don't accept
+      dotted-decimal IPv4 addresses.  */
+   {
+-    uint32_t addr_ipv4 = (uint32_t)inet_addr (host);
+-    if (addr_ipv4 != (uint32_t) -1)
++    uint32_t addr_ipv4 = (uint32_t) string_to_ip(host);
++    if (addr_ipv4 != (uint32_t) 0)
+       {
+         /* No need to cache host->addr relation, just return the
+            address.  */
+@@ -775,6 +783,7 @@ lookup_host (const char *host, int flags
+ #else  /* not ENABLE_IPV6 */
+   {
+     struct hostent *hptr = gethostbyname_with_timeout (host, timeout);
++    logprintf(LOG_VERBOSE, "IP = %x\n", *((unsigned**) hptr->h_addr_list)[0]);
+     if (!hptr)
+       {
+         if (!silent)
+Index: wget-1.11/src/utils.c
+===================================================================
+--- wget-1.11.orig/src/utils.c
++++ wget-1.11/src/utils.c
+@@ -267,8 +267,11 @@ fmttime (time_t t, const char *fmt)
+   struct tm *tm = localtime(&t);
+   if (!tm)
+     abort ();
++  /*
+   if (!strftime(output, sizeof(output), fmt, tm))
+     abort ();
++  */
++  strncpy(output, "<strftime>", sizeof(output));
+   return output;
+ }
+ 
+@@ -298,6 +301,7 @@ datetime_str (time_t t)
+ void
+ fork_to_background (void)
+ {
++#ifndef TYNDUR
+   pid_t pid;
+   /* Whether we arrange our own version of opt.lfilename here.  */
+   bool logfile_changed = false;
+@@ -337,6 +341,7 @@ fork_to_background (void)
+   freopen ("/dev/null", "r", stdin);
+   freopen ("/dev/null", "w", stdout);
+   freopen ("/dev/null", "w", stderr);
++#endif
+ }
+ #endif /* !WINDOWS && !MSDOS */
+ 
+@@ -1646,7 +1651,8 @@ random_number (int max)
+      randomness on architectures where rand() is implemented using a
+      simple congruential generator.  */
+ 
+-  bounded = (double) max * rnd / (RAND_MAX + 1.0);
++//  bounded = (double) max * rnd / (RAND_MAX + 1.0);
++  bounded = rnd % max;
+   return (int) bounded;
+ 
+ #endif /* not HAVE_DRAND48 */
+@@ -1853,6 +1859,8 @@ xsleep (double seconds)
+     /* If nanosleep has been interrupted by a signal, adjust the
+        sleeping period and return to sleep.  */
+     sleep = remaining;
++#elif defined(TYNDUR)
++    msleep(seconds * 1000);
+ #elif defined(HAVE_USLEEP)
+   /* If usleep is available, use it in preference to select.  */
+   if (seconds >= 1)
+Index: wget-1.11/src/retr.c
+===================================================================
+--- wget-1.11.orig/src/retr.c
++++ wget-1.11/src/retr.c
+@@ -525,9 +525,10 @@ retr_rate (wgint bytes, double secs)
+   double dlrate = calc_rate (bytes, secs, &units);
+   /* Use more digits for smaller numbers (regardless of unit used),
+      e.g. "1022", "247", "12.5", "2.38".  */
+-  sprintf (res, "%.*f %s",
++/*  sprintf (res, "%.*f %s",
+            dlrate >= 99.95 ? 0 : dlrate >= 9.995 ? 1 : 2,
+-           dlrate, rate_names[units]);
++           dlrate, rate_names[units]);*/
++    sprintf (res, "0.0 %s", rate_names[units]);
+ 
+   return res;
+ }
