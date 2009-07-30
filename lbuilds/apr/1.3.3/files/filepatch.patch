@@ -1,0 +1,69 @@
+Index: apr-1.3.3/file_io/unix/filepath.c
+===================================================================
+--- apr-1.3.3.orig/file_io/unix/filepath.c
++++ apr-1.3.3/file_io/unix/filepath.c
+@@ -78,6 +78,37 @@ APR_DECLARE(apr_status_t) apr_filepath_r
+     return APR_ERELATIVE;
+ }
+ 
++
++static int is_relative(const char* path)
++{
++    const char* pos_slash;
++    const char* pos_pipe;
++
++    if (path == NULL || *path == 0) {
++        return 1;
++    }
++
++    if (*path == '/') {
++        return 0;
++    }
++
++    pos_slash = strchr(path, '/');
++    if (!pos_slash) {
++        return 1;
++    }
++
++    if ((pos_slash > path) && (pos_slash[-1] != ':')) {
++        return 1;
++    }
++
++    pos_pipe = strchr(path, '|');
++    if (!pos_pipe) {
++        return 0;
++    }
++
++    return pos_pipe < pos_slash;
++}
++
+ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
+                                              const char *rootpath,
+                                              const char *addpath,
+@@ -97,7 +128,7 @@ APR_DECLARE(apr_status_t) apr_filepath_m
+     if (!addpath)
+         addpath = "";
+ 
+-    if (addpath[0] == '/') {
++    if (!is_relative(addpath)) {
+         /* If addpath is rooted, then rootpath is unused.
+          * Ths violates any APR_FILEPATH_SECUREROOTTEST and
+          * APR_FILEPATH_NOTABSOLUTE flags specified.
+@@ -123,7 +154,7 @@ APR_DECLARE(apr_status_t) apr_filepath_m
+         if (flags & APR_FILEPATH_NOTABSOLUTE) {
+             if (!rootpath)
+                 rootpath = "";
+-            else if (rootpath[0] == '/')
++            else if (!is_relative(rootpath))
+                 return APR_EABSOLUTE;
+         }
+     }
+@@ -169,7 +200,7 @@ APR_DECLARE(apr_status_t) apr_filepath_m
+     else {
+         /* If both paths are relative, fail early
+          */
+-        if (rootpath[0] != '/' && (flags & APR_FILEPATH_NOTRELATIVE))
++        if (is_relative(rootpath) && (flags & APR_FILEPATH_NOTRELATIVE))
+             return APR_ERELATIVE;
+ 
+         /* Base the result path on the rootpath
