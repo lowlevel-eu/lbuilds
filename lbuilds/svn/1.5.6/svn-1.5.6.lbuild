@@ -37,6 +37,7 @@ src_configure() {
 		--prefix="${R}" \
         --disable-nls \
         --with-berkeley-db=no \
+        --with-editor=kedit \
 		|| die "configure failed"
 }
 
