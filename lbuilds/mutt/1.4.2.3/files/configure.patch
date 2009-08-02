@@ -1,0 +1,26 @@
+Index: mutt-1.4.2.3/config.sub
+===================================================================
+--- mutt-1.4.2.3.orig/config.sub
++++ mutt-1.4.2.3/config.sub
+@@ -1093,7 +1093,7 @@ case $os in
+ 	      | -interix* | -uwin* | -rhapsody* | -darwin* | -opened* \
+ 	      | -openstep* | -oskit* | -conix* | -pw32* | -nonstopux* \
+ 	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
+-	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* | -morphos*)
++	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* | -morphos* | -tyndur* )
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: mutt-1.4.2.3/configure
+===================================================================
+--- mutt-1.4.2.3.orig/configure
++++ mutt-1.4.2.3/configure
+@@ -12180,7 +12180,7 @@ fi
+ 
+ 
+ if test x$GCC = xyes -a $mutt_cv_warnings = yes; then
+-        CFLAGS="-Wall -pedantic $CFLAGS"
++        CFLAGS="-Wall $CFLAGS"
+ fi
+ 
+ # Check whether --enable-nfs-fix was given.
