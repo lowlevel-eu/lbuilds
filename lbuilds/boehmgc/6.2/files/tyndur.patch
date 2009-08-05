@@ -1,0 +1,69 @@
+Index: gc6.2/include/private/gcconfig.h
+===================================================================
+--- gc6.2.orig/include/private/gcconfig.h
++++ gc6.2/include/private/gcconfig.h
+@@ -1014,6 +1014,16 @@
+ #	endif /* USE_MMAP */
+ #   endif /* DGUX */
+ 
++#   ifdef TYNDUR
++#       define STACK_GROWS_DOWN
++#       define STACKBOTTOM ((ptr_t) 0xffffffff)
++        extern int _etext, _end;
++        extern ptr_t GC_SysVGetDataStart();
++#       define DATASTART (&_etext)
++#       define DATAEND (&_end)
++#	    define GETPAGESIZE() 0x1000
++#   endif
++
+ #   ifdef LINUX
+ #	ifndef __GNUC__
+ 	  /* The Intel compiler doesn't like inline assembly */
+Index: gc6.2/os_dep.c
+===================================================================
+--- gc6.2.orig/os_dep.c
++++ gc6.2/os_dep.c
+@@ -963,7 +963,7 @@ ptr_t GC_get_stack_base()
+ #endif /* FREEBSD_STACKBOTTOM */
+ 
+ #if !defined(BEOS) && !defined(AMIGA) && !defined(MSWIN32) \
+-    && !defined(MSWINCE) && !defined(OS2)
++    && !defined(MSWINCE) && !defined(OS2) && !defined(TYNUDR)
+ 
+ ptr_t GC_get_stack_base()
+ {
+@@ -1555,6 +1555,17 @@ word bytes;
+     return((ptr_t)result);
+ }
+ 
++#elif defined(TYNDUR)
++
++extern void* mem_allocate(size_t size, int flags);
++
++ptr_t GC_unix_get_mem(bytes)
++word bytes;
++{
++  ptr_t result = mem_allocate(bytes, 0);
++  return(result);
++}
++
+ #else /* Not RS6000, not USE_MMAP */
+ ptr_t GC_unix_get_mem(bytes)
+ word bytes;
+Index: gc6.2/include/private/gc_priv.h
+===================================================================
+--- gc6.2.orig/include/private/gc_priv.h
++++ gc6.2/include/private/gc_priv.h
+@@ -329,7 +329,11 @@ void GC_print_callers GC_PROTO((struct c
+  */
+ #   endif
+ #   define CLOCK_TYPE clock_t
+-#   define GET_TIME(x) x = clock()
++#   ifdef TYNDUR
++#       define GET_TIME(x) x = get_tick_count()
++#   else
++#       define GET_TIME(x) x = clock()
++#   endif
+ #   define MS_TIME_DIFF(a,b) ((unsigned long) \
+ 		(1000.0*(double)((a)-(b))/(double)CLOCKS_PER_SEC))
+ # endif /* !MSWIN32 */
