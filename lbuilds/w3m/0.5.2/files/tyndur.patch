@@ -1,0 +1,338 @@
+Index: w3m-0.5.2/main.c
+===================================================================
+--- w3m-0.5.2.orig/main.c
++++ w3m-0.5.2/main.c
+@@ -11,6 +11,7 @@
+ #include <sys/wait.h>
+ #endif
+ #include <time.h>
++#include <strings.h>
+ #include "terms.h"
+ #include "myctype.h"
+ #include "regex.h"
+@@ -437,7 +438,7 @@ main(int argc, char **argv, char **envp)
+ 
+ #ifdef USE_M17N
+     if (non_null(Locale = getenv("LC_ALL")) ||
+-	non_null(Locale = getenv("LC_CTYPE")) ||
++       non_null(Locale = getenv("LC_CTYPE")) ||
+ 	non_null(Locale = getenv("LANG"))) {
+ 	DisplayCharset = wc_guess_locale_charset(Locale, DisplayCharset);
+ 	DocumentCharset = wc_guess_locale_charset(Locale, DocumentCharset);
+@@ -847,7 +848,7 @@ main(int argc, char **argv, char **envp)
+     if (load_argc == 0) {
+ 	/* no URL specified */
+ 	if (!isatty(0)) {
+-	    redin = newFileStream(fdopen(dup(0), "rb"), (void (*)())pclose);
++	    redin = newFileStream(fdopen(0, "rb"), NULL /*(void (*)())pclose*/);
+ 	    newbuf = openGeneralPagerBuffer(redin);
+ 	    dup2(1, 0);
+ 	}
+@@ -4406,11 +4407,14 @@ DEFUN(svBuf, PRINT SAVE_SCREEN, "Save re
+ 	}
+     }
+     file = conv_to_system(qfile ? qfile : file);
++#ifndef TYNDUR
+     if (*file == '|') {
+ 	is_pipe = TRUE;
+ 	f = popen(file + 1, "w");
+     }
+-    else {
++    else
++#endif
++    {
+ 	if (qfile) {
+ 	    file = unescape_spaces(Strnew_charp(qfile))->ptr;
+ 	    file = conv_to_system(file);
+@@ -4430,9 +4434,11 @@ DEFUN(svBuf, PRINT SAVE_SCREEN, "Save re
+ 	return;
+     }
+     saveBuffer(Currentbuf, f, TRUE);
++#ifndef TYNDUR
+     if (is_pipe)
+ 	pclose(f);
+     else
++#endif
+ 	fclose(f);
+     displayBuffer(Currentbuf, B_NORMAL);
+ }
+Index: w3m-0.5.2/file.c
+===================================================================
+--- w3m-0.5.2.orig/file.c
++++ w3m-0.5.2/file.c
+@@ -8,6 +8,7 @@
+ #include <sys/wait.h>
+ #endif
+ #include <stdio.h>
++#include <strings.h>
+ #include <time.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+@@ -375,12 +376,14 @@ examineFile(char *path, URLFile *uf)
+ 		uf->guess_type = "text/plain";
+ 	    if (strcasecmp(uf->guess_type, "text/html") == 0)
+ 		return;
++#ifndef TYNDUR
+ 	    if ((fp = lessopen_stream(path))) {
+ 		UFclose(uf);
+ 		uf->stream = newFileStream(fp, (void (*)())pclose);
+ 		uf->guess_type = "text/plain";
+ 		return;
+ 	    }
++#endif
+ 	}
+ 	check_compression(path, uf);
+ 	if (uf->compression != CMP_NOCOMPRESS) {
+@@ -1602,7 +1605,7 @@ getAuthCookie(struct http_auth *hauth, c
+ 				getpassphrase(proxy ? "Proxy Password: " :
+ 					      "Password: "));
+ #else
+-#ifndef __MINGW32_VERSION
++#if !defined(__MINGW32_VERSION) && !defined(TYNDUR)
+ 	    *pwd = Strnew_charp((char *)
+ 				getpass(proxy ? "Proxy Password: " :
+ 					"Password: "));
+@@ -6560,6 +6563,9 @@ loadHTMLBuffer(URLFile *f, Buffer *newBu
+     return newBuf;
+ }
+ 
++
++#define floor(x) ((float)((int) x))
++
+ static char *_size_unit[] = { "b", "kb", "Mb", "Gb", "Tb",
+     "Pb", "Eb", "Zb", "Bb", "Yb", NULL
+ };
+@@ -7427,6 +7433,9 @@ static Buffer *
+ loadcmdout(char *cmd,
+ 	   Buffer *(*loadproc) (URLFile *, Buffer *), Buffer *defaultbuf)
+ {
++#ifdef TYNDUR
++    return NULL;
++#else
+     FILE *f, *popen(const char *, const char *);
+     Buffer *buf;
+     URLFile uf;
+@@ -7440,6 +7449,7 @@ loadcmdout(char *cmd,
+     buf = loadproc(&uf, defaultbuf);
+     UFclose(&uf);
+     return buf;
++#endif
+ }
+ 
+ /* 
+@@ -7465,6 +7475,9 @@ getshell(char *cmd)
+ Buffer *
+ getpipe(char *cmd)
+ {
++#ifdef TYNDUR
++    return NULL;
++#else
+     FILE *f, *popen(const char *, const char *);
+     Buffer *buf;
+ 
+@@ -7483,6 +7496,7 @@ getpipe(char *cmd)
+     buf->document_charset = WC_CES_US_ASCII;
+ #endif
+     return buf;
++#endif
+ }
+ 
+ /* 
+@@ -7879,10 +7893,12 @@ _MoveFile(char *path1, char *path2)
+     f1 = openIS(path1);
+     if (f1 == NULL)
+ 	return -1;
++#ifndef TYNDUR
+     if (*path2 == '|' && PermitSaveToPipe) {
+ 	is_pipe = TRUE;
+ 	f2 = popen(path2 + 1, "w");
+     }
++#endif
+     else {
+ 	is_pipe = FALSE;
+ 	f2 = fopen(path2, "wb");
+@@ -7899,9 +7915,11 @@ _MoveFile(char *path1, char *path2)
+ 	showProgress(&linelen, &trbyte);
+     }
+     ISclose(f1);
++#ifndef TYNDUR
+     if (is_pipe)
+ 	pclose(f2);
+     else
++#endif
+ 	fclose(f2);
+     return 0;
+ }
+@@ -8199,7 +8217,7 @@ inputAnswer(char *prompt)
+ static void
+ uncompress_stream(URLFile *uf, char **src)
+ {
+-#ifndef __MINGW32_VERSION
++#if !defined(__MINGW32_VERSION) && !defined(TYNDUR)
+     pid_t pid1;
+     FILE *f1;
+     char *expand_cmd = GUNZIP_CMDNAME;
+@@ -8300,6 +8318,7 @@ lessopen_stream(char *path)
+ 	return NULL;
+     }
+ 
++#ifndef TYNDUR
+     if (lessopen[0] == '|') {
+ 	/* pipe mode */
+ 	Str tmpf;
+@@ -8318,7 +8337,9 @@ lessopen_stream(char *path)
+ 	}
+ 	ungetc(c, fp);
+     }
+-    else {
++    else
++#endif
++    {
+ 	/* filename mode */
+ 	/* not supported m(__)m */
+ 	fp = NULL;
+Index: w3m-0.5.2/terms.c
+===================================================================
+--- w3m-0.5.2.orig/terms.c
++++ w3m-0.5.2/terms.c
+@@ -12,11 +12,12 @@
+ #include <unistd.h>
+ #include "config.h"
+ #include <string.h>
++#include <strings.h>
+ #ifdef HAVE_SYS_SELECT_H
+ #include <sys/select.h>
+ #endif
+ #ifndef __MINGW32_VERSION
+-#include <sys/ioctl.h>
++//#include <sys/ioctl.h>
+ #else
+ #include <winsock.h>
+ #endif /* __MINGW32_VERSION */
+@@ -506,6 +507,7 @@ static struct w3m_term_info {
+ int
+ set_tty(void)
+ {
++#ifndef TYNDUR
+     char *ttyn;
+ 
+     if (isatty(0))		/* stdin */
+@@ -545,6 +547,7 @@ set_tty(void)
+ 	}
+     }
+ #endif
++#endif
+     return 0;
+ }
+ 
+@@ -617,7 +620,11 @@ close_tty(void)
+ char *
+ ttyname_tty(void)
+ {
++#ifndef TYNDUR
+     return ttyname(tty);
++#else
++    return "[TODO: ttyname]";
++#endif
+ }
+ 
+ void
+Index: w3m-0.5.2/Str.h
+===================================================================
+--- w3m-0.5.2.orig/Str.h
++++ w3m-0.5.2/Str.h
+@@ -17,6 +17,7 @@
+ #define GC_STR_H
+ #include <stdio.h>
+ #include <string.h>
++#include <strings.h>
+ #ifdef __EMX__
+ #define strcasecmp	stricmp
+ #define strncasecmp	strnicmp
+Index: w3m-0.5.2/ftp.c
+===================================================================
+--- w3m-0.5.2.orig/ftp.c
++++ w3m-0.5.2/ftp.c
+@@ -130,6 +130,7 @@ ftp_login(FTP ftp)
+ 	    struct sockaddr_in sockname;
+ 	    int socknamelen = sizeof(sockname);
+ 
++#ifndef TYNDUR
+ 	    if (!getsockname(sock, (struct sockaddr *)&sockname, &socknamelen)) {
+ 		struct hostent *sockent;
+ 		Str tmp = Strnew_charp(ftp->pass);
+@@ -144,6 +145,12 @@ ftp_login(FTP ftp)
+ 
+ 		ftp->pass = tmp->ptr;
+ 	    }
++#else
++		Str tmp = Strnew_charp(ftp->pass);
++		Strcat_m_charp(tmp, "[", inet_ntoa(sockname.sin_addr),
++				   "]", NULL);
++		ftp->pass = tmp->ptr;
++#endif
+ 	}
+     }
+     ftp->rf = newInputStream(sock);
+@@ -377,7 +384,7 @@ openFTPStream(ParsedURL *pu, URLFile *uf
+ 		term_cbreak();
+ 	    }
+ 	    else {
+-#ifndef __MINGW32_VERSION
++#if !defined(__MINGW32_VERSION) && !defined(TYNDUR)
+ 		pwd = Strnew_charp((char *)getpass("Password: "));
+ #else
+ 		term_raw();
+Index: w3m-0.5.2/etc.c
+===================================================================
+--- w3m-0.5.2.orig/etc.c
++++ w3m-0.5.2/etc.c
+@@ -1361,7 +1361,7 @@ setup_child(int child, int i, int f)
+ {
+     reset_signals();
+     mySignal(SIGINT, SIG_IGN);
+-#ifndef __MINGW32_VERSION
++#if !defined(__MINGW32_VERSION) && !defined(TYNDUR)
+     if (!child)
+ 	SETPGRP();
+ #endif /* __MINGW32_VERSION */
+@@ -1432,18 +1432,21 @@ open_pipe_rw(FILE ** fr, FILE ** fw)
+ }
+ #endif /* __MINGW32_VERSION */
+ 
++
+ void
+ myExec(char *command)
+ {
++#ifndef TYNDUR
+     mySignal(SIGINT, SIG_DFL);
+     execl("/bin/sh", "sh", "-c", command, NULL);
++#endif
+     exit(127);
+ }
+ 
+ void
+ mySystem(char *command, int background)
+ {
+-#ifndef __MINGW32_VERSION
++#if !defined(__MINGW32_VERSION) && !defined(TYNDUR)
+     if (background) {
+ #ifndef __EMX__
+ 	flush_tty();
+Index: w3m-0.5.2/local.c
+===================================================================
+--- w3m-0.5.2.orig/local.c
++++ w3m-0.5.2/local.c
+@@ -417,9 +417,12 @@ localcgi_post(char *uri, char *qstr, For
+ #ifdef HAVE_CHDIR		/* ifndef __EMX__ ? */
+     chdir(mydirname(file));
+ #endif
++
++#ifndef TYNDUR
+     execl(file, mybasename(file), NULL);
+     fprintf(stderr, "execl(\"%s\", \"%s\", NULL): %s\n",
+ 	    file, mybasename(file), strerror(errno));
++#endif
+     exit(1);
+     return NULL;
+ #endif

@@ -1,0 +1,130 @@
+Index: w3m-0.5.2/config.sub
+===================================================================
+--- w3m-0.5.2.orig/config.sub
++++ w3m-0.5.2/config.sub
+@@ -1167,7 +1167,7 @@ case $os in
+ 	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+-	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly*)
++	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* | -tyndur* )
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: w3m-0.5.2/configure
+===================================================================
+--- w3m-0.5.2.orig/configure
++++ w3m-0.5.2/configure
+@@ -6221,7 +6221,7 @@ cat >>confdefs.h <<_ACEOF
+ _ACEOF
+ 
+ 
+-for lib in bsd BSD 44bsd socket nsl dld dl
++for lib in "" # bsd BSD 44bsd socket nsl dld dl
+ do
+  lib=$lib
+  { echo "$as_me:$LINENO: checking for -l$lib" >&5
+@@ -8019,6 +8019,10 @@ sed 's/^/| /' conftest.$ac_ext >&5
+ 	ac_cv_lib_gc_GC_init=no
+ fi
+ 
++ac_cv_lib_gc_GC_init=yes
++
++
++
+ rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+       conftest$ac_exeext conftest.$ac_ext
+ LIBS=$ac_check_lib_save_LIBS
+@@ -10490,70 +10494,7 @@ _ACEOF
+ 
+ fi
+ 
+-{ echo "$as_me:$LINENO: checking whether setpgrp takes no argument" >&5
+-echo $ECHO_N "checking whether setpgrp takes no argument... $ECHO_C" >&6; }
+-if test "${ac_cv_func_setpgrp_void+set}" = set; then
+-  echo $ECHO_N "(cached) $ECHO_C" >&6
+-else
+-  if test "$cross_compiling" = yes; then
+-  { { echo "$as_me:$LINENO: error: cannot check setpgrp when cross compiling" >&5
+-echo "$as_me: error: cannot check setpgrp when cross compiling" >&2;}
+-   { (exit 1); exit 1; }; }
+-else
+-  cat >conftest.$ac_ext <<_ACEOF
+-/* confdefs.h.  */
+-_ACEOF
+-cat confdefs.h >>conftest.$ac_ext
+-cat >>conftest.$ac_ext <<_ACEOF
+-/* end confdefs.h.  */
+-$ac_includes_default
+-int
+-main ()
+-{
+-/* If this system has a BSD-style setpgrp which takes arguments,
+-  setpgrp(1, 1) will fail with ESRCH and return -1, in that case
+-  exit successfully. */
+-  return setpgrp (1,1) != -1;
+-  ;
+-  return 0;
+-}
+-_ACEOF
+-rm -f conftest$ac_exeext
+-if { (ac_try="$ac_link"
+-case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_link") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+-  { (case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+-  (eval "$ac_try") 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); }; }; then
+-  ac_cv_func_setpgrp_void=no
+-else
+-  echo "$as_me: program exited with status $ac_status" >&5
+-echo "$as_me: failed program was:" >&5
+-sed 's/^/| /' conftest.$ac_ext >&5
+-
+-( exit $ac_status )
+ ac_cv_func_setpgrp_void=yes
+-fi
+-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+-fi
+-
+-
+-fi
+-{ echo "$as_me:$LINENO: result: $ac_cv_func_setpgrp_void" >&5
+-echo "${ECHO_T}$ac_cv_func_setpgrp_void" >&6; }
+ if test $ac_cv_func_setpgrp_void = yes; then
+ 
+ cat >>confdefs.h <<\_ACEOF
+@@ -10698,7 +10639,7 @@ main ()
+ }
+ _ACEOF
+ rm -f conftest.$ac_objext
+-if { (ac_try="$ac_compile"
++if false && { (ac_try="$ac_compile"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+Index: w3m-0.5.2/config.h.in
+===================================================================
+--- w3m-0.5.2.orig/config.h.in
++++ w3m-0.5.2/config.h.in
+@@ -177,7 +177,7 @@ typedef RETSIGTYPE MySignalHandler;
+ #endif /* __MINGW32_VERSION */
+ #else
+ # define SETJMP(env) setjmp(env)
+-# define LONGJMP(env,val) longjmp(env)
++# define LONGJMP(env,val) longjmp(env,val)
+ # define JMP_BUF jmp_buf
+ #endif
+ 
