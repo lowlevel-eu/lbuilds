@@ -10,6 +10,8 @@ mkdir -p ${TMP}/cross-binutils/build
 mkdir -p ${TMP}/cross-gcc/build
 mkdir -p ${TMP}/cross-fpc
 
+if false; then
+
 cd ${TMP}/cross-binutils
 echo "[binutils] Herunterladen..."
 [ -f binutils-2.18.tar.bz2 ] || wget -q http://ftp.gnu.org/gnu/binutils/binutils-2.18.tar.bz2 || exit -1
@@ -41,6 +43,8 @@ make all-gcc ${MAKEOPTS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log || exit -1
 echo "[gcc] Installieren..."
 make install-gcc ${MAKEOPTS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log || exit -1
 echo -e "[gcc] Abgeschlossen\n"
+
+fi
 
 cd ${TMP}/cross-fpc
 echo "[fpc] Herunterladen..."

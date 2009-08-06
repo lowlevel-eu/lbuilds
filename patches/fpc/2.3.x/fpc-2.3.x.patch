@@ -1,15 +1,15 @@
 Index: fpc/compiler/fpc
 ===================================================================
---- /dev/null
-+++ fpc/compiler/fpc
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ fpc/compiler/fpc	2009-08-06 16:03:08.726695360 +0200
 @@ -0,0 +1,2 @@
 +#!/bin/bash
 +echo /home/kevin/tyndur-fp-system/fpcbuild_2.0.4_exp/fpcsrc/compiler/ppc386
 Index: fpc/compiler/i386/cputarg.pas
 ===================================================================
---- fpc/compiler/i386/cputarg.pas.orig
-+++ fpc/compiler/i386/cputarg.pas
-@@ -41,6 +41,9 @@ implementation
+--- fpc.orig/compiler/i386/cputarg.pas	2008-05-20 01:00:27.000000000 +0200
++++ fpc/compiler/i386/cputarg.pas	2009-08-06 16:03:08.730694280 +0200
+@@ -41,6 +41,9 @@
      {$ifndef NOTARGETBSD}
        ,t_bsd
      {$endif}
@@ -21,9 +21,9 @@ Index: fpc/compiler/i386/cputarg.pas
      {$endif}
 Index: fpc/compiler/systems/i_tyndur.pas
 ===================================================================
---- /dev/null
-+++ fpc/compiler/systems/i_tyndur.pas
-@@ -0,0 +1,100 @@
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ fpc/compiler/systems/i_tyndur.pas	2009-08-06 16:14:32.434692840 +0200
+@@ -0,0 +1,102 @@
 +{
 +    Copyright (c) 1998-2002 by Peter Vreman
 +
@@ -83,6 +83,8 @@ Index: fpc/compiler/systems/i_tyndur.pas
 +            staticClibext : '.a';
 +            staticClibprefix : 'lib';
 +            sharedClibprefix : 'lib';
++            importlibprefix : 'libimp';
++            importlibext : '.a';
 +            Cprefix      : '';
 +            newline      : #10;
 +            dirsep       : '/';
@@ -126,8 +128,8 @@ Index: fpc/compiler/systems/i_tyndur.pas
 +end.
 Index: fpc/compiler/systems/t_tyndur.pas
 ===================================================================
---- /dev/null
-+++ fpc/compiler/systems/t_tyndur.pas
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ fpc/compiler/systems/t_tyndur.pas	2009-08-06 16:03:08.734695720 +0200
 @@ -0,0 +1,868 @@
 +{
 +    Copyright (c) 1998-2008 by Peter Vreman
@@ -999,9 +1001,9 @@ Index: fpc/compiler/systems/t_tyndur.pas
 +end.
 Index: fpc/compiler/systems.pas
 ===================================================================
---- fpc/compiler/systems.pas.orig
-+++ fpc/compiler/systems.pas
-@@ -145,7 +145,8 @@ interface
+--- fpc.orig/compiler/systems.pas	2009-06-28 01:00:28.000000000 +0200
++++ fpc/compiler/systems.pas	2009-08-06 16:03:08.738692440 +0200
+@@ -145,7 +145,8 @@
               system_x86_64_darwin,      { 61 }
               system_avr_embedded,       { 62 }
               system_i386_haiku,         { 63 }
@@ -1011,7 +1013,7 @@ Index: fpc/compiler/systems.pas
         );
  
       type
-@@ -819,6 +820,9 @@ begin
+@@ -831,6 +832,9 @@
      default_target(system_i386_linux);
      {$define default_target_set}
     {$endif}
@@ -1023,9 +1025,9 @@ Index: fpc/compiler/systems.pas
      {$define default_target_set}
 Index: fpc/utils/fpcm/fpcmmain.pp
 ===================================================================
---- fpc/utils/fpcm/fpcmmain.pp.orig
-+++ fpc/utils/fpcm/fpcmmain.pp
-@@ -70,7 +70,7 @@ interface
+--- fpc.orig/utils/fpcm/fpcmmain.pp	2008-05-20 01:00:23.000000000 +0200
++++ fpc/utils/fpcm/fpcmmain.pp	2009-08-06 16:03:08.742692280 +0200
+@@ -70,7 +70,7 @@
          o_linux,o_go32v2,o_win32,o_os2,o_freebsd,o_beos,o_haiku,o_netbsd,
          o_amiga,o_atari, o_solaris, o_qnx, o_netware, o_openbsd,o_wdosx,
          o_palmos,o_macos,o_darwin,o_emx,o_watcom,o_morphos,o_netwlibc,
@@ -1034,7 +1036,7 @@ Index: fpc/utils/fpcm/fpcmmain.pp
        );
  
        TTargetSet=array[tcpu,tos] of boolean;
-@@ -92,14 +92,14 @@ interface
+@@ -92,14 +92,14 @@
          'linux','go32v2','win32','os2','freebsd','beos','haiku','netbsd',
          'amiga','atari','solaris', 'qnx', 'netware','openbsd','wdosx',
          'palmos','macos','darwin','emx','watcom','morphos','netwlibc',
@@ -1051,7 +1053,7 @@ Index: fpc/utils/fpcm/fpcmmain.pp
        );
  
        { This table is kept OS,Cpu because it is easier to maintain (PFV) }
-@@ -132,7 +132,8 @@ interface
+@@ -132,7 +132,8 @@
          { gba    }  ( false, false, false, false, false, true,  false, false, false),
          { nds    }  ( false, false, false, false, false, true,  false, false, false),
          { embedded }( true,  true,  true,  true,  true,  true,  true,  true,  true ),
@@ -1063,30 +1065,30 @@ Index: fpc/utils/fpcm/fpcmmain.pp
      type
 Index: fpc/utils/fpcm/fpcmake.inc
 ===================================================================
---- fpc/utils/fpcm/fpcmake.inc.orig
-+++ fpc/utils/fpcm/fpcmake.inc
+--- fpc.orig/utils/fpcm/fpcmake.inc	2009-07-31 01:00:26.000000000 +0200
++++ fpc/utils/fpcm/fpcmake.inc	2009-08-06 16:03:08.750693000 +0200
 @@ -1,7 +1,7 @@
  {$ifdef Delphi}
--const fpcmakeini : array[0..226] of string[240]=(
-+const fpcmakeini : array[0..227] of string[240]=(
+-const fpcmakeini : array[0..218] of string[240]=(
++const fpcmakeini : array[0..219] of string[240]=(
  {$else Delphi}
--const fpcmakeini : array[0..226,1..240] of char=(
-+const fpcmakeini : array[0..227,1..240] of char=(
+-const fpcmakeini : array[0..218,1..240] of char=(
++const fpcmakeini : array[0..219,1..240] of char=(
  {$endif Delphi}
-   ';'#013#010+
-   '; Templates used by fpcmake to create a Makefile from Makefile.fpc'#013+
-@@ -877,6 +877,14 @@ const fpcmakeini : array[0..226,1..240]
-   'SHORTSUFFIX=lnx'#013#010+
-   'endif'#013#010+
-   #013#010+
-+  '# tyndur'#013#010+
-+  'ifeq ($(OS_TARGET),tyndur)'#013#010+
-+  'BATCHEXT=.lsh'#013#010+
-+  'EXEEXT='#013#010+
-+  'HASSHAREDLIB=1'#013#010+
-+  'SHORTSUFFIX=tyn'#013#010+
-+  'endif'#013#010,
-+  #013#010+
-   '# FreeBSD'#013#010+
-   'ifeq ($(OS_TARGET),freebsd)'#013#010+
-   'BATCHEXT=.sh'#013#010+
+   ';'#010+
+   '; Templates used by fpcmake to create a Makefile from Makefile.fpc'#010+
+@@ -858,6 +858,14 @@
+   'SHO','RTSUFFIX=lnx'#010+
+   'endif'#010+
+   #010+
++  '# tyndur'#010+
++  'ifeq ($(OS_TARGET),tyndur)'#010+
++  'BATCHEXT=.lsh'#010+
++  'EXEEXT='#010+
++  'HASSHAREDLIB=1'#010+
++  'SHORTSUFFIX=tyn'#010+
++  'endif'#010,
++  #010+
+   '# FreeBSD'#010+
+   'ifeq ($(OS_TARGET),freebsd)'#010+
+   'BATCHEXT=.sh'#010+
