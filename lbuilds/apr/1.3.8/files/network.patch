@@ -1,8 +1,8 @@
-Index: apr-1.3.3/network_io/unix/sockaddr.c
+Index: apr-1.3.8/network_io/unix/sockaddr.c
 ===================================================================
---- apr-1.3.3.orig/network_io/unix/sockaddr.c
-+++ apr-1.3.3/network_io/unix/sockaddr.c
-@@ -68,6 +68,13 @@ static void *getservbyname(const char *n
+--- apr-1.3.8.orig/network_io/unix/sockaddr.c	2009-08-07 20:33:51.786958360 +0200
++++ apr-1.3.8/network_io/unix/sockaddr.c	2009-08-07 20:34:33.794960280 +0200
+@@ -68,6 +68,13 @@
  }
  #endif
  
@@ -16,7 +16,7 @@ Index: apr-1.3.3/network_io/unix/sockaddr.c
  static apr_status_t get_local_addr(apr_socket_t *sock)
  {
      sock->local_addr->salen = sizeof(sock->local_addr->sa);
-@@ -97,6 +104,7 @@ static apr_status_t get_remote_addr(apr_
+@@ -97,6 +104,7 @@
          return APR_SUCCESS;
      }
  }
@@ -24,7 +24,7 @@ Index: apr-1.3.3/network_io/unix/sockaddr.c
  
  APR_DECLARE(apr_status_t) apr_sockaddr_ip_getbuf(char *buf, apr_size_t buflen,
                                                   apr_sockaddr_t *sockaddr)
-@@ -159,6 +167,8 @@ APR_DECLARE(apr_status_t) apr_socket_add
+@@ -159,6 +167,8 @@
                                             apr_interface_e which,
                                             apr_socket_t *sock)
  {
@@ -33,7 +33,7 @@ Index: apr-1.3.3/network_io/unix/sockaddr.c
      if (which == APR_LOCAL) {
          if (sock->local_interface_unknown || sock->local_port_unknown) {
              apr_status_t rv = get_local_addr(sock);
-@@ -184,6 +194,7 @@ APR_DECLARE(apr_status_t) apr_socket_add
+@@ -184,6 +194,7 @@
          return APR_EINVAL;
      }
      return APR_SUCCESS;
@@ -41,7 +41,7 @@ Index: apr-1.3.3/network_io/unix/sockaddr.c
  }
  
  APR_DECLARE(apr_status_t) apr_parse_addr_port(char **addr,
-@@ -568,6 +579,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_i
+@@ -572,6 +583,7 @@
      return find_addresses(sa, hostname, family, port, flags, p);
  }
  
@@ -49,7 +49,7 @@ Index: apr-1.3.3/network_io/unix/sockaddr.c
  APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
                                            apr_sockaddr_t *sockaddr,
                                            apr_int32_t flags)
-@@ -677,6 +689,7 @@ APR_DECLARE(apr_status_t) apr_getnameinf
+@@ -681,6 +693,7 @@
  #endif
  #endif
  }
@@ -57,11 +57,11 @@ Index: apr-1.3.3/network_io/unix/sockaddr.c
  
  APR_DECLARE(apr_status_t) apr_getservbyname(apr_sockaddr_t *sockaddr,
                                              const char *servname)
-Index: apr-1.3.3/support/unix/waitio.c
+Index: apr-1.3.8/support/unix/waitio.c
 ===================================================================
---- apr-1.3.3.orig/support/unix/waitio.c
-+++ apr-1.3.3/support/unix/waitio.c
-@@ -61,6 +61,40 @@ apr_status_t apr_wait_for_io_or_timeout(
+--- apr-1.3.8.orig/support/unix/waitio.c	2009-08-07 20:33:51.838958560 +0200
++++ apr-1.3.8/support/unix/waitio.c	2009-08-07 20:34:33.794960280 +0200
+@@ -61,6 +61,40 @@
      }
  }
  
@@ -102,7 +102,7 @@ Index: apr-1.3.3/support/unix/waitio.c
  #else /* !WAITIO_USES_POLL */
  
  apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
-@@ -79,7 +113,7 @@ apr_status_t apr_wait_for_io_or_timeout(
+@@ -79,7 +113,7 @@
  
          pollset = f->pollset;
          if (pollset == NULL) {
@@ -111,7 +111,7 @@ Index: apr-1.3.3/support/unix/waitio.c
              if (status != APR_SUCCESS) {
                  return status;
              }
-@@ -96,6 +130,7 @@ apr_status_t apr_wait_for_io_or_timeout(
+@@ -96,6 +130,7 @@
      }
      pfd.reqevents = type;
  
@@ -119,7 +119,7 @@ Index: apr-1.3.3/support/unix/waitio.c
      /* Remove the object if it was in the pollset, then add in the new
       * object with the correct reqevents value. Ignore the status result
       * on the remove, because it might not be in there (yet).
-@@ -115,6 +150,7 @@ apr_status_t apr_wait_for_io_or_timeout(
+@@ -115,6 +150,7 @@
              return APR_SUCCESS;
          }
      } while (APR_STATUS_IS_EINTR(status));
@@ -127,11 +127,11 @@ Index: apr-1.3.3/support/unix/waitio.c
  
      return status;
  }
-Index: apr-1.3.3/network_io/unix/sockets.c
+Index: apr-1.3.8/network_io/unix/sockets.c
 ===================================================================
---- apr-1.3.3.orig/network_io/unix/sockets.c
-+++ apr-1.3.3/network_io/unix/sockets.c
-@@ -67,7 +67,7 @@ static void alloc_socket(apr_socket_t **
+--- apr-1.3.8.orig/network_io/unix/sockets.c	2009-08-07 20:33:51.810958600 +0200
++++ apr-1.3.8/network_io/unix/sockets.c	2009-08-07 20:34:57.834958680 +0200
+@@ -67,7 +67,7 @@
                                                          sizeof(apr_sockaddr_t));
      (*new)->remote_addr->pool = p;
      (*new)->remote_addr_unknown = 1;
@@ -140,7 +140,16 @@ Index: apr-1.3.3/network_io/unix/sockets.c
      /* Create a pollset with room for one descriptor. */
      /* ### check return codes */
      (void) apr_pollset_create(&(*new)->pollset, 1, p, 0);
-@@ -141,7 +141,10 @@ apr_status_t apr_socket_create(apr_socke
+@@ -134,7 +134,7 @@
+     }
+     set_socket_vars(*new, family, type, protocol);
+ 
+-#ifndef HAVE_SOCK_CLOEXEC
++#if 0
+     {
+         int flags;
+ 
+@@ -158,7 +158,10 @@
  apr_status_t apr_socket_shutdown(apr_socket_t *thesocket, 
                                   apr_shutdown_how_e how)
  {
@@ -151,3 +160,12 @@ Index: apr-1.3.3/network_io/unix/sockets.c
  }
  
  apr_status_t apr_socket_close(apr_socket_t *thesocket)
+@@ -276,7 +279,7 @@
+         (*new)->local_interface_unknown = 1;
+     }
+ 
+-#ifndef HAVE_ACCEPT4
++#if 0
+     {
+         int flags;
+ 

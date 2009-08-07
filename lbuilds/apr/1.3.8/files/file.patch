@@ -1,0 +1,132 @@
+Index: apr-1.3.8/file_io/unix/open.c
+===================================================================
+--- apr-1.3.8.orig/file_io/unix/open.c	2009-08-07 20:19:18.934960440 +0200
++++ apr-1.3.8/file_io/unix/open.c	2009-08-07 20:28:44.582959240 +0200
+@@ -47,7 +47,7 @@
+         /* Are there any error conditions other than EINTR or EBADF? */
+         rv = errno;
+     }
+-#ifndef WAITIO_USES_POLL
++#if 0
+     if (file->pollset != NULL) {
+         apr_status_t pollset_rv = apr_pollset_destroy(file->pollset);
+         /* If the file close failed, return its error value,
+@@ -166,12 +166,14 @@
+     if (!(flag & APR_FILE_NOCLEANUP)) {
+         int flags;
+ 
++#if 0
+         if ((flags = fcntl(fd, F_GETFD)) == -1)
+             return errno;
+ 
+         flags |= FD_CLOEXEC;
+         if (fcntl(fd, F_SETFD, flags) == -1)
+             return errno;
++#endif
+     }
+ 
+     (*new) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
+@@ -357,12 +359,14 @@
+     if (thefile->flags & APR_INHERIT) {
+         int flags;
+ 
++#if 0
+         if ((flags = fcntl(thefile->filedes, F_GETFD)) == -1)
+             return errno;
+ 
+         flags |= FD_CLOEXEC;
+         if (fcntl(thefile->filedes, F_SETFD, flags) == -1)
+             return errno;
++#endif
+ 
+         thefile->flags &= ~APR_INHERIT;
+         apr_pool_child_cleanup_set(thefile->pool,
+Index: apr-1.3.8/file_io/unix/seek.c
+===================================================================
+--- apr-1.3.8.orig/file_io/unix/seek.c	2009-08-07 20:19:18.982957560 +0200
++++ apr-1.3.8/file_io/unix/seek.c	2009-08-07 20:26:44.794959720 +0200
+@@ -98,8 +98,10 @@
+ 
+ apr_status_t apr_file_trunc(apr_file_t *fp, apr_off_t offset)
+ {
++#if 0
+     if (ftruncate(fp->filedes, offset) == -1) {
+         return errno;
+     }
++#endif
+     return apr_file_seek(fp, APR_SET, &offset);
+ }
+Index: apr-1.3.8/file_io/unix/mktemp.c
+===================================================================
+--- apr-1.3.8.orig/file_io/unix/mktemp.c	2009-08-07 20:31:23.118957480 +0200
++++ apr-1.3.8/file_io/unix/mktemp.c	2009-08-07 20:31:35.902957440 +0200
+@@ -203,6 +203,7 @@
+     apr_os_file_put(fp, &fd, flags, p);
+     (*fp)->fname = apr_pstrdup(p, template);
+ 
++#if 0
+     if (!(flags & APR_FILE_NOCLEANUP)) {
+         int flags;
+ 
+@@ -218,6 +219,7 @@
+                                   apr_unix_child_file_cleanup);
+     }
+ #endif
++#endif
+     return APR_SUCCESS;
+ }
+ 
+Index: apr-1.3.8/include/arch/unix/apr_arch_inherit.h
+===================================================================
+--- apr-1.3.8.orig/include/arch/unix/apr_arch_inherit.h	2009-08-07 20:29:53.614959120 +0200
++++ apr-1.3.8/include/arch/unix/apr_arch_inherit.h	2009-08-07 20:34:27.922957520 +0200
+@@ -27,12 +27,14 @@
+     if (the##name->flag & APR_FILE_NOCLEANUP)                       \
+         return APR_EINVAL;                                          \
+     if (!(the##name->flag & APR_INHERIT)) {                         \
++        /* \
+         int flags = fcntl(the##name->name##des, F_GETFD);           \
+         if (flags == -1)                                            \
+             return errno;                                           \
+         flags &= ~(FD_CLOEXEC);                                     \
+         if (fcntl(the##name->name##des, F_SETFD, flags) == -1)      \
+             return errno;                                           \
++        */ \
+         the##name->flag |= APR_INHERIT;                             \
+         apr_pool_child_cleanup_set(the##name->pool,                 \
+                                    (void *)the##name,               \
+@@ -47,12 +49,14 @@
+     if (the##name->flag & APR_FILE_NOCLEANUP)                       \
+         return APR_EINVAL;                                          \
+     if (the##name->flag & APR_INHERIT) {                            \
++        /* \
+         int flags;                                                  \
+         if ((flags = fcntl(the##name->name##des, F_GETFD)) == -1)   \
+             return errno;                                           \
+         flags |= FD_CLOEXEC;                                        \
+         if (fcntl(the##name->name##des, F_SETFD, flags) == -1)      \
+             return errno;                                           \
++        */ \
+         the##name->flag &= ~APR_INHERIT;                            \
+         apr_pool_child_cleanup_set(the##name->pool,                 \
+                                    (void *)the##name,               \
+Index: apr-1.3.8/file_io/unix/filedup.c
+===================================================================
+--- apr-1.3.8.orig/file_io/unix/filedup.c	2009-08-07 20:31:48.566961520 +0200
++++ apr-1.3.8/file_io/unix/filedup.c	2009-08-07 20:31:59.778957480 +0200
+@@ -46,13 +46,14 @@
+             if (rv == -1)
+                 return errno;
+ 
++#if 0
+             if ((flags = fcntl((*new_file)->filedes, F_GETFD)) == -1)
+                 return errno;
+ 
+             flags |= FD_CLOEXEC;
+             if (fcntl((*new_file)->filedes, F_SETFD, flags) == -1)
+                 return errno;
+-
++#endif
+         }
+ #endif
+     } else {

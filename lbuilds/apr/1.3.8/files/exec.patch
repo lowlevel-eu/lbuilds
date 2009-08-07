@@ -1,8 +1,8 @@
-Index: apr-1.3.3/threadproc/unix/proc.c
+Index: apr-1.3.8/threadproc/unix/proc.c
 ===================================================================
---- apr-1.3.3.orig/threadproc/unix/proc.c
-+++ apr-1.3.3/threadproc/unix/proc.c
-@@ -347,6 +347,22 @@ APR_DECLARE(apr_status_t) apr_procattr_g
+--- apr-1.3.8.orig/threadproc/unix/proc.c	2009-08-07 19:44:03.287957560 +0200
++++ apr-1.3.8/threadproc/unix/proc.c	2009-08-07 19:48:28.759959120 +0200
+@@ -347,6 +347,22 @@
      return rv;
  }
  
@@ -25,7 +25,7 @@ Index: apr-1.3.3/threadproc/unix/proc.c
  APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                            const char *progname,
                                            const char * const *args,
-@@ -394,6 +410,7 @@ APR_DECLARE(apr_status_t) apr_proc_creat
+@@ -394,6 +410,7 @@
          }
      }
  
@@ -33,7 +33,7 @@ Index: apr-1.3.3/threadproc/unix/proc.c
      if ((new->pid = fork()) < 0) {
          return errno;
      }
-@@ -491,6 +508,7 @@ APR_DECLARE(apr_status_t) apr_proc_creat
+@@ -491,6 +508,7 @@
              }
              _exit(-1);   /* We have big problems, the child should exit. */
          }
@@ -41,7 +41,7 @@ Index: apr-1.3.3/threadproc/unix/proc.c
  
          if (attr->cmdtype == APR_SHELLCMD ||
              attr->cmdtype == APR_SHELLCMD_ENV) {
-@@ -544,26 +562,38 @@ APR_DECLARE(apr_status_t) apr_proc_creat
+@@ -544,26 +562,38 @@
                  apr_proc_detach(APR_PROC_DETACH_DAEMONIZE);
              }
  
@@ -80,7 +80,7 @@ Index: apr-1.3.3/threadproc/unix/proc.c
          }
          else {
              /* APR_PROGRAM_PATH */
-@@ -571,8 +601,14 @@ APR_DECLARE(apr_status_t) apr_proc_creat
+@@ -571,8 +601,14 @@
                  apr_proc_detach(APR_PROC_DETACH_DAEMONIZE);
              }
  
@@ -95,7 +95,7 @@ Index: apr-1.3.3/threadproc/unix/proc.c
          if (attr->errfn) {
              char *desc;
  
-@@ -584,6 +620,7 @@ APR_DECLARE(apr_status_t) apr_proc_creat
+@@ -584,6 +620,7 @@
          _exit(-1);  /* if we get here, there is a problem, so exit with an
                       * error code. */
      }

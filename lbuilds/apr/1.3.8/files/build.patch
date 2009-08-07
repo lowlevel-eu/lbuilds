@@ -1,7 +1,7 @@
-Index: apr-1.3.3/file_io/unix/flock.c
+Index: apr-1.3.8/file_io/unix/flock.c
 ===================================================================
---- apr-1.3.3.orig/file_io/unix/flock.c
-+++ apr-1.3.3/file_io/unix/flock.c
+--- apr-1.3.8.orig/file_io/unix/flock.c	2006-08-03 12:55:31.000000000 +0200
++++ apr-1.3.8/file_io/unix/flock.c	2009-08-07 19:44:02.019962360 +0200
 @@ -16,6 +16,9 @@
  
  #include "apr_arch_file_io.h"
@@ -12,7 +12,7 @@ Index: apr-1.3.3/file_io/unix/flock.c
  #if APR_HAVE_FCNTL_H
  #include <fcntl.h>
  #endif
-@@ -76,7 +79,7 @@ APR_DECLARE(apr_status_t) apr_file_lock(
+@@ -76,7 +79,7 @@
              return errno;
      }
  #else
@@ -21,7 +21,7 @@ Index: apr-1.3.3/file_io/unix/flock.c
  #endif
  
      return APR_SUCCESS;
-@@ -113,7 +116,7 @@ APR_DECLARE(apr_status_t) apr_file_unloc
+@@ -113,7 +116,7 @@
              return errno;
      }
  #else
@@ -30,11 +30,11 @@ Index: apr-1.3.3/file_io/unix/flock.c
  #endif
  
      return APR_SUCCESS;
-Index: apr-1.3.3/include/apr_network_io.h
+Index: apr-1.3.8/include/apr_network_io.h
 ===================================================================
---- apr-1.3.3.orig/include/apr_network_io.h
-+++ apr-1.3.3/include/apr_network_io.h
-@@ -112,16 +112,6 @@ typedef enum {
+--- apr-1.3.8.orig/include/apr_network_io.h	2007-12-15 05:10:38.000000000 +0100
++++ apr-1.3.8/include/apr_network_io.h	2009-08-07 19:44:03.035956920 +0200
+@@ -112,16 +112,6 @@
  #define APR_IPV4_ADDR_OK  0x01  /**< @see apr_sockaddr_info_get() */
  #define APR_IPV6_ADDR_OK  0x02  /**< @see apr_sockaddr_info_get() */
  
@@ -51,10 +51,10 @@ Index: apr-1.3.3/include/apr_network_io.h
  /** @def APR_INADDR_NONE
   * Not all platforms have a real INADDR_NONE.  This macro replaces
   * INADDR_NONE on all platforms.
-Index: apr-1.3.3/file_io/unix/pipe.c
+Index: apr-1.3.8/file_io/unix/pipe.c
 ===================================================================
---- apr-1.3.3.orig/file_io/unix/pipe.c
-+++ apr-1.3.3/file_io/unix/pipe.c
+--- apr-1.3.8.orig/file_io/unix/pipe.c	2007-10-14 15:34:42.000000000 +0200
++++ apr-1.3.8/file_io/unix/pipe.c	2009-08-07 19:44:03.119958120 +0200
 @@ -35,6 +35,7 @@
  
  static apr_status_t pipeblock(apr_file_t *thepipe)
@@ -63,7 +63,7 @@ Index: apr-1.3.3/file_io/unix/pipe.c
  #if !BEOS_BLOCKING
        int fd_flags;
  
-@@ -67,10 +68,13 @@ static apr_status_t pipeblock(apr_file_t
+@@ -67,10 +68,13 @@
  
      thepipe->blocking = BLK_ON;
      return APR_SUCCESS;
@@ -77,7 +77,7 @@ Index: apr-1.3.3/file_io/unix/pipe.c
  #if !BEOS_BLOCKING
        int fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
  
-@@ -103,6 +107,9 @@ static apr_status_t pipenonblock(apr_fil
+@@ -103,6 +107,9 @@
  
      thepipe->blocking = BLK_OFF;
      return APR_SUCCESS;
@@ -87,10 +87,10 @@ Index: apr-1.3.3/file_io/unix/pipe.c
  }
  
  APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
-Index: apr-1.3.3/file_io/unix/readwrite.c
+Index: apr-1.3.8/file_io/unix/readwrite.c
 ===================================================================
---- apr-1.3.3.orig/file_io/unix/readwrite.c
-+++ apr-1.3.3/file_io/unix/readwrite.c
+--- apr-1.3.8.orig/file_io/unix/readwrite.c	2007-05-15 00:58:16.000000000 +0200
++++ apr-1.3.8/file_io/unix/readwrite.c	2009-08-07 19:44:03.119958120 +0200
 @@ -19,6 +19,8 @@
  #include "apr_thread_mutex.h"
  #include "apr_support.h"
@@ -100,11 +100,11 @@ Index: apr-1.3.3/file_io/unix/readwrite.c
  /* The only case where we don't use wait_for_io_or_timeout is on
   * pre-BONE BeOS, so this check should be sufficient and simpler */
  #if !BEOS_R5
-Index: apr-1.3.3/locks/unix/proc_mutex.c
+Index: apr-1.3.8/locks/unix/proc_mutex.c
 ===================================================================
---- apr-1.3.3.orig/locks/unix/proc_mutex.c
-+++ apr-1.3.3/locks/unix/proc_mutex.c
-@@ -798,20 +798,7 @@ static apr_status_t proc_mutex_choose_me
+--- apr-1.3.8.orig/locks/unix/proc_mutex.c	2009-06-26 07:51:10.000000000 +0200
++++ apr-1.3.8/locks/unix/proc_mutex.c	2009-08-07 19:44:03.119958120 +0200
+@@ -798,20 +798,7 @@
  #endif
          break;
      case APR_LOCK_DEFAULT:
@@ -125,11 +125,11 @@ Index: apr-1.3.3/locks/unix/proc_mutex.c
      default:
          return APR_ENOTIMPL;
      }
-Index: apr-1.3.3/misc/unix/errorcodes.c
+Index: apr-1.3.8/misc/unix/errorcodes.c
 ===================================================================
---- apr-1.3.3.orig/misc/unix/errorcodes.c
-+++ apr-1.3.3/misc/unix/errorcodes.c
-@@ -322,9 +322,6 @@ static char *apr_os_strerror(char* buf,
+--- apr-1.3.8.orig/misc/unix/errorcodes.c	2009-04-22 14:58:09.000000000 +0200
++++ apr-1.3.8/misc/unix/errorcodes.c	2009-08-07 19:44:03.283958360 +0200
+@@ -322,9 +322,6 @@
      const char *msg;
  
      switch(err) {
@@ -139,11 +139,11 @@ Index: apr-1.3.3/misc/unix/errorcodes.c
  #if defined(NO_DATA)
      case NO_DATA:
  #if defined(NO_ADDRESS) && (NO_DATA != NO_ADDRESS)
-Index: apr-1.3.3/misc/unix/otherchild.c
+Index: apr-1.3.8/misc/unix/otherchild.c
 ===================================================================
---- apr-1.3.3.orig/misc/unix/otherchild.c
-+++ apr-1.3.3/misc/unix/otherchild.c
-@@ -160,7 +160,7 @@ APR_DECLARE(void) apr_proc_other_child_r
+--- apr-1.3.8.orig/misc/unix/otherchild.c	2006-08-03 12:55:31.000000000 +0200
++++ apr-1.3.8/misc/unix/otherchild.c	2009-08-07 19:44:03.283958360 +0200
+@@ -160,7 +160,7 @@
      if (ocr->proc == NULL)
          return;
  
@@ -152,11 +152,11 @@ Index: apr-1.3.3/misc/unix/otherchild.c
      if (waitret == ocr->proc->pid) {
          ocr->proc = NULL;
          (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
-Index: apr-1.3.3/network_io/unix/sockaddr.c
+Index: apr-1.3.8/network_io/unix/sockaddr.c
 ===================================================================
---- apr-1.3.3.orig/network_io/unix/sockaddr.c
-+++ apr-1.3.3/network_io/unix/sockaddr.c
-@@ -353,12 +353,6 @@ static apr_status_t call_resolver(apr_so
+--- apr-1.3.8.orig/network_io/unix/sockaddr.c	2009-02-20 03:31:27.000000000 +0100
++++ apr-1.3.8/network_io/unix/sockaddr.c	2009-08-07 19:48:42.515957600 +0200
+@@ -353,12 +353,6 @@
      }
  #endif
      if (error) {
@@ -169,7 +169,7 @@ Index: apr-1.3.3/network_io/unix/sockaddr.c
          {
              /* issues with representing this with APR's error scheme:
               * glibc uses negative values for these numbers, perhaps so 
-@@ -507,11 +501,7 @@ static apr_status_t find_addresses(apr_s
+@@ -511,11 +505,7 @@
  #endif
  
          if (!hp) {
@@ -181,7 +181,7 @@ Index: apr-1.3.3/network_io/unix/sockaddr.c
          }
      }
  
-@@ -592,7 +582,7 @@ APR_DECLARE(apr_status_t) apr_getnameinf
+@@ -596,7 +586,7 @@
  
      /* don't know if it is portable for getnameinfo() to set h_errno;
       * clear it then see if it was set */
@@ -190,7 +190,7 @@ Index: apr-1.3.3/network_io/unix/sockaddr.c
  
      /* default flags are NI_NAMREQD; otherwise, getnameinfo() will return
       * a numeric address string if it fails to resolve the host name;
-@@ -614,30 +604,16 @@ APR_DECLARE(apr_status_t) apr_getnameinf
+@@ -618,30 +608,16 @@
  
          rc = getnameinfo((const struct sockaddr *)&tmpsa, sizeof(tmpsa),
                           tmphostname, sizeof(tmphostname), NULL, 0,
@@ -223,11 +223,11 @@ Index: apr-1.3.3/network_io/unix/sockaddr.c
          {
  #if defined(NEGATIVE_EAI)
              if (rc < 0) rc = -rc;
-Index: apr-1.3.3/include/arch/unix/apr_arch_shm.h
+Index: apr-1.3.8/include/arch/unix/apr_arch_shm.h
 ===================================================================
---- apr-1.3.3.orig/include/arch/unix/apr_arch_shm.h
-+++ apr-1.3.3/include/arch/unix/apr_arch_shm.h
-@@ -65,7 +65,7 @@ struct apr_shm_t {
+--- apr-1.3.8.orig/include/arch/unix/apr_arch_shm.h	2008-06-03 02:15:38.000000000 +0200
++++ apr-1.3.8/include/arch/unix/apr_arch_shm.h	2009-08-07 19:44:03.283958360 +0200
+@@ -65,7 +65,7 @@
      apr_size_t reqsize;  /* requested segment size */
      apr_size_t realsize; /* actual segment size */
      const char *filename;      /* NULL if anonymous */
@@ -236,10 +236,10 @@ Index: apr-1.3.3/include/arch/unix/apr_arch_shm.h
      int shmid;          /* shmem ID returned from shmget() */
  #endif
  };
-Index: apr-1.3.3/network_io/unix/sendrecv.c
+Index: apr-1.3.8/network_io/unix/sendrecv.c
 ===================================================================
---- apr-1.3.3.orig/network_io/unix/sendrecv.c
-+++ apr-1.3.3/network_io/unix/sendrecv.c
+--- apr-1.3.8.orig/network_io/unix/sendrecv.c	2009-08-07 19:44:01.675959320 +0200
++++ apr-1.3.8/network_io/unix/sendrecv.c	2009-08-07 19:44:03.287957560 +0200
 @@ -27,6 +27,8 @@
  #include <osreldate.h>
  #endif
@@ -249,10 +249,10 @@ Index: apr-1.3.3/network_io/unix/sendrecv.c
  apr_status_t apr_socket_send(apr_socket_t *sock, const char *buf, 
                               apr_size_t *len)
  {
-Index: apr-1.3.3/network_io/unix/sockopt.c
+Index: apr-1.3.8/network_io/unix/sockopt.c
 ===================================================================
---- apr-1.3.3.orig/network_io/unix/sockopt.c
-+++ apr-1.3.3/network_io/unix/sockopt.c
+--- apr-1.3.8.orig/network_io/unix/sockopt.c	2006-08-03 12:55:31.000000000 +0200
++++ apr-1.3.8/network_io/unix/sockopt.c	2009-08-07 19:44:03.287957560 +0200
 @@ -20,54 +20,11 @@
  
  static apr_status_t soblock(int sd)
@@ -308,7 +308,7 @@ Index: apr-1.3.3/network_io/unix/sockopt.c
      return APR_SUCCESS;
  }
  
-@@ -113,6 +70,7 @@ apr_status_t apr_socket_timeout_set(apr_
+@@ -113,6 +70,7 @@
  apr_status_t apr_socket_opt_set(apr_socket_t *sock, 
                                  apr_int32_t opt, apr_int32_t on)
  {
@@ -316,7 +316,7 @@ Index: apr-1.3.3/network_io/unix/sockopt.c
      int one;
      apr_status_t rv;
  
-@@ -122,7 +80,7 @@ apr_status_t apr_socket_opt_set(apr_sock
+@@ -122,7 +80,7 @@
          one = 0;
      switch(opt) {
      case APR_SO_KEEPALIVE:
@@ -325,7 +325,7 @@ Index: apr-1.3.3/network_io/unix/sockopt.c
          if (on != apr_is_option_set(sock, APR_SO_KEEPALIVE)) {
              if (setsockopt(sock->socketdes, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
                  return errno;
-@@ -321,7 +279,7 @@ apr_status_t apr_socket_opt_set(apr_sock
+@@ -321,7 +279,7 @@
      default:
          return APR_EINVAL;
      }
@@ -334,7 +334,7 @@ Index: apr-1.3.3/network_io/unix/sockopt.c
      return APR_SUCCESS; 
  }         
  
-@@ -346,7 +304,7 @@ apr_status_t apr_socket_opt_get(apr_sock
+@@ -346,7 +304,7 @@
  
  apr_status_t apr_socket_atmark(apr_socket_t *sock, int *atmark)
  {
@@ -343,10 +343,10 @@ Index: apr-1.3.3/network_io/unix/sockopt.c
      int oobmark;
  
      if (ioctl(sock->socketdes, SIOCATMARK, (void*) &oobmark) < 0)
-Index: apr-1.3.3/poll/unix/select.c
+Index: apr-1.3.8/poll/unix/select.c
 ===================================================================
---- apr-1.3.3.orig/poll/unix/select.c
-+++ apr-1.3.3/poll/unix/select.c
+--- apr-1.3.8.orig/poll/unix/select.c	2008-08-28 19:13:46.000000000 +0200
++++ apr-1.3.8/poll/unix/select.c	2009-08-07 19:44:03.287957560 +0200
 @@ -27,6 +27,9 @@
  #include "apr_arch_file_io.h"
  #include "apr_arch_poll_private.h"
@@ -357,11 +357,11 @@ Index: apr-1.3.3/poll/unix/select.c
  #ifdef POLL_USES_SELECT
  
  APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num,
-Index: apr-1.3.3/shmem/unix/shm.c
+Index: apr-1.3.8/shmem/unix/shm.c
 ===================================================================
---- apr-1.3.3.orig/shmem/unix/shm.c
-+++ apr-1.3.3/shmem/unix/shm.c
-@@ -27,13 +27,13 @@ static apr_status_t shm_cleanup_owner(vo
+--- apr-1.3.8.orig/shmem/unix/shm.c	2008-06-03 02:15:38.000000000 +0200
++++ apr-1.3.8/shmem/unix/shm.c	2009-08-07 19:44:03.287957560 +0200
+@@ -27,13 +27,13 @@
  
      /* anonymous shared memory */
      if (m->filename == NULL) {
@@ -377,7 +377,7 @@ Index: apr-1.3.3/shmem/unix/shm.c
          if (shmdt(m->base) == -1) {
              return errno;
          }
-@@ -45,7 +45,7 @@ static apr_status_t shm_cleanup_owner(vo
+@@ -45,7 +45,7 @@
  
      /* name-based shared memory */
      else {
@@ -386,7 +386,7 @@ Index: apr-1.3.3/shmem/unix/shm.c
          if (munmap(m->base, m->realsize) == -1) {
              return errno;
          }
-@@ -56,7 +56,7 @@ static apr_status_t shm_cleanup_owner(vo
+@@ -56,7 +56,7 @@
              return apr_file_remove(m->filename, m->pool);
          }
  #endif
@@ -395,7 +395,7 @@ Index: apr-1.3.3/shmem/unix/shm.c
          if (munmap(m->base, m->realsize) == -1) {
              return errno;
          }
-@@ -65,7 +65,7 @@ static apr_status_t shm_cleanup_owner(vo
+@@ -65,7 +65,7 @@
          }
          return APR_SUCCESS;
  #endif
@@ -404,7 +404,7 @@ Index: apr-1.3.3/shmem/unix/shm.c
          /* Indicate that the segment is to be destroyed as soon
           * as all processes have detached. This also disallows any
           * new attachments to the segment. */
-@@ -94,27 +94,25 @@ APR_DECLARE(apr_status_t) apr_shm_create
+@@ -94,27 +94,25 @@
  {
      apr_shm_t *new_m;
      apr_status_t status;
@@ -437,7 +437,7 @@ Index: apr-1.3.3/shmem/unix/shm.c
          new_m = apr_palloc(pool, sizeof(apr_shm_t));
          new_m->pool = pool;
          new_m->reqsize = reqsize;
-@@ -173,7 +171,7 @@ APR_DECLARE(apr_status_t) apr_shm_create
+@@ -173,7 +171,7 @@
  
  #endif /* APR_USE_SHMEM_MMAP_ZERO */
  #endif /* APR_USE_SHMEM_MMAP_ZERO || APR_USE_SHMEM_MMAP_ANON */
@@ -446,7 +446,7 @@ Index: apr-1.3.3/shmem/unix/shm.c
  
          new_m = apr_palloc(pool, sizeof(apr_shm_t));
          new_m->pool = pool;
-@@ -225,7 +223,7 @@ APR_DECLARE(apr_status_t) apr_shm_create
+@@ -225,7 +223,7 @@
          new_m->reqsize = reqsize;
          new_m->filename = apr_pstrdup(pool, filename);
  
@@ -455,7 +455,7 @@ Index: apr-1.3.3/shmem/unix/shm.c
          new_m->realsize = reqsize + 
              APR_ALIGN_DEFAULT(sizeof(apr_size_t)); /* room for metadata */
          /* FIXME: Ignore error for now. *
-@@ -305,7 +303,7 @@ APR_DECLARE(apr_status_t) apr_shm_create
+@@ -305,7 +303,7 @@
  
  #endif /* APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM */
  
@@ -464,7 +464,7 @@ Index: apr-1.3.3/shmem/unix/shm.c
          new_m->realsize = reqsize;
  
          /* FIXME: APR_OS_DEFAULT is too permissive, switch to 600 I think. */
-@@ -368,23 +366,23 @@ APR_DECLARE(apr_status_t) apr_shm_create
+@@ -368,23 +366,23 @@
  APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
                                           apr_pool_t *pool)
  {
@@ -492,7 +492,7 @@ Index: apr-1.3.3/shmem/unix/shm.c
      /* Presume that the file already exists; just open for writing */    
      status = apr_file_open(&file, filename, APR_WRITE,
                             APR_OS_DEFAULT, pool);
-@@ -438,13 +436,13 @@ static apr_status_t shm_cleanup_attach(v
+@@ -438,13 +436,13 @@
          return APR_EINVAL;
      }
      else {
@@ -508,7 +508,7 @@ Index: apr-1.3.3/shmem/unix/shm.c
          if (shmdt(m->base) == -1) {
              return errno;
          }
-@@ -465,7 +463,7 @@ APR_DECLARE(apr_status_t) apr_shm_attach
+@@ -465,7 +463,7 @@
          return APR_EINVAL;
      }
      else {
@@ -517,7 +517,7 @@ Index: apr-1.3.3/shmem/unix/shm.c
          apr_shm_t *new_m;
          apr_status_t status;
          int tmpfd;
-@@ -521,7 +519,7 @@ APR_DECLARE(apr_status_t) apr_shm_attach
+@@ -521,7 +519,7 @@
          return APR_SUCCESS;
  
  #endif /* APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM */
@@ -526,10 +526,10 @@ Index: apr-1.3.3/shmem/unix/shm.c
          apr_shm_t *new_m;
          apr_status_t status;
          apr_file_t *file;   /* file where metadata is stored */
-Index: apr-1.3.3/threadproc/unix/proc.c
+Index: apr-1.3.8/threadproc/unix/proc.c
 ===================================================================
---- apr-1.3.3.orig/threadproc/unix/proc.c
-+++ apr-1.3.3/threadproc/unix/proc.c
+--- apr-1.3.8.orig/threadproc/unix/proc.c	2009-06-10 17:44:50.000000000 +0200
++++ apr-1.3.8/threadproc/unix/proc.c	2009-08-07 19:48:46.075957600 +0200
 @@ -20,6 +20,8 @@
  #include "apr_signal.h"
  #include "apr_random.h"
@@ -539,7 +539,7 @@ Index: apr-1.3.3/threadproc/unix/proc.c
  /* Heavy on no'ops, here's what we want to pass if there is APR_NO_FILE
   * requested for a specific child handle;
   */
-@@ -614,7 +616,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait(
+@@ -614,7 +616,7 @@
                                          apr_wait_how_e waithow)
  {
      pid_t pstatus;
@@ -548,7 +548,7 @@ Index: apr-1.3.3/threadproc/unix/proc.c
      int exit_int;
      int ignore;
      apr_exit_why_e ignorewhy;
-@@ -627,9 +629,9 @@ APR_DECLARE(apr_status_t) apr_proc_wait(
+@@ -627,9 +629,9 @@
          exitwhy = &ignorewhy;
      }
  
@@ -560,11 +560,11 @@ Index: apr-1.3.3/threadproc/unix/proc.c
  
      do {
          pstatus = waitpid(proc->pid, &exit_int, waitpid_options);
-Index: apr-1.3.3/time/unix/time.c
+Index: apr-1.3.8/time/unix/time.c
 ===================================================================
---- apr-1.3.3.orig/time/unix/time.c
-+++ apr-1.3.3/time/unix/time.c
-@@ -334,6 +334,7 @@ APR_DECLARE(void) apr_unix_setup_time(vo
+--- apr-1.3.8.orig/time/unix/time.c	2006-08-03 12:55:31.000000000 +0200
++++ apr-1.3.8/time/unix/time.c	2009-08-07 19:44:03.287957560 +0200
+@@ -334,6 +334,7 @@
  #endif
      t.tm_isdst = 0; /* we know this GMT time isn't daylight-savings */
      t2 = mktime(&t);
@@ -572,11 +572,11 @@ Index: apr-1.3.3/time/unix/time.c
      server_gmt_offset = (apr_int32_t) difftime(t1, t2);
  #endif /* NO_GMTOFF_IN_STRUCT_TM */
  }
-Index: apr-1.3.3/time/unix/timestr.c
+Index: apr-1.3.8/time/unix/timestr.c
 ===================================================================
---- apr-1.3.3.orig/time/unix/timestr.c
-+++ apr-1.3.3/time/unix/timestr.c
-@@ -148,6 +148,8 @@ apr_status_t apr_strftime(char *s, apr_s
+--- apr-1.3.8.orig/time/unix/timestr.c	2006-08-03 12:55:31.000000000 +0200
++++ apr-1.3.8/time/unix/timestr.c	2009-08-07 19:44:03.287957560 +0200
+@@ -148,6 +148,8 @@
  #elif defined(HAVE_STRUCT_TM___TM_GMTOFF)
      tm.__tm_gmtoff = xt->tm_gmtoff;
  #endif
@@ -586,11 +586,11 @@ Index: apr-1.3.3/time/unix/timestr.c
 +        tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
      return APR_SUCCESS;
  }
-Index: apr-1.3.3/threadproc/unix/procsup.c
+Index: apr-1.3.8/threadproc/unix/procsup.c
 ===================================================================
---- apr-1.3.3.orig/threadproc/unix/procsup.c
-+++ apr-1.3.3/threadproc/unix/procsup.c
-@@ -55,9 +55,7 @@ APR_DECLARE(apr_status_t) apr_proc_detac
+--- apr-1.3.8.orig/threadproc/unix/procsup.c	2006-08-03 12:55:31.000000000 +0200
++++ apr-1.3.8/threadproc/unix/procsup.c	2009-08-07 19:44:03.287957560 +0200
+@@ -55,9 +55,7 @@
  #elif defined(OS2) || defined(TPF) || defined(MPE)
      /* do nothing */
  #else
