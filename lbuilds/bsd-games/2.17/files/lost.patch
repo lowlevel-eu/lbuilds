@@ -1,8 +1,18 @@
 Nur in bsd-games-2.17: bsdgames-2.17.
-diff -ur bsd-games-2.17.orig/config.params bsd-games-2.17/config.params
---- bsd-games-2.17.orig/config.params	2008-10-29 16:33:35.000000000 +0100
-+++ bsd-games-2.17/config.params	2008-10-29 16:05:55.000000000 +0100
-@@ -38,5 +38,7 @@
+Index: bsd-games-2.17/config.params
+===================================================================
+--- bsd-games-2.17.orig/config.params
++++ bsd-games-2.17/config.params
+@@ -18,7 +18,7 @@ bsd_games_cfg_sbindir=/usr/sbin
+ # use a subdir. /var too.
+ bsd_games_cfg_usrlibdir=/usr/lib/games/bsdgames
+ bsd_games_cfg_sharedir=/usr/share/games/bsdgames
+-bsd_games_cfg_varlibdir=/var/games/bsdgames
++bsd_games_cfg_varlibdir=file:/tmp
+ 
+ # Do not do chown now, we arn't running as root.
+ bsd_games_cfg_do_chown=n
+@@ -38,5 +38,15 @@ bsd_games_cfg_dictionary_src=`pwd`/temp-
  
  # Put it in /usr/share/games with the rest of the games data.
  bsd_games_cfg_wtf_acronymfile=/usr/share/games/bsdgames/acronyms
@@ -12,13 +22,19 @@ diff -ur bsd-games-2.17.orig/config.params bsd-games-2.17/config.params
 +bsd_games_cfg_build_dirs="hack"
 +bsd_games_cfg_install_prefix="/home/toni/arbeitskopien/lost_packages/work/bsd-games-2.17/root"
 +bsd_games_cfg_build_dirs="hack"
-Nur in bsd-games-2.17: GNUmakefile.
-Nur in bsd-games-2.17/hack: alloc.d.
-Nur in bsd-games-2.17/hack: alloc.o.
-diff -ur bsd-games-2.17.orig/hack/extern.h bsd-games-2.17/hack/extern.h
---- bsd-games-2.17.orig/hack/extern.h	2004-01-27 21:52:07.000000000 +0100
-+++ bsd-games-2.17/hack/extern.h	2008-10-29 16:19:40.000000000 +0100
-@@ -170,7 +170,7 @@
++bsd_games_cfg_build_dirs="hack"
++bsd_games_cfg_install_prefix="/home/kevin/entwicklung/lbuilds/work/bsd-games-2.17/root"
++bsd_games_cfg_build_dirs="hack"
++bsd_games_cfg_install_prefix="/home/kevin/entwicklung/lbuilds/work/bsd-games-2.17/root"
++bsd_games_cfg_build_dirs="hack"
++bsd_games_cfg_install_prefix="/home/kevin/entwicklung/lbuilds/work/bsd-games-2.17/root"
++bsd_games_cfg_build_dirs="hack"
++bsd_games_cfg_install_prefix="/home/kevin/entwicklung/lbuilds/work/bsd-games-2.17/root"
+Index: bsd-games-2.17/hack/extern.h
+===================================================================
+--- bsd-games-2.17.orig/hack/extern.h
++++ bsd-games-2.17/hack/extern.h
+@@ -170,7 +170,7 @@ void topten(void);
  void outheader(void);
  struct toptenentry;
  int outentry(int, struct toptenentry *, int);
@@ -27,30 +43,11 @@ diff -ur bsd-games-2.17.orig/hack/extern.h bsd-games-2.17/hack/extern.h
  const char *ordin(int);
  void clearlocks(void);
  void hangup(int) __attribute__((__noreturn__));
-Nur in bsd-games-2.17/hack: hack.6.
-Nur in bsd-games-2.17/hack: hack.apply.d.
-Nur in bsd-games-2.17/hack: hack.apply.o.
-Nur in bsd-games-2.17/hack: hack.bones.d.
-Nur in bsd-games-2.17/hack: hack.bones.o.
-Nur in bsd-games-2.17/hack: hack.cmd.d.
-Nur in bsd-games-2.17/hack: hack.cmd.o.
-Nur in bsd-games-2.17/hack: hack.d.
-Nur in bsd-games-2.17/hack: hack.Decl.d.
-Nur in bsd-games-2.17/hack: hack.Decl.o.
-Nur in bsd-games-2.17/hack: hack.do.d.
-Nur in bsd-games-2.17/hack: hack.dog.d.
-Nur in bsd-games-2.17/hack: hack.dog.o.
-Nur in bsd-games-2.17/hack: hack.do_name.d.
-Nur in bsd-games-2.17/hack: hack.do_name.o.
-Nur in bsd-games-2.17/hack: hack.do.o.
-Nur in bsd-games-2.17/hack: hack.do_wear.d.
-Nur in bsd-games-2.17/hack: hack.do_wear.o.
-Nur in bsd-games-2.17/hack: hack.eat.d.
-Nur in bsd-games-2.17/hack: hack.eat.o.
-diff -ur bsd-games-2.17.orig/hack/hack.end.c bsd-games-2.17/hack/hack.end.c
---- bsd-games-2.17.orig/hack/hack.end.c	2003-12-17 03:47:37.000000000 +0100
-+++ bsd-games-2.17/hack/hack.end.c	2008-10-29 16:19:29.000000000 +0100
-@@ -548,7 +548,7 @@
+Index: bsd-games-2.17/hack/hack.end.c
+===================================================================
+--- bsd-games-2.17.orig/hack/hack.end.c
++++ bsd-games-2.17/hack/hack.end.c
+@@ -554,7 +554,7 @@ outentry(int rank, struct toptenentry *t
  		char           *bp = eos(linebuf);
  		char            hpbuf[10];
  		int             hppos;
@@ -59,7 +56,7 @@ diff -ur bsd-games-2.17.orig/hack/hack.end.c bsd-games-2.17/hack/hack.end.c
  		hppos = COLNO - 7 - strlen(hpbuf);
  		if (bp <= linebuf + hppos) {
  			while (bp < linebuf + hppos)
-@@ -575,7 +575,7 @@
+@@ -581,7 +581,7 @@ outentry(int rank, struct toptenentry *t
  }
  
  char           *
@@ -68,48 +65,11 @@ diff -ur bsd-games-2.17.orig/hack/hack.end.c bsd-games-2.17/hack/hack.end.c
  	int             a;
  {
  	static char     buf[12];
-Nur in bsd-games-2.17/hack: hack.end.d.
-Nur in bsd-games-2.17/hack: hack.end.o.
-Nur in bsd-games-2.17/hack: hack.engrave.d.
-Nur in bsd-games-2.17/hack: hack.engrave.o.
-Nur in bsd-games-2.17/hack: hack.fight.d.
-Nur in bsd-games-2.17/hack: hack.fight.o.
-Nur in bsd-games-2.17/hack: hack.invent.d.
-Nur in bsd-games-2.17/hack: hack.invent.o.
-Nur in bsd-games-2.17/hack: hack.ioctl.d.
-Nur in bsd-games-2.17/hack: hack.ioctl.o.
-Nur in bsd-games-2.17/hack: hack.lev.d.
-Nur in bsd-games-2.17/hack: hack.lev.o.
-Nur in bsd-games-2.17/hack: hack.main.d.
-Nur in bsd-games-2.17/hack: hack.main.o.
-Nur in bsd-games-2.17/hack: hack.makemon.d.
-Nur in bsd-games-2.17/hack: hack.makemon.o.
-Nur in bsd-games-2.17/hack: hack.mhitu.d.
-Nur in bsd-games-2.17/hack: hack.mhitu.o.
-Nur in bsd-games-2.17/hack: hack.mklev.d.
-Nur in bsd-games-2.17/hack: hack.mklev.o.
-Nur in bsd-games-2.17/hack: hack.mkmaze.d.
-Nur in bsd-games-2.17/hack: hack.mkmaze.o.
-Nur in bsd-games-2.17/hack: hack.mkobj.d.
-Nur in bsd-games-2.17/hack: hack.mkobj.o.
-Nur in bsd-games-2.17/hack: hack.mkshop.d.
-Nur in bsd-games-2.17/hack: hack.mkshop.o.
-Nur in bsd-games-2.17/hack: hack.mon.d.
-Nur in bsd-games-2.17/hack: hack.mon.o.
-Nur in bsd-games-2.17/hack: hack.monst.d.
-Nur in bsd-games-2.17/hack: hack.monst.o.
-Nur in bsd-games-2.17/hack: hack.o.
-Nur in bsd-games-2.17/hack: hack.objnam.d.
-Nur in bsd-games-2.17/hack: hack.objnam.o.
-Nur in bsd-games-2.17/hack: hack.o_init.d.
-Nur in bsd-games-2.17/hack: hack.o_init.o.
-Nur in bsd-games-2.17/hack: hack.onames.h.
-Nur in bsd-games-2.17/hack: hack.options.d.
-Nur in bsd-games-2.17/hack: hack.options.o.
-diff -ur bsd-games-2.17.orig/hack/hack.pager.c bsd-games-2.17/hack/hack.pager.c
---- bsd-games-2.17.orig/hack/hack.pager.c	2003-12-17 03:47:37.000000000 +0100
-+++ bsd-games-2.17/hack/hack.pager.c	2008-10-29 16:28:02.000000000 +0100
-@@ -139,7 +139,7 @@
+Index: bsd-games-2.17/hack/hack.pager.c
+===================================================================
+--- bsd-games-2.17.orig/hack/hack.pager.c
++++ bsd-games-2.17/hack/hack.pager.c
+@@ -139,7 +139,7 @@ page_more(fp, strip)
  				 * (0 or 1) */
  {
  	char           *bufr, *ep;
@@ -118,7 +78,7 @@ diff -ur bsd-games-2.17.orig/hack/hack.pager.c bsd-games-2.17/hack/hack.pager.c
  
  	set_pager(0);
  	bufr = (char *) alloc((unsigned) CO);
-@@ -157,7 +157,7 @@
+@@ -157,7 +157,7 @@ page_more(fp, strip)
  ret:
  	free(bufr);
  	(void) fclose(fp);
@@ -127,42 +87,11 @@ diff -ur bsd-games-2.17.orig/hack/hack.pager.c bsd-games-2.17/hack/hack.pager.c
  	got_intrup = 0;
  }
  
-Nur in bsd-games-2.17/hack: hack.pager.d.
-Nur in bsd-games-2.17/hack: hack.pager.o.
-Nur in bsd-games-2.17/hack: hack.potion.d.
-Nur in bsd-games-2.17/hack: hack.potion.o.
-Nur in bsd-games-2.17/hack: hack.pri.d.
-Nur in bsd-games-2.17/hack: hack.pri.o.
-Nur in bsd-games-2.17/hack: hack.read.d.
-Nur in bsd-games-2.17/hack: hack.read.o.
-Nur in bsd-games-2.17/hack: hack.rip.d.
-Nur in bsd-games-2.17/hack: hack.rip.o.
-Nur in bsd-games-2.17/hack: hack.rumors.d.
-Nur in bsd-games-2.17/hack: hack.rumors.o.
-Nur in bsd-games-2.17/hack: hack.save.d.
-Nur in bsd-games-2.17/hack: hack.save.o.
-Nur in bsd-games-2.17/hack: hack.search.d.
-Nur in bsd-games-2.17/hack: hack.search.o.
-Nur in bsd-games-2.17/hack: hack.shk.d.
-Nur in bsd-games-2.17/hack: hack.shknam.d.
-Nur in bsd-games-2.17/hack: hack.shknam.o.
-Nur in bsd-games-2.17/hack: hack.shk.o.
-Nur in bsd-games-2.17/hack: hack.steal.d.
-Nur in bsd-games-2.17/hack: hack.steal.o.
-Nur in bsd-games-2.17/hack: hack.termcap.d.
-Nur in bsd-games-2.17/hack: hack.termcap.o.
-Nur in bsd-games-2.17/hack: hack.timeout.d.
-Nur in bsd-games-2.17/hack: hack.timeout.o.
-Nur in bsd-games-2.17/hack: hack.topl.d.
-Nur in bsd-games-2.17/hack: hack.topl.o.
-Nur in bsd-games-2.17/hack: hack.track.d.
-Nur in bsd-games-2.17/hack: hack.track.o.
-Nur in bsd-games-2.17/hack: hack.trap.d.
-Nur in bsd-games-2.17/hack: hack.trap.o.
-diff -ur bsd-games-2.17.orig/hack/hack.tty.c bsd-games-2.17/hack/hack.tty.c
---- bsd-games-2.17.orig/hack/hack.tty.c	2003-12-17 03:47:37.000000000 +0100
-+++ bsd-games-2.17/hack/hack.tty.c	2008-10-29 16:28:22.000000000 +0100
-@@ -139,10 +139,10 @@
+Index: bsd-games-2.17/hack/hack.tty.c
+===================================================================
+--- bsd-games-2.17.orig/hack/hack.tty.c
++++ bsd-games-2.17/hack/hack.tty.c
+@@ -139,10 +139,10 @@ gettty()
  	getioctls();
  
  	/* do not expand tabs - they might be needed inside a cm sequence */
@@ -175,37 +104,10 @@ diff -ur bsd-games-2.17.orig/hack/hack.tty.c bsd-games-2.17/hack/hack.tty.c
  	settty_needed = TRUE;
  }
  
-Nur in bsd-games-2.17/hack: hack.tty.d.
-Nur in bsd-games-2.17/hack: hack.tty.o.
-Nur in bsd-games-2.17/hack: hack.u_init.d.
-Nur in bsd-games-2.17/hack: hack.u_init.o.
-Nur in bsd-games-2.17/hack: hack.unix.d.
-Nur in bsd-games-2.17/hack: hack.unix.o.
-Nur in bsd-games-2.17/hack: hack.vault.d.
-Nur in bsd-games-2.17/hack: hack.vault.o.
-Nur in bsd-games-2.17/hack: hack.version.d.
-Nur in bsd-games-2.17/hack: hack.version.o.
-Nur in bsd-games-2.17/hack: hack.wield.d.
-Nur in bsd-games-2.17/hack: hack.wield.o.
-Nur in bsd-games-2.17/hack: hack.wizard.d.
-Nur in bsd-games-2.17/hack: hack.wizard.o.
-Nur in bsd-games-2.17/hack: hack.worm.d.
-Nur in bsd-games-2.17/hack: hack.worm.o.
-Nur in bsd-games-2.17/hack: hack.worn.d.
-Nur in bsd-games-2.17/hack: hack.worn.o.
-Nur in bsd-games-2.17/hack: hack.zap.d.
-Nur in bsd-games-2.17/hack: hack.zap.o.
-Nur in bsd-games-2.17/hack: makedefs.
-Nur in bsd-games-2.17/hack: makedefs.d.
-Nur in bsd-games-2.17/hack: makedefs.o.
-Nur in bsd-games-2.17/hack: pathnames.h.
-Nur in bsd-games-2.17/hack: rnd.d.
-Nur in bsd-games-2.17/hack: rnd.o.
-Nur in bsd-games-2.17: hide-game.
-Nur in bsd-games-2.17/include: bsd-games.h.
-diff -ur bsd-games-2.17.orig/include/signal.h bsd-games-2.17/include/signal.h
---- bsd-games-2.17.orig/include/signal.h	2004-01-25 20:53:18.000000000 +0100
-+++ bsd-games-2.17/include/signal.h	2008-10-29 16:14:58.000000000 +0100
+Index: bsd-games-2.17/include/signal.h
+===================================================================
+--- bsd-games-2.17.orig/include/signal.h
++++ bsd-games-2.17/include/signal.h
 @@ -31,7 +31,7 @@
  #pragma GCC system_header
  #endif
@@ -215,9 +117,10 @@ diff -ur bsd-games-2.17.orig/include/signal.h bsd-games-2.17/include/signal.h
  
  #ifndef __GLIBC__
  #define __USE_BSD_SIGNAL	1 /* Get BSD signal semantics with libc5 */
-diff -ur bsd-games-2.17.orig/include/sys/ttydefaults.h bsd-games-2.17/include/sys/ttydefaults.h
---- bsd-games-2.17.orig/include/sys/ttydefaults.h	2000-08-04 02:24:39.000000000 +0200
-+++ bsd-games-2.17/include/sys/ttydefaults.h	2008-10-29 16:15:44.000000000 +0100
+Index: bsd-games-2.17/include/sys/ttydefaults.h
+===================================================================
+--- bsd-games-2.17.orig/include/sys/ttydefaults.h
++++ bsd-games-2.17/include/sys/ttydefaults.h
 @@ -31,7 +31,7 @@
  #pragma GCC system_header
  #endif
@@ -227,8 +130,33 @@ diff -ur bsd-games-2.17.orig/include/sys/ttydefaults.h bsd-games-2.17/include/sy
  
  #ifdef __GLIBC__
  #include_next <sys/ttydefaults.h>
-Nur in bsd-games-2.17: install-man.
-Nur in bsd-games-2.17: install-score.
-Nur in bsd-games-2.17: Makeconfig.
-Nur in bsd-games-2.17: subst.rules.
-Nur in bsd-games-2.17: subst.sed.
+Index: bsd-games-2.17/include/sys/cdefs.h
+===================================================================
+--- bsd-games-2.17.orig/include/sys/cdefs.h
++++ bsd-games-2.17/include/sys/cdefs.h
+@@ -31,7 +31,9 @@
+ #pragma GCC system_header
+ #endif
+ 
++#ifndef TYNDUR
+ #include_next <sys/cdefs.h>
++#endif
+ 
+ #ifndef __RCSID
+ #define __RCSID(arg)	static const char rcsid[] __attribute__((__unused__)) = arg
+Index: bsd-games-2.17/hack/hack.main.c
+===================================================================
+--- bsd-games-2.17.orig/hack/hack.main.c
++++ bsd-games-2.17/hack/hack.main.c
+@@ -552,8 +552,10 @@ chdirx(dir, wr)
+ #endif
+ 
+ #ifdef HACKDIR
+-	if (dir == NULL)
++	if (dir == NULL) {
+ 		dir = HACKDIR;
++        mkdir(dir);
++    }
+ #endif
+ 
+ 	if (dir && chdir(dir) < 0) {

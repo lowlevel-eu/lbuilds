@@ -3,8 +3,7 @@ include toolchain
 
 DESCRIPTION="bsd-games"
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Bsd-games"
-SRC_URI="ftp://metalab.unc.edu/pub/Linux/games/${P}.tar.gz
-	http://mirror.switch.ch/ftp/mirror/gentoo/distfiles/bsdgames_${PV}-7.diff.gz"
+SRC_URI="ftp://metalab.unc.edu/pub/Linux/games/${P}.tar.gz"
 
 
 LICENSE="BSD"
@@ -16,8 +15,15 @@ MY_S="${S}/${P}"
 
 src_unpack() {
 	lunpack ${P}.tar.gz
-	cd ${MY_S} && lpatch ${DISTDIR}/bsdgames_${PV}-7.diff.gz ${F}/lost.patch \
-		${F}/hack.patch || die "patching failed"
+	cd ${MY_S}
+
+    ln -s ${F} patches
+    [ -f ${F}/series ] && ln -s ${F}/series series
+    for i in ${F}/*.patch; do
+        [ -L series ] || echo `basename $i` >> series
+        (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
+    done
+    (which quilt > /dev/null 2>&1) && quilt push -a || die "Fehler beim Anwenden der Patches"
 }
 
 src_configure() {
@@ -35,7 +41,7 @@ src_compile() {
 
 	lmake hack/makedefs || die "make failed"
 	lmake CC="`tc-cc`" \
-		CFLAGS+="-I`tc-incdir`" \
+		CFLAGS+="-I`tc-incdir` -I${MY_S}/include" \
 		CFLAGS+="-I`tc-incdir`/ncurses" \
 		LDFLAGS="-L`tc-libdir`" \
 		|| die "make failed"

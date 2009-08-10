@@ -1,14 +1,6 @@
 diff -ur bsd-games-2.17.orig/hack/extern.h bsd-games-2.17/hack/extern.h
 --- bsd-games-2.17.orig/hack/extern.h	2008-10-29 16:46:46.000000000 +0100
 +++ bsd-games-2.17/hack/extern.h	2008-10-29 17:00:51.000000000 +0100
-@@ -170,6 +170,7 @@
- void outheader(void);
- struct toptenentry;
- int outentry(int, struct toptenentry *, int);
-+/* Schon in LOST-Libc */
- char *h_itoa(int);
- const char *ordin(int);
- void clearlocks(void);
 @@ -511,7 +512,8 @@
  void standoutend(void);
  void backsp(void);
@@ -194,39 +186,6 @@ diff -ur bsd-games-2.17.orig/hack/hack.termcap.c bsd-games-2.17/hack/hack.termca
  
  void
 Dateien bsd-games-2.17.orig/hack/hack.termcap.o und bsd-games-2.17/hack/hack.termcap.o sind verschieden.
-diff -ur bsd-games-2.17.orig/config.params bsd-games-2.17/config.params
---- bsd-games-2.17.orig/config.params	2008-10-29 17:49:06.000000000 +0100
-+++ bsd-games-2.17/config.params	2008-10-29 17:52:11.000000000 +0100
-@@ -42,3 +42,5 @@
- bsd_games_cfg_build_dirs="hack"
- bsd_games_cfg_install_prefix="/home/toni/arbeitskopien/lost_packages/work/bsd-games-2.17/root"
- bsd_games_cfg_build_dirs="hack"
-+bsd_games_cfg_build_dirs="hack"
-+bsd_games_cfg_install_prefix="/home/toni/arbeitskopien/lost_packages/work/bsd-games-2.17/root"
-Nur in bsd-games-2.17: GNUmakefile.
-Nur in bsd-games-2.17/hack: alloc.d.
-Nur in bsd-games-2.17/hack: alloc.o.
-Nur in bsd-games-2.17/hack: hack.
-Nur in bsd-games-2.17/hack: hack.6.
-Nur in bsd-games-2.17/hack: hack.apply.d.
-Nur in bsd-games-2.17/hack: hack.apply.o.
-Nur in bsd-games-2.17/hack: hack.bones.d.
-Nur in bsd-games-2.17/hack: hack.bones.o.
-Nur in bsd-games-2.17/hack: hack.cmd.d.
-Nur in bsd-games-2.17/hack: hack.cmd.o.
-Nur in bsd-games-2.17/hack: hack.d.
-Nur in bsd-games-2.17/hack: hack.Decl.d.
-Nur in bsd-games-2.17/hack: hack.Decl.o.
-Nur in bsd-games-2.17/hack: hack.do.d.
-Nur in bsd-games-2.17/hack: hack.dog.d.
-Nur in bsd-games-2.17/hack: hack.dog.o.
-Nur in bsd-games-2.17/hack: hack.do_name.d.
-Nur in bsd-games-2.17/hack: hack.do_name.o.
-Nur in bsd-games-2.17/hack: hack.do.o.
-Nur in bsd-games-2.17/hack: hack.do_wear.d.
-Nur in bsd-games-2.17/hack: hack.do_wear.o.
-Nur in bsd-games-2.17/hack: hack.eat.d.
-Nur in bsd-games-2.17/hack: hack.eat.o.
 diff -ur bsd-games-2.17.orig/hack/hack.end.c bsd-games-2.17/hack/hack.end.c
 --- bsd-games-2.17.orig/hack/hack.end.c	2008-10-29 17:49:06.000000000 +0100
 +++ bsd-games-2.17/hack/hack.end.c	2008-10-29 17:52:11.000000000 +0100
