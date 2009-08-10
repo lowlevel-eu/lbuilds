@@ -19,7 +19,7 @@ echo "[binutils] Patch anwenden..."
 patch -p0 -d binutils-2.18/ < ${PATCHES}/binutils/2.18/binutils-2.18.patch >${LOGS}/binutils.log || exit -1
 cd build
 echo "[binutils] Konfigurieren..."
-../binutils-2.18/configure --prefix="${PREFIX}" --with-sysroot=${PREFIX} --target=${TARGET} --disable-nls >>${LOGS}/binutils.log || exit -1
+../binutils-2.18/configure --prefix="${PREFIX}" --with-sysroot=${PREFIX} --target=${TARGET} --disable-nls --disable-werror >>${LOGS}/binutils.log || exit -1
 echo "[binutils] Kompilieren..."
 make ${MAKEOPTS} >>${LOGS}/binutils.log 2>>${LOGS}/binutils.log || exit -1
 echo "[binutils] Installieren..."
