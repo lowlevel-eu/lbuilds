@@ -1,0 +1,98 @@
+Index: src/git-1.6.4/configure.ac
+===================================================================
+--- src.orig/git-1.6.4/configure.ac
++++ src/git-1.6.4/configure.ac
+@@ -573,15 +573,16 @@ AC_SUBST(NO_IPV6)
+ AC_CACHE_CHECK([whether formatted IO functions support C99 size specifiers],
+  [ac_cv_c_c99_format],
+ [# Actually git uses only %z (%zu) in alloc.c, and %t (%td) in mktag.c
+-AC_RUN_IFELSE(
+-	[AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+-		[[char buf[64];
+-		if (sprintf(buf, "%lld%hhd%jd%zd%td", (long long int)1, (char)2, (intmax_t)3, (size_t)4, (ptrdiff_t)5) != 5)
+-		  return 1;
+-		else if (strcmp(buf, "12345"))
+-		  return 2;]])],
+-	[ac_cv_c_c99_format=yes],
+-	[ac_cv_c_c99_format=no])
++#AC_RUN_IFELSE(
++#	[AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
++#		[[char buf[64];
++#		if (sprintf(buf, "%lld%hhd%jd%zd%td", (long long int)1, (char)2, (intmax_t)3, (size_t)4, (ptrdiff_t)5) != 5)
++#		  return 1;
++#		else if (strcmp(buf, "12345"))
++#		  return 2;]])],
++#	[ac_cv_c_c99_format=yes],
++#	[ac_cv_c_c99_format=no])
++	[ac_cv_c_c99_format=no]
+ ])
+ if test $ac_cv_c_c99_format = no; then
+ 	NO_C99_FORMAT=YesPlease
+@@ -595,13 +596,14 @@ AC_SUBST(NO_C99_FORMAT)
+ AC_CACHE_CHECK([whether system succeeds to read fopen'ed directory],
+  [ac_cv_fread_reads_directories],
+ [
+-AC_RUN_IFELSE(
+-	[AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+-		[[char c;
+-		FILE *f = fopen(".", "r");
+-		return f && fread(&c, 1, 1, f)]])],
++#AC_RUN_IFELSE(
++#	[AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
++#		[[char c;
++#		FILE *f = fopen(".", "r");
++#		return f && fread(&c, 1, 1, f)]])],
++#	[ac_cv_fread_reads_directories=no],
++#	[ac_cv_fread_reads_directories=yes])
+ 	[ac_cv_fread_reads_directories=no],
+-	[ac_cv_fread_reads_directories=yes])
+ ])
+ if test $ac_cv_fread_reads_directories = yes; then
+ 	FREAD_READS_DIRECTORIES=UnfortunatelyYes
+@@ -616,26 +618,27 @@ AC_SUBST(FREAD_READS_DIRECTORIES)
+ AC_CACHE_CHECK([whether snprintf() and/or vsnprintf() return bogus value],
+  [ac_cv_snprintf_returns_bogus],
+ [
+-AC_RUN_IFELSE(
+-	[AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
+-		#include "stdarg.h"
+-
+-		int test_vsnprintf(char *str, size_t maxsize, const char *format, ...)
+-		{
+-		  int ret;
+-		  va_list ap;
+-		  va_start(ap, format);
+-		  ret = vsnprintf(str, maxsize, format, ap);
+-		  va_end(ap);
+-		  return ret;
+-		}],
+-		[[char buf[6];
+-		  if (test_vsnprintf(buf, 3, "%s", "12345") != 5
+-		      || strcmp(buf, "12")) return 1;
+-		  if (snprintf(buf, 3, "%s", "12345") != 5
+-		      || strcmp(buf, "12")) return 1]])],
++#AC_RUN_IFELSE(
++#	[AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
++#		#include "stdarg.h"
++#
++#		int test_vsnprintf(char *str, size_t maxsize, const char *format, ...)
++#		{
++#		  int ret;
++#		  va_list ap;
++#		  va_start(ap, format);
++#		  ret = vsnprintf(str, maxsize, format, ap);
++#		  va_end(ap);
++#		  return ret;
++#		}],
++#		[[char buf[6];
++#		  if (test_vsnprintf(buf, 3, "%s", "12345") != 5
++#		      || strcmp(buf, "12")) return 1;
++#		  if (snprintf(buf, 3, "%s", "12345") != 5
++#		      || strcmp(buf, "12")) return 1]])],
++#	[ac_cv_snprintf_returns_bogus=no],
++#	[ac_cv_snprintf_returns_bogus=yes])
+ 	[ac_cv_snprintf_returns_bogus=no],
+-	[ac_cv_snprintf_returns_bogus=yes])
+ ])
+ if test $ac_cv_snprintf_returns_bogus = yes; then
+ 	SNPRINTF_RETURNS_BOGUS=UnfortunatelyYes
