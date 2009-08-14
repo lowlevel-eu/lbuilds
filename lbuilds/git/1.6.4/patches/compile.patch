@@ -83,7 +83,7 @@ Index: src/git-1.6.4/compat/tyndur.h
 ===================================================================
 --- /dev/null
 +++ src/git-1.6.4/compat/tyndur.h
-@@ -0,0 +1,137 @@
+@@ -0,0 +1,143 @@
 +#ifndef COMPAT_TYNDUR_H
 +#define COMPAT_TYNDUR_H
 +
@@ -98,6 +98,7 @@ Index: src/git-1.6.4/compat/tyndur.h
 +#include <signal.h>
 +#include <unistd.h>
 +#include <errno.h>
++#include <readline/readline.h>
 +
 +#define SIGCHLD 1000
 +#define ENAMETOOLONG 2000
@@ -156,24 +157,29 @@ Index: src/git-1.6.4/compat/tyndur.h
 +    return 0;
 +}
 +
-+static int symlink(const char* oldpath, const char* newpath)
++static pid_t setsid(void)
 +{
-+    return io_create_link(oldpath, newpath, 0);
++    return getpid();
 +}
 +
-+/* time.h */
-+static struct tm* localtime_r(const time_t* timep, struct tm* result)
++static int setuid(uid_t uid)
 +{
-+    struct tm* ret = localtime(timep);
-+    *result = *ret;
-+    return result;
++    return 0;
 +}
 +
-+static struct tm* gmtime_r(const time_t* timep, struct tm* result)
++static int setgid(gid_t gid)
 +{
-+    struct tm* ret = gmtime(timep);
-+    *result = *ret;
-+    return result;
++    return 0;
++}
++
++static int initgroups(const char *user, gid_t group)
++{
++    return 0;
++}
++
++static char *getpass(const char *prompt)
++{
++    return readline(prompt);
 +}
 +
 +/* wait.h */
@@ -406,3 +412,85 @@ Index: src/git-1.6.4/daemon.c
  		}
  	}
  
+@@ -1149,7 +1164,9 @@ int main(int argc, char **argv)
+ 		if (!freopen("/dev/null", "w", stderr))
+ 			die_errno("failed to redirect stderr to /dev/null");
+ 
++#if 0
+ 		if (getpeername(0, peer, &slen))
++#endif
+ 			peer = NULL;
+ 
+ 		return execute(peer);
+Index: src/git-1.6.4/imap-send.c
+===================================================================
+--- src.orig/git-1.6.4/imap-send.c
++++ src/git-1.6.4/imap-send.c
+@@ -994,6 +994,10 @@ static struct store *imap_open_store(str
+ 	/* open connection to IMAP server */
+ 
+ 	if (srvc->tunnel) {
++#ifdef TYNDUR
++        perror("tunnel");
++        exit(1);
++#else
+ 		imap_info("Starting tunnel '%s'... ", srvc->tunnel);
+ 
+ 		if (socketpair(PF_UNIX, SOCK_STREAM, 0, a)) {
+@@ -1018,6 +1022,7 @@ static struct store *imap_open_store(str
+ 		imap->buf.sock.fd = a[1];
+ 
+ 		imap_info("ok\n");
++#endif
+ 	} else {
+ #ifndef NO_IPV6
+ 		struct addrinfo hints, *ai0, *ai;
+Index: src/git-1.6.4/builtin-help.c
+===================================================================
+--- src.orig/git-1.6.4/builtin-help.c
++++ src/git-1.6.4/builtin-help.c
+@@ -119,7 +119,7 @@ static void exec_woman_emacs(const char
+ 		if (!path)
+ 			path = "emacsclient";
+ 		strbuf_addf(&man_page, "(woman \"%s\")", page);
+-		execlp(path, "emacsclient", "-e", man_page.buf, NULL);
++//		execlp(path, "emacsclient", "-e", man_page.buf, NULL);
+ 		warning("failed to exec '%s': %s", path, strerror(errno));
+ 	}
+ }
+@@ -147,7 +147,7 @@ static void exec_man_konqueror(const cha
+ 		} else
+ 			path = "kfmclient";
+ 		strbuf_addf(&man_page, "man:%s(1)", page);
+-		execlp(path, filename, "newTab", man_page.buf, NULL);
++//		execlp(path, filename, "newTab", man_page.buf, NULL);
+ 		warning("failed to exec '%s': %s", path, strerror(errno));
+ 	}
+ }
+@@ -156,7 +156,7 @@ static void exec_man_man(const char *pat
+ {
+ 	if (!path)
+ 		path = "man";
+-	execlp(path, "man", page, NULL);
++//	execlp(path, "man", page, NULL);
+ 	warning("failed to exec '%s': %s", path, strerror(errno));
+ }
+ 
+@@ -164,7 +164,7 @@ static void exec_man_cmd(const char *cmd
+ {
+ 	struct strbuf shell_cmd = STRBUF_INIT;
+ 	strbuf_addf(&shell_cmd, "%s %s", cmd, page);
+-	execl("/bin/sh", "sh", "-c", shell_cmd.buf, NULL);
++//	execl("/bin/sh", "sh", "-c", shell_cmd.buf, NULL);
+ 	warning("failed to exec '%s': %s", cmd, strerror(errno));
+ }
+ 
+@@ -371,7 +371,7 @@ static void show_info_page(const char *g
+ {
+ 	const char *page = cmd_to_page(git_cmd);
+ 	setenv("INFOPATH", system_path(GIT_INFO_PATH), 1);
+-	execlp("info", "info", "gitman", page, NULL);
++//	execlp("info", "info", "gitman", page, NULL);
+ }
+ 
+ static void get_html_page_path(struct strbuf *page_path, const char *page)
