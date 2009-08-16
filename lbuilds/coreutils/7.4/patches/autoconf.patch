@@ -1,0 +1,60 @@
+Index: src/coreutils-7.4/m4/ls-mntd-fs.m4
+===================================================================
+--- src.orig/coreutils-7.4/m4/ls-mntd-fs.m4
++++ src/coreutils-7.4/m4/ls-mntd-fs.m4
+@@ -325,11 +325,11 @@ if test -z "$ac_list_mounted_fs"; then
+   fi
+ fi
+ 
+-if test -z "$ac_list_mounted_fs"; then
+-  AC_MSG_ERROR([could not determine how to read list of mounted file systems])
+-  # FIXME -- no need to abort building the whole package
+-  # Can't build mountlist.c or anything that needs its functions
+-fi
++#if test -z "$ac_list_mounted_fs"; then
++#  AC_MSG_ERROR([could not determine how to read list of mounted file systems])
++#  # FIXME -- no need to abort building the whole package
++#  # Can't build mountlist.c or anything that needs its functions
++#fi
+ 
+ AS_IF([test $ac_list_mounted_fs = found], [$1], [$2])
+ 
+Index: src/coreutils-7.4/m4/rename-dest-slash.m4
+===================================================================
+--- src.orig/coreutils-7.4/m4/rename-dest-slash.m4
++++ src/coreutils-7.4/m4/rename-dest-slash.m4
+@@ -29,7 +29,7 @@ AC_DEFUN([gl_FUNC_RENAME_TRAILING_DEST_S
+       gl_cv_func_rename_trailing_dest_slash_bug=no,
+       gl_cv_func_rename_trailing_dest_slash_bug=yes,
+       dnl When crosscompiling, assume rename is broken.
+-      gl_cv_func_rename_trailing_dest_slash_bug=yes)
++      gl_cv_func_rename_trailing_dest_slash_bug=no)
+ 
+       rm -rf conftest.d1 conftest.d2
+   ])
+Index: src/coreutils-7.4/m4/rename.m4
+===================================================================
+--- src.orig/coreutils-7.4/m4/rename.m4
++++ src/coreutils-7.4/m4/rename.m4
+@@ -34,7 +34,7 @@ AC_DEFUN([gl_FUNC_RENAME],
+       gl_cv_func_rename_trailing_slash_bug=no,
+       gl_cv_func_rename_trailing_slash_bug=yes,
+       dnl When crosscompiling, assume rename is broken.
+-      gl_cv_func_rename_trailing_slash_bug=yes)
++      gl_cv_func_rename_trailing_slash_bug=no)
+ 
+       rm -rf conftest.d1 conftest.d2
+   ])
+Index: src/coreutils-7.4/m4/putenv.m4
+===================================================================
+--- src.orig/coreutils-7.4/m4/putenv.m4
++++ src/coreutils-7.4/m4/putenv.m4
+@@ -32,7 +32,7 @@ AC_DEFUN([gl_FUNC_PUTENV],
+ 	     gl_cv_func_svid_putenv=yes,
+ 	     gl_cv_func_svid_putenv=no,
+ 	     dnl When crosscompiling, assume putenv is broken.
+-	     gl_cv_func_svid_putenv=no)
++	     gl_cv_func_svid_putenv=yes)
+    ])
+   if test $gl_cv_func_svid_putenv = no; then
+     REPLACE_PUTENV=1

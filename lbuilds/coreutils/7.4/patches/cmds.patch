@@ -1,0 +1,461 @@
+Index: src/coreutils-7.4/src/copy.c
+===================================================================
+--- src.orig/coreutils-7.4/src/copy.c
++++ src/coreutils-7.4/src/copy.c
+@@ -740,7 +740,7 @@ copy_reg (char const *src_name, char con
+ 
+     if (last_write_made_hole)
+       {
+-	if (HAVE_FTRUNCATE
++	if (0
+ 	    ? /* ftruncate sets the file size,
+ 		 so there is no need for a write.  */
+ 	    ftruncate (dest_desc, n_read_total) < 0
+Index: src/coreutils-7.4/src/stty.c
+===================================================================
+--- src.orig/coreutils-7.4/src/stty.c
++++ src/coreutils-7.4/src/stty.c
+@@ -830,10 +830,12 @@ main (int argc, char **argv)
+       device_name = file_name;
+       if (fd_reopen (STDIN_FILENO, device_name, O_RDONLY | O_NONBLOCK, 0) < 0)
+ 	error (EXIT_FAILURE, errno, "%s", device_name);
++#if 0
+       if ((fdflags = fcntl (STDIN_FILENO, F_GETFL)) == -1
+ 	  || fcntl (STDIN_FILENO, F_SETFL, fdflags & ~O_NONBLOCK) < 0)
+ 	error (EXIT_FAILURE, errno, _("%s: couldn't reset non-blocking mode"),
+ 	       device_name);
++#endif
+     }
+   else
+     device_name = _("standard input");
+@@ -1293,6 +1295,7 @@ set_control_char (struct control_info co
+ static void
+ set_speed (enum speed_setting type, const char *arg, struct termios *mode)
+ {
++#if 0
+   speed_t baud;
+ 
+   baud = string_to_baud (arg);
+@@ -1300,6 +1303,7 @@ set_speed (enum speed_setting type, cons
+     cfsetispeed (mode, baud);
+   if (type == output_speed || type == both_speeds)
+     cfsetospeed (mode, baud);
++#endif
+ }
+ 
+ #ifdef TIOCGWINSZ
+@@ -1624,6 +1628,7 @@ display_all (struct termios *mode, char
+ static void
+ display_speed (struct termios *mode, bool fancy)
+ {
++#if 0
+   if (cfgetispeed (mode) == 0 || cfgetispeed (mode) == cfgetospeed (mode))
+     wrapf (fancy ? "speed %lu baud;" : "%lu\n",
+ 	   baud_to_value (cfgetospeed (mode)));
+@@ -1633,6 +1638,7 @@ display_speed (struct termios *mode, boo
+ 	   baud_to_value (cfgetospeed (mode)));
+   if (!fancy)
+     current_col = 0;
++#endif
+ }
+ 
+ static void
+Index: src/coreutils-7.4/src/dd.c
+===================================================================
+--- src.orig/coreutils-7.4/src/dd.c
++++ src/coreutils-7.4/src/dd.c
+@@ -1785,6 +1785,7 @@ dd_copy (void)
+       conversions_mask |= C_FSYNC;
+     }
+ 
++#if 0
+   if (conversions_mask & C_FSYNC)
+     while (fsync (STDOUT_FILENO) != 0)
+       if (errno != EINTR)
+@@ -1792,6 +1793,7 @@ dd_copy (void)
+ 	  error (0, errno, _("fsync failed for %s"), quote (output_file));
+ 	  return EXIT_FAILURE;
+ 	}
++#endif
+ 
+   return exit_status;
+ }
+Index: src/coreutils-7.4/src/install.c
+===================================================================
+--- src.orig/coreutils-7.4/src/install.c
++++ src/coreutils-7.4/src/install.c
+@@ -841,6 +841,7 @@ change_timestamps (struct stat const *fr
+ static void
+ strip (char const *name)
+ {
++#if 0
+   int status;
+   pid_t pid = fork ();
+ 
+@@ -860,6 +861,13 @@ strip (char const *name)
+ 	error (EXIT_FAILURE, 0, _("strip process terminated abnormally"));
+       break;
+     }
++#else
++    char* cmd;
++
++    asprintf(&cmd, "strip %s", name);
++    system(cmd);
++    free(cmd);
++#endif
+ }
+ 
+ /* Initialize the user and group ownership of the files to install. */
+Index: src/coreutils-7.4/src/shred.c
+===================================================================
+--- src.orig/coreutils-7.4/src/shred.c
++++ src/coreutils-7.4/src/shred.c
+@@ -310,8 +310,12 @@ dosync (int fd, char const *qname)
+     }
+ #endif
+ 
++
++#if 0
+   if (fsync (fd) == 0)
+     return 0;
++#endif
++
+   err = errno;
+   if ( ! ignorable_sync_errno (err))
+     {
+Index: src/coreutils-7.4/src/stat.c
+===================================================================
+--- src.orig/coreutils-7.4/src/stat.c
++++ src/coreutils-7.4/src/stat.c
+@@ -180,6 +180,9 @@ static bool interpret_backslash_escapes;
+    "" for --printf=FMT, "\n" for --format=FMT (-c).  */
+ static char const *trailing_delim = "";
+ 
++struct statfs {
++};
++
+ /* Return the type of the specified file system.
+    Some systems have statfvs.f_basetype[FSTYPSZ] (AIX, HP-UX, and Solaris).
+    Others have statvfs.f_fstypename[_VFS_NAMELEN] (NetBSD 3.0).
+@@ -189,10 +192,14 @@ static char const *trailing_delim = "";
+ static char const *
+ human_fstype (STRUCT_STATVFS const *statfsbuf)
+ {
+-#ifdef STATXFS_FILE_SYSTEM_TYPE_MEMBER_NAME
++#if defined(STATXFS_FILE_SYSTEM_TYPE_MEMBER_NAME) && !defined(__TYNDUR__)
+   return statfsbuf->STATXFS_FILE_SYSTEM_TYPE_MEMBER_NAME;
+ #else
++#ifndef __TYNDUR__
+   switch (statfsbuf->f_type)
++#else
++  switch (-1)
++#endif
+     {
+ # if defined __linux__
+ 
+@@ -384,7 +391,11 @@ human_fstype (STRUCT_STATVFS const *stat
+ # endif
+     default:
+       {
++#ifndef __TYNDUR__
+ 	unsigned long int type = statfsbuf->f_type;
++#else
++	unsigned long int type = 0;
++#endif
+ 	static char buf[sizeof "UNKNOWN (0x%lx)" - 3
+ 			+ (sizeof type * CHAR_BIT + 3) / 4];
+ 	sprintf (buf, "UNKNOWN (0x%lx)", type);
+@@ -485,6 +496,8 @@ print_statfs (char *pformat, size_t pref
+       {
+ #if STRUCT_STATXFS_F_FSID_IS_INTEGER
+ 	uintmax_t fsid = statfsbuf->f_fsid;
++#elif defined(__TYNDUR__)
++    uintmax_t fsid = 0;
+ #else
+ 	typedef unsigned int fsid_word;
+ 	verify (alignof (STRUCT_STATVFS) % alignof (fsid_word) == 0);
+@@ -507,6 +520,7 @@ print_statfs (char *pformat, size_t pref
+       }
+       break;
+ 
++#ifndef __TYNDUR__
+     case 'l':
+       OUT_NAMEMAX (pformat, prefix_len, SB_F_NAMEMAX (statfsbuf));
+       break;
+@@ -546,6 +560,7 @@ print_statfs (char *pformat, size_t pref
+     case 'd':
+       out_int (pformat, prefix_len, statfsbuf->f_ffree);
+       break;
++#endif
+     case 'C':
+       out_file_context (filename, pformat, prefix_len);
+       break;
+@@ -612,7 +627,7 @@ print_stat (char *pformat, size_t prefix
+       out_uint (pformat, prefix_len, statbuf->st_uid);
+       break;
+     case 'U':
+-      setpwent ();
++//      setpwent ();
+       pw_ent = getpwuid (statbuf->st_uid);
+       out_string (pformat, prefix_len,
+ 		  pw_ent ? pw_ent->pw_name : "UNKNOWN");
+@@ -621,7 +636,7 @@ print_stat (char *pformat, size_t prefix
+       out_uint (pformat, prefix_len, statbuf->st_gid);
+       break;
+     case 'G':
+-      setgrent ();
++//      setgrent ();
+       gw_ent = getgrgid (statbuf->st_gid);
+       out_string (pformat, prefix_len,
+ 		  gw_ent ? gw_ent->gr_name : "UNKNOWN");
+@@ -829,7 +844,7 @@ do_statfs (char const *filename, bool te
+ {
+   STRUCT_STATVFS statfsbuf;
+ 
+-  if (STATFS (filename, &statfsbuf) != 0)
++  if (1) //(STATFS (filename, &statfsbuf) != 0)
+     {
+       error (0, errno, _("cannot read file system information for %s"),
+ 	     quote (filename));
+Index: src/coreutils-7.4/src/csplit.c
+===================================================================
+--- src.orig/coreutils-7.4/src/csplit.c
++++ src/coreutils-7.4/src/csplit.c
+@@ -1417,7 +1417,7 @@ main (int argc, char **argv)
+ 
+     act.sa_handler = interrupt_handler;
+     act.sa_mask = caught_signals;
+-    act.sa_flags = SA_NODEFER | SA_RESETHAND;
++    act.sa_flags = SA_NODEFER; // | SA_RESETHAND;
+ 
+     for (i = 0; i < nsigs; i++)
+       if (sigismember (&caught_signals, sig[i]))
+Index: src/coreutils-7.4/src/sort.c
+===================================================================
+--- src.orig/coreutils-7.4/src/sort.c
++++ src/coreutils-7.4/src/sort.c
+@@ -952,7 +952,7 @@ maybe_create_temp (FILE **pfp, pid_t *pp
+ 	  dup2_or_die (pipefds[0], STDIN_FILENO);
+ 	  close (pipefds[0]);
+ 
+-	  if (execlp (compress_program, compress_program, (char *) NULL) < 0)
++//	  if (execlp (compress_program, compress_program, (char *) NULL) < 0)
+ 	    error (SORT_FAILURE, errno, _("couldn't execute %s"),
+ 		   compress_program);
+ 	}
+@@ -1015,7 +1015,7 @@ open_temp (const char *name, pid_t pid)
+       dup2_or_die (pipefds[1], STDOUT_FILENO);
+       close (pipefds[1]);
+ 
+-      execlp (compress_program, compress_program, "-d", (char *) NULL);
++//      execlp (compress_program, compress_program, "-d", (char *) NULL);
+       error (SORT_FAILURE, errno, _("couldn't execute %s -d"),
+ 	     compress_program);
+ 
+Index: src/coreutils-7.4/src/env.c
+===================================================================
+--- src.orig/coreutils-7.4/src/env.c
++++ src/coreutils-7.4/src/env.c
+@@ -91,7 +91,7 @@
+   proper_name ("Richard Mlynarik"), \
+   proper_name ("David MacKenzie")
+ 
+-extern char **environ;
++//extern char **environ;
+ 
+ static struct option const longopts[] =
+ {
+@@ -167,7 +167,7 @@ main (int argc, char **argv)
+   if (ignore_environment)
+     {
+       static char *dummy_environ[] = { NULL };
+-      environ = dummy_environ;
++//      environ = dummy_environ;
+     }
+ 
+   optind = 0;			/* Force GNU getopt to re-initialize. */
+@@ -184,7 +184,7 @@ main (int argc, char **argv)
+   /* If no program is specified, print the environment and exit. */
+   if (argc <= optind)
+     {
+-      char *const *e = environ;
++      char *const *e = ""; //environ;
+       while (*e)
+ 	puts (*e++);
+       exit (EXIT_SUCCESS);
+Index: src/coreutils-7.4/src/logname.c
+===================================================================
+--- src.orig/coreutils-7.4/src/logname.c
++++ src/coreutils-7.4/src/logname.c
+@@ -74,7 +74,7 @@ main (int argc, char **argv)
+     }
+ 
+   /* POSIX requires using getlogin (or equivalent code).  */
+-  cp = getlogin ();
++  cp = "root"; //getlogin ();
+   if (cp)
+     {
+       puts (cp);
+Index: src/coreutils-7.4/src/printenv.c
+===================================================================
+--- src.orig/coreutils-7.4/src/printenv.c
++++ src/coreutils-7.4/src/printenv.c
+@@ -95,8 +95,8 @@ main (int argc, char **argv)
+ 
+   if (optind >= argc)
+     {
+-      for (env = environ; *env != NULL; ++env)
+-	puts (*env);
++/*      for (env = environ; *env != NULL; ++env)
++	puts (*env); */
+       ok = true;
+     }
+   else
+@@ -107,7 +107,7 @@ main (int argc, char **argv)
+ 	{
+ 	  bool matched = false;
+ 
+-	  for (env = environ; *env; ++env)
++	  /*for (env = environ; *env; ++env)
+ 	    {
+ 	      ep = *env;
+ 	      ap = argv[i];
+@@ -120,7 +120,7 @@ main (int argc, char **argv)
+ 		      break;
+ 		    }
+ 		}
+-	    }
++	    }*/
+ 
+ 	  matches += matched;
+ 	}
+Index: src/coreutils-7.4/src/setuidgid.c
+===================================================================
+--- src.orig/coreutils-7.4/src/setuidgid.c
++++ src/coreutils-7.4/src/setuidgid.c
+@@ -196,6 +196,7 @@ main (int argc, char **argv)
+ #endif
+   }
+ 
++#if 0
+   if (setgid (primary_gid))
+     error (SETUIDGID_FAILURE, errno,
+            _("cannot set group-ID to %lu"), (unsigned long int) primary_gid);
+@@ -203,7 +204,7 @@ main (int argc, char **argv)
+   if (setuid (uid))
+     error (SETUIDGID_FAILURE, errno,
+            _("cannot set user-ID to %lu"), (unsigned long int) uid);
+-
++#endif
+   {
+     char **cmd = argv + optind + 1;
+     int exit_status;
+Index: src/coreutils-7.4/src/timeout.c
+===================================================================
+--- src.orig/coreutils-7.4/src/timeout.c
++++ src/coreutils-7.4/src/timeout.c
+@@ -79,6 +79,11 @@
+ /* Internal failure.  */
+ #define EXIT_CANCELED 125
+ 
++#define NSIG 80
++#define SA_RESTART 0
++#define SIGTTIN 40
++#define SIGTTOU 41
++
+ static int timed_out;
+ static int term_signal = SIGTERM;  /* same default as kill command.  */
+ static int monitored_pid;
+@@ -275,7 +280,7 @@ main (int argc, char **argv)
+      Note we don't just put the child in a separate group as
+      then we would need to worry about foreground and background groups
+      and propagating signals between them.  */
+-  setpgid (0, 0);
++//  setpgid (0, 0);
+ 
+   /* Setup handlers before fork() so that we
+      handle any signals caused by child, without races.  */
+Index: src/coreutils-7.4/src/tty.c
+===================================================================
+--- src.orig/coreutils-7.4/src/tty.c
++++ src/coreutils-7.4/src/tty.c
+@@ -112,7 +112,7 @@ main (int argc, char **argv)
+   if (optind < argc)
+     error (0, 0, _("extra operand %s"), quote (argv[optind]));
+ 
+-  tty = ttyname (STDIN_FILENO);
++  tty = "<ttyname>"; //ttyname (STDIN_FILENO);
+   if (!silent)
+     {
+       if (tty)
+Index: src/coreutils-7.4/src/su.c
+===================================================================
+--- src.orig/coreutils-7.4/src/su.c
++++ src/coreutils-7.4/src/su.c
+@@ -123,7 +123,7 @@ char *getusershell (void);
+ void endusershell (void);
+ void setusershell (void);
+ 
+-extern char **environ;
++char **environ;
+ 
+ static void run_shell (char const *, char const *, char **, size_t)
+      ATTRIBUTE_NORETURN;
+@@ -230,7 +230,7 @@ correct_password (const struct passwd *p
+     correct = sp->sp_pwdp;
+   else
+ #endif
+-    correct = pw->pw_passwd;
++    correct = "passwort"; //pw->pw_passwd;
+ 
+   if (getuid () == 0 || !correct || correct[0] == '\0')
+     return true;
+@@ -241,7 +241,7 @@ correct_password (const struct passwd *p
+       error (0, 0, _("getpass: cannot open /dev/tty"));
+       return false;
+     }
+-  encrypted = crypt (unencrypted, correct);
++  encrypted = strdup(unencrypted); //crypt (unencrypted, correct);
+   memset (unencrypted, 0, strlen (unencrypted));
+   return STREQ (encrypted, correct);
+ }
+@@ -299,10 +299,12 @@ change_identity (const struct passwd *pw
+     error (EXIT_FAILURE, errno, _("cannot set groups"));
+   endgrent ();
+ #endif
++#if 0
+   if (setgid (pw->pw_gid))
+     error (EXIT_FAILURE, errno, _("cannot set group id"));
+   if (setuid (pw->pw_uid))
+     error (EXIT_FAILURE, errno, _("cannot set user id"));
++#endif
+ }
+ 
+ /* Run SHELL, or DEFAULT_SHELL if SHELL is empty.
+@@ -340,7 +342,7 @@ run_shell (char const *shell, char const
+     }
+   memcpy (args + argno, additional_args, n_additional_args * sizeof *args);
+   args[argno + n_additional_args] = NULL;
+-  execv (shell, (char **) args);
++//  execv (shell, (char **) args);
+ 
+   {
+     int exit_status = (errno == ENOENT ? EXIT_ENOENT : EXIT_CANNOT_INVOKE);
+@@ -467,7 +469,7 @@ main (int argc, char **argv)
+ 
+   pw = getpwnam (new_user);
+   if (! (pw && pw->pw_name && pw->pw_name[0] && pw->pw_dir && pw->pw_dir[0]
+-	 && pw->pw_passwd))
++)) //	 && pw->pw_passwd))
+     error (EXIT_FAILURE, 0, _("user %s does not exist"), new_user);
+ 
+   /* Make a copy of the password information and point pw at the local
+@@ -479,7 +481,7 @@ main (int argc, char **argv)
+   pw_copy = *pw;
+   pw = &pw_copy;
+   pw->pw_name = xstrdup (pw->pw_name);
+-  pw->pw_passwd = xstrdup (pw->pw_passwd);
++//  pw->pw_passwd = xstrdup (pw->pw_passwd);
+   pw->pw_dir = xstrdup (pw->pw_dir);
+   pw->pw_shell = xstrdup (pw->pw_shell && pw->pw_shell[0]
+ 			  ? pw->pw_shell

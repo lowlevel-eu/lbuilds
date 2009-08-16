@@ -1,0 +1,26 @@
+Index: src/coreutils-7.4/build-aux/config.sub
+===================================================================
+--- src.orig/coreutils-7.4/build-aux/config.sub
++++ src/coreutils-7.4/build-aux/config.sub
+@@ -1283,7 +1283,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -tyndur* )
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: src/coreutils-7.4/Makefile.in
+===================================================================
+--- src.orig/coreutils-7.4/Makefile.in
++++ src/coreutils-7.4/Makefile.in
+@@ -936,7 +936,7 @@ top_srcdir = @top_srcdir@
+ 
+ # Some tests always need root privileges, others need them only sometimes.
+ ALL_RECURSIVE_TARGETS = install-root check-root distcheck-hook
+-SUBDIRS = lib src doc man po tests gnulib-tests
++SUBDIRS = lib src doc po tests gnulib-tests
+ changelog_etc = \
+   ChangeLog-2005			\
+   ChangeLog-2006			\

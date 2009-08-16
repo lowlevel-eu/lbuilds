@@ -1,0 +1,158 @@
+Index: src/coreutils-7.4/lib/freadahead.c
+===================================================================
+--- src.orig/coreutils-7.4/lib/freadahead.c
++++ src/coreutils-7.4/lib/freadahead.c
+@@ -79,6 +79,8 @@ freadahead (FILE *fp)
+ #elif defined SLOW_BUT_NO_HACKS     /* users can define this */
+   abort ();
+   return 0;
++#elif defined __TYNDUR__
++  return fp->ungetc_count;
+ #else
+  #error "Please port gnulib freadahead.c to your platform! Look at the definition of fflush, fread, ungetc on your system, then report this to bug-gnulib."
+ #endif
+Index: src/coreutils-7.4/lib/freading.c
+===================================================================
+--- src.orig/coreutils-7.4/lib/freading.c
++++ src/coreutils-7.4/lib/freading.c
+@@ -56,6 +56,8 @@ freading (FILE *fp)
+ # else
+   return (fp->__buffer < fp->__get_limit /*|| fp->__bufp == fp->__put_limit ??*/);
+ # endif
++#elif defined __TYNDUR__
++  return 1;
+ #else
+  #error "Please port gnulib freading.c to your platform!"
+ #endif
+Index: src/coreutils-7.4/lib/freadptr.c
+===================================================================
+--- src.orig/coreutils-7.4/lib/freadptr.c
++++ src/coreutils-7.4/lib/freadptr.c
+@@ -93,6 +93,8 @@ freadptr (FILE *fp, size_t *sizep)
+     return NULL;
+   *sizep = size;
+   return fp->__bufp;
++#elif defined __TYNDUR__
++  return NULL;
+ #elif defined SLOW_BUT_NO_HACKS     /* users can define this */
+   /* This implementation is correct on any ANSI C platform.  It is just
+      awfully slow.  */
+Index: src/coreutils-7.4/lib/freadseek.c
+===================================================================
+--- src.orig/coreutils-7.4/lib/freadseek.c
++++ src/coreutils-7.4/lib/freadseek.c
+@@ -55,6 +55,9 @@ freadptrinc (FILE *fp, size_t increment)
+   fp->_Next += increment;
+ #elif defined __MINT__              /* Atari FreeMiNT */
+   fp->__bufp += increment;
++#elif defined __TYNDUR__
++  unsigned char buf[increment];
++  fread(buf, increment, 1, fp);
+ #elif defined SLOW_BUT_NO_HACKS     /* users can define this */
+ #else
+  #error "Please port gnulib freadseek.c to your platform! Look at the definition of getc, getc_unlocked on your system, then report this to bug-gnulib."
+Index: src/coreutils-7.4/lib/fseterr.c
+===================================================================
+--- src.orig/coreutils-7.4/lib/fseterr.c
++++ src/coreutils-7.4/lib/fseterr.c
+@@ -43,6 +43,7 @@ fseterr (FILE *fp)
+   fp->_Mode |= 0x200 /* _MERR */;
+ #elif defined __MINT__              /* Atari FreeMiNT */
+   fp->__error = 1;
++#elif defined __TYNDUR__
+ #elif 0                             /* unknown  */
+   /* Portable fallback, based on an idea by Rich Felker.
+      Wow! 6 system calls for something that is just a bit operation!
+Index: src/coreutils-7.4/lib/savewd.c
+===================================================================
+--- src.orig/coreutils-7.4/lib/savewd.c
++++ src/coreutils-7.4/lib/savewd.c
+@@ -209,8 +209,10 @@ savewd_restore (struct savewd *wd, int s
+ 	    while (waitpid (child, &child_status, 0) < 0)
+ 	      assert (errno == EINTR);
+ 	    wd->val.child = -1;
++#if 0
+ 	    if (! WIFEXITED (child_status))
+ 	      raise (WTERMSIG (child_status));
++#endif
+ 	    return WEXITSTATUS (child_status);
+ 	  }
+       }
+Index: src/coreutils-7.4/lib/fseeko.c
+===================================================================
+--- src.orig/coreutils-7.4/lib/fseeko.c
++++ src/coreutils-7.4/lib/fseeko.c
+@@ -90,6 +90,8 @@ rpl_fseeko (FILE *fp, off_t offset, int
+       && fp->__get_limit == fp->__bufp
+       && fp->__put_limit == fp->__bufp
+       && !fp->__pushed_back)
++#elif defined __TYNDUR__
++  if (0)
+ #else
+   #error "Please port gnulib fseeko.c to your platform! Look at the code in fpurge.c, then report this to bug-gnulib."
+ #endif
+Index: src/coreutils-7.4/lib/inttypes.in.h
+===================================================================
+--- src.orig/coreutils-7.4/lib/inttypes.in.h
++++ src/coreutils-7.4/lib/inttypes.in.h
+@@ -41,9 +41,11 @@
+ /* Get CHAR_BIT.  */
+ #include <limits.h>
+ 
++/*
+ #if !(INT_MIN == INT32_MIN && INT_MAX == INT32_MAX)
+ # error "This file assumes that 'int' has exactly 32 bits. Please report your platform and compiler to <bug-gnulib@gnu.org>."
+ #endif
++*/
+ 
+ /* The definition of GL_LINK_WARNING is copied here.  */
+ 
+Index: src/coreutils-7.4/lib/gettimeofday.c
+===================================================================
+--- src.orig/coreutils-7.4/lib/gettimeofday.c
++++ src/coreutils-7.4/lib/gettimeofday.c
+@@ -94,7 +94,7 @@ rpl_tzset (void)
+   /* Save and restore the contents of the buffer used for localtime's
+      result around the call to tzset.  */
+   struct tm save = *localtime_buffer_addr;
+-  tzset ();
++//  tzset ();
+   *localtime_buffer_addr = save;
+ }
+ #endif
+Index: src/coreutils-7.4/lib/strtod.c
+===================================================================
+--- src.orig/coreutils-7.4/lib/strtod.c
++++ src/coreutils-7.4/lib/strtod.c
+@@ -228,6 +228,8 @@ strtod (const char *nptr, char **endptr)
+       goto valid;
+     }
+ 
++#if 0
++// FIXME
+   /* Multiply NUM by 10 to the EXPONENT power,
+      checking for overflow and underflow.  */
+ 
+@@ -243,6 +245,7 @@ strtod (const char *nptr, char **endptr)
+     }
+ 
+   num *= pow (10.0, (double) exponent);
++#endif
+ 
+  valid:
+   if (endptr != NULL)
+Index: src/coreutils-7.4/lib/fclose.c
+===================================================================
+--- src.orig/coreutils-7.4/lib/fclose.c
++++ src/coreutils-7.4/lib/fclose.c
+@@ -33,8 +33,10 @@ rpl_fclose (FILE *fp)
+   if (fflush (fp))
+     saved_errno = errno;
+ 
++#if 0
+   if (close (fileno (fp)) < 0 && saved_errno == 0)
+     saved_errno = errno;
++#endif
+ 
+   fclose (fp); /* will fail with errno = EBADF */
+ 

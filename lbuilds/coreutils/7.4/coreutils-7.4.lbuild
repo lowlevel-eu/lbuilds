@@ -1,0 +1,43 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Coreutils"
+SRC_URI="ftp://ftp.gnu.org/gnu/coreutils/coreutils-7.4.tar.gz"
+
+LICENSE="GPL"
+
+RUN_DEPEND=""
+BUILD_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_configure() {
+	cd ${MY_S}
+
+    autoconf
+	./configure \
+        CC=`tc-cc` \
+        SKIP_FTRUNCATE_CHECK=yes \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+        --disable-acl \
+        --disable-assert \
+        --disable-rpath \
+        --disable-largefile \
+        --disable-xattr \
+        --disable-libcap \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+	lmake
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+}
