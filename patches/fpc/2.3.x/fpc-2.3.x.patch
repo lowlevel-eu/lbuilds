@@ -1065,30 +1065,35 @@ Index: fpc/utils/fpcm/fpcmmain.pp
      type
 Index: fpc/utils/fpcm/fpcmake.inc
 ===================================================================
---- fpc.orig/utils/fpcm/fpcmake.inc	2009-07-31 01:00:26.000000000 +0200
-+++ fpc/utils/fpcm/fpcmake.inc	2009-08-06 16:03:08.750693000 +0200
+--- fpc/utils/fpcm/fpcmake.inc.orig
++++ fpc/utils/fpcm/fpcmake.inc
 @@ -1,7 +1,7 @@
  {$ifdef Delphi}
 -const fpcmakeini : array[0..218] of string[240]=(
-+const fpcmakeini : array[0..219] of string[240]=(
++const fpcmakeini : array[0..220] of string[240]=(
  {$else Delphi}
 -const fpcmakeini : array[0..218,1..240] of char=(
-+const fpcmakeini : array[0..219,1..240] of char=(
++const fpcmakeini : array[0..220,1..240] of char=(
  {$endif Delphi}
    ';'#010+
    '; Templates used by fpcmake to create a Makefile from Makefile.fpc'#010+
-@@ -858,6 +858,14 @@
-   'SHO','RTSUFFIX=lnx'#010+
+@@ -877,6 +877,14 @@ const fpcmakeini : array[0..218,1..240]
+   'SHORTSUFFIX=lnx'#010+
    'endif'#010+
    #010+
 +  '# tyndur'#010+
-+  'ifeq ($(OS_TARGET),tyndur)'#010+
++  'ifeq',' ($(OS_TARGET),tyndur)'#010+
 +  'BATCHEXT=.lsh'#010+
 +  'EXEEXT='#010+
-+  'HASSHAREDLIB=1'#010+
++  'HASS','HAREDLIB=1'#010+
 +  'SHORTSUFFIX=tyn'#010+
-+  'endif'#010,
++  'endif'#010+
 +  #010+
    '# FreeBSD'#010+
    'ifeq ($(OS_TARGET),freebsd)'#010+
    'BATCHEXT=.sh'#010+
+@@ -2383,4 +2383,4 @@
+   '        @$(ECHO)  LCLDIR............... $(LCLDIR)'#010+
+-  '        @$(ECHO)  LCL Unit dir......... $(LC','LUNITDIR)'#010+
++  '        @$(ECHO)  LCL Unit dir.....','.... $(LCLUNITDIR)'#010+
+   '	    @$(ECHO)  LCL Component dir.... $(LCLCOMPONENTDIR)'#010+
