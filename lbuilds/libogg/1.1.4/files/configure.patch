@@ -1,0 +1,13 @@
+Index: libogg-1.1.4/config.sub
+===================================================================
+--- libogg-1.1.4.orig/config.sub
++++ libogg-1.1.4/config.sub
+@@ -1195,7 +1195,7 @@ case $os in
+	      | -*vms* | -sco* | -esix* | -isc* | -aix* | -sunos | -sunos[34]*\
+	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
+	      | -amigaos* | -amigados* | -msdos* | -newsos* | -unicos* | -aof* \
+-	      | -aos* \
++	      | -aos* | -tyndur* \
+	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* \
+	      | -clix* | -riscos* | -uniplus* | -iris* | -rtu* | -xenix* \
+	      | -hiux* | -386bsd* | -knetbsd* | -mirbsd* | -netbsd* \

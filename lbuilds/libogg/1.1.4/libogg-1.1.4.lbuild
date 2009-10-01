@@ -1,0 +1,53 @@
+include toolchain
+include lutils
+
+DESCRIPTION="libogg"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/libogg"
+SRC_URI="http://downloads.xiph.org/releases/ogg/${P}.tar.gz"
+PS="lib"
+
+LICENSE="unknown"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+lunpack ${P}.tar.gz
+cd ${MY_S}
+
+    ln -s ${F} patches
+    [ -f ${F}/series ] && ln -s ${F}/series series
+    for i in ${F}/*.patch; do
+        [ -L series ] || echo `basename $i` >> series
+        (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
+    done
+    (which quilt > /dev/null 2>&1) && quilt push -a || die "Fehler beim Anwenden der Patches"
+}
+
+src_configure() {
+	cd ${MY_S}
+
+	./configure \
+                CC=`tc-cc` \
+                --build=`tc-build` \
+                --target=`tc-host` \
+                --host=`tc-host` \
+                --prefix="${R}" \
+                || die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+
+	lmake install prefix="${D}${R}" || die "make install failed"
+	rm -rf ${D}${R}/share
+}
