@@ -17,8 +17,8 @@ lerror() {
 
 # Make ausfuehren
 lmake() {
-    echo make $MAKE_OPTS $*
-    make $MAKE_OPTS $*
+    echo make $MAKE_OPTS "$@"
+    make $MAKE_OPTS "$@"
     return $?
 }
 
