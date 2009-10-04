@@ -1,0 +1,17 @@
+Index: src/ncurses-5.6/ncurses/base/lib_addch.c
+===================================================================
+--- src.orig/ncurses-5.6/ncurses/base/lib_addch.c
++++ src/ncurses-5.6/ncurses/base/lib_addch.c
+@@ -266,10 +266,12 @@ waddch_literal(WINDOW *win, NCURSES_CH_T
+ 
+ 	    if (len > 0) {
+ 		if (is8bits(CharOf(ch))) {
++#if 0
+ 		    const char *s = unctrl((chtype) CharOf(ch));
+ 		    if (s[1] != 0) {
+ 			return waddstr(win, s);
+ 		    }
++#endif
+ 		}
+ 	    } else {
+ 		return OK;

@@ -4,3 +4,4 @@ tests.patch
 terminfo.patch
 term_lost.patch
 utf8.patch
+lynx-newline.patch
