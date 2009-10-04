@@ -8,7 +8,7 @@ SRC_URI="http://switch.dl.sourceforge.net/sourceforge/w3m/w3m-0.5.2.tar.gz"
 LICENSE="GPL"
 
 RUN_DEPEND=""
-BUILD_DEPEND="=ncurses-5.6 =boehmgc-6.2 =libm-0.2"
+BUILD_DEPEND="=ncurses-5.6 =boehmgc-6.2"
 
 MY_S="${S}/${P}"
 

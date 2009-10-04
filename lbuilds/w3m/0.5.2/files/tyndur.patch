@@ -19,16 +19,38 @@ Index: w3m-0.5.2/main.c
  	non_null(Locale = getenv("LANG"))) {
  	DisplayCharset = wc_guess_locale_charset(Locale, DisplayCharset);
  	DocumentCharset = wc_guess_locale_charset(Locale, DocumentCharset);
-@@ -847,7 +848,7 @@ main(int argc, char **argv, char **envp)
+@@ -788,10 +789,12 @@ main(int argc, char **argv, char **envp)
+     if (BookmarkFile == NULL)
+ 	BookmarkFile = rcFile(BOOKMARK);
+ 
++#ifndef TYNDUR
+     if (!isatty(1) && !w3m_dump) {
+ 	/* redirected output */
+ 	w3m_dump = DUMP_BUFFER;
+     }
++#endif
+     if (w3m_dump) {
+ 	if (COLS == 0)
+ 	    COLS = 80;
+@@ -846,12 +849,15 @@ main(int argc, char **argv, char **envp)
+     err_msg = Strnew();
      if (load_argc == 0) {
  	/* no URL specified */
++#ifndef TYNDUR
  	if (!isatty(0)) {
 -	    redin = newFileStream(fdopen(dup(0), "rb"), (void (*)())pclose);
 +	    redin = newFileStream(fdopen(0, "rb"), NULL /*(void (*)())pclose*/);
  	    newbuf = openGeneralPagerBuffer(redin);
  	    dup2(1, 0);
  	}
-@@ -4406,11 +4407,14 @@ DEFUN(svBuf, PRINT SAVE_SCREEN, "Save re
+-	else if (load_bookmark) {
++	else
++#endif
++    if (load_bookmark) {
+ 	    newbuf = loadGeneralFile(BookmarkFile, NULL, NO_REFERER, 0, NULL);
+ 	    if (newbuf == NULL)
+ 		Strcat_charp(err_msg, "w3m: Can't load bookmark.\n");
+@@ -4406,11 +4412,14 @@ DEFUN(svBuf, PRINT SAVE_SCREEN, "Save re
  	}
      }
      file = conv_to_system(qfile ? qfile : file);
@@ -44,7 +66,7 @@ Index: w3m-0.5.2/main.c
  	if (qfile) {
  	    file = unescape_spaces(Strnew_charp(qfile))->ptr;
  	    file = conv_to_system(file);
-@@ -4430,9 +4434,11 @@ DEFUN(svBuf, PRINT SAVE_SCREEN, "Save re
+@@ -4430,9 +4439,11 @@ DEFUN(svBuf, PRINT SAVE_SCREEN, "Save re
  	return;
      }
      saveBuffer(Currentbuf, f, TRUE);
@@ -92,17 +114,7 @@ Index: w3m-0.5.2/file.c
  	    *pwd = Strnew_charp((char *)
  				getpass(proxy ? "Proxy Password: " :
  					"Password: "));
-@@ -6560,6 +6563,9 @@ loadHTMLBuffer(URLFile *f, Buffer *newBu
-     return newBuf;
- }
- 
-+
-+#define floor(x) ((float)((int) x))
-+
- static char *_size_unit[] = { "b", "kb", "Mb", "Gb", "Tb",
-     "Pb", "Eb", "Zb", "Bb", "Yb", NULL
- };
-@@ -7427,6 +7433,9 @@ static Buffer *
+@@ -7427,6 +7430,9 @@ static Buffer *
  loadcmdout(char *cmd,
  	   Buffer *(*loadproc) (URLFile *, Buffer *), Buffer *defaultbuf)
  {
@@ -112,7 +124,7 @@ Index: w3m-0.5.2/file.c
      FILE *f, *popen(const char *, const char *);
      Buffer *buf;
      URLFile uf;
-@@ -7440,6 +7449,7 @@ loadcmdout(char *cmd,
+@@ -7440,6 +7446,7 @@ loadcmdout(char *cmd,
      buf = loadproc(&uf, defaultbuf);
      UFclose(&uf);
      return buf;
@@ -120,7 +132,7 @@ Index: w3m-0.5.2/file.c
  }
  
  /* 
-@@ -7465,6 +7475,9 @@ getshell(char *cmd)
+@@ -7465,6 +7472,9 @@ getshell(char *cmd)
  Buffer *
  getpipe(char *cmd)
  {
@@ -130,7 +142,7 @@ Index: w3m-0.5.2/file.c
      FILE *f, *popen(const char *, const char *);
      Buffer *buf;
  
-@@ -7483,6 +7496,7 @@ getpipe(char *cmd)
+@@ -7483,6 +7493,7 @@ getpipe(char *cmd)
      buf->document_charset = WC_CES_US_ASCII;
  #endif
      return buf;
@@ -138,7 +150,7 @@ Index: w3m-0.5.2/file.c
  }
  
  /* 
-@@ -7879,10 +7893,12 @@ _MoveFile(char *path1, char *path2)
+@@ -7879,10 +7890,12 @@ _MoveFile(char *path1, char *path2)
      f1 = openIS(path1);
      if (f1 == NULL)
  	return -1;
@@ -151,7 +163,7 @@ Index: w3m-0.5.2/file.c
      else {
  	is_pipe = FALSE;
  	f2 = fopen(path2, "wb");
-@@ -7899,9 +7915,11 @@ _MoveFile(char *path1, char *path2)
+@@ -7899,9 +7912,11 @@ _MoveFile(char *path1, char *path2)
  	showProgress(&linelen, &trbyte);
      }
      ISclose(f1);
@@ -163,7 +175,7 @@ Index: w3m-0.5.2/file.c
  	fclose(f2);
      return 0;
  }
-@@ -8199,7 +8217,7 @@ inputAnswer(char *prompt)
+@@ -8199,7 +8214,7 @@ inputAnswer(char *prompt)
  static void
  uncompress_stream(URLFile *uf, char **src)
  {
@@ -172,7 +184,7 @@ Index: w3m-0.5.2/file.c
      pid_t pid1;
      FILE *f1;
      char *expand_cmd = GUNZIP_CMDNAME;
-@@ -8300,6 +8318,7 @@ lessopen_stream(char *path)
+@@ -8300,6 +8315,7 @@ lessopen_stream(char *path)
  	return NULL;
      }
  
@@ -180,7 +192,7 @@ Index: w3m-0.5.2/file.c
      if (lessopen[0] == '|') {
  	/* pipe mode */
  	Str tmpf;
-@@ -8318,7 +8337,9 @@ lessopen_stream(char *path)
+@@ -8318,7 +8334,9 @@ lessopen_stream(char *path)
  	}
  	ungetc(c, fp);
      }
@@ -209,23 +221,22 @@ Index: w3m-0.5.2/terms.c
  #else
  #include <winsock.h>
  #endif /* __MINGW32_VERSION */
-@@ -506,6 +507,7 @@ static struct w3m_term_info {
- int
- set_tty(void)
+@@ -508,10 +509,14 @@ set_tty(void)
  {
-+#ifndef TYNDUR
      char *ttyn;
  
++#ifndef TYNDUR
      if (isatty(0))		/* stdin */
-@@ -545,6 +547,7 @@ set_tty(void)
- 	}
-     }
- #endif
+ 	ttyn = ttyname(0);
+     else
+ 	ttyn = DEV_TTY_PATH;
++#else
++    ttyn = "tty0";
 +#endif
-     return 0;
- }
- 
-@@ -617,7 +620,11 @@ close_tty(void)
+     tty = open(ttyn, O_RDWR);
+     if (tty < 0) {
+ 	/* use stderr instead of stdin... is it OK???? */
+@@ -617,7 +622,11 @@ close_tty(void)
  char *
  ttyname_tty(void)
  {
@@ -237,6 +248,24 @@ Index: w3m-0.5.2/terms.c
  }
  
  void
+@@ -1858,6 +1867,9 @@ term_title(char *s)
+ char
+ getch(void)
+ {
++#ifdef TYNDUR
++    return getchar();
++#else
+     char c;
+ 
+     while (
+@@ -1874,6 +1886,7 @@ getch(void)
+ 	break;			/* unreachable */
+     }
+     return c;
++#endif
+ }
+ 
+ #ifdef USE_MOUSE
 Index: w3m-0.5.2/Str.h
 ===================================================================
 --- w3m-0.5.2.orig/Str.h
