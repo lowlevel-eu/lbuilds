@@ -1,28 +1,28 @@
 Index: mutt-1.4.2.3/sendlib.c
 ===================================================================
---- mutt-1.4.2.3.orig/sendlib.c	2007-05-23 03:17:54.000000000 +0200
-+++ mutt-1.4.2.3/sendlib.c	2009-08-24 09:03:54.000000000 +0200
+--- mutt-1.4.2.3.orig/sendlib.c
++++ mutt-1.4.2.3/sendlib.c
 @@ -55,6 +55,11 @@
  #include <assert.h>
  #endif
-
+ 
 +void execv(const char*, const char*);
 +void setsid(void);
 +
 +#define SIGTSTP 1
 +
  extern char RFC822Specials[];
-
+ 
  static struct sysexits
-@@ -1775,6 +1780,7 @@
+@@ -1775,6 +1780,7 @@ send_msg (const char *path, char **args,
    sigset_t set;
    int fd, st;
    pid_t pid, ppid;
 +  char *syscmd;
-
+ 
    mutt_block_signals_system ();
-
-@@ -1801,7 +1807,8 @@
+ 
+@@ -1801,7 +1807,8 @@ send_msg (const char *path, char **args,
      /* we want the delivery to continue even after the main process dies,
       * so we put ourselves into another session right away
       */
@@ -32,10 +32,10 @@ Index: mutt-1.4.2.3/sendlib.c
    
      /* next we close all open files */
  #if defined(OPEN_MAX)
-@@ -1844,7 +1851,12 @@
-	  _exit (S_ERR);
+@@ -1844,7 +1851,12 @@ send_msg (const char *path, char **args,
+ 	  _exit (S_ERR);
        }
-
+ 
 -      execv (path, args);
 +      syscmd = malloc(256);
 +
@@ -48,12 +48,12 @@ Index: mutt-1.4.2.3/sendlib.c
      else if (pid == -1)
 Index: mutt-1.4.2.3/resize.c
 ===================================================================
---- mutt-1.4.2.3.orig/resize.c	2007-05-23 03:17:54.000000000 +0200
-+++ mutt-1.4.2.3/resize.c	2009-08-24 09:03:54.000000000 +0200
+--- mutt-1.4.2.3.orig/resize.c
++++ mutt-1.4.2.3/resize.c
 @@ -32,6 +32,11 @@
  # endif
  #endif
-
+ 
 +struct winsize
 +{
 +    int ws_row, ws_col;
@@ -62,7 +62,7 @@ Index: mutt-1.4.2.3/resize.c
  /* this routine should be called after receiving SIGWINCH */
  void mutt_resize_screen (void)
  {
-@@ -46,12 +51,12 @@
+@@ -46,12 +51,12 @@ void mutt_resize_screen (void)
    SLtt_Screen_Cols = -1;
    if ((fd = open ("/dev/tty", O_RDONLY)) != -1)
    {
@@ -79,24 +79,24 @@ Index: mutt-1.4.2.3/resize.c
    {
 Index: mutt-1.4.2.3/mutt_tunnel.c
 ===================================================================
---- mutt-1.4.2.3.orig/mutt_tunnel.c	2007-05-23 03:17:53.000000000 +0200
-+++ mutt-1.4.2.3/mutt_tunnel.c	2009-08-24 09:03:54.000000000 +0200
+--- mutt-1.4.2.3.orig/mutt_tunnel.c
++++ mutt-1.4.2.3/mutt_tunnel.c
 @@ -27,6 +27,8 @@
  #include <sys/wait.h>
  #include <fcntl.h>
  #include <errno.h>
 +#include <stdlib.h>
 +#include <string.h>
-
+ 
  /* -- data types -- */
  typedef struct
-@@ -89,9 +91,14 @@
+@@ -89,9 +91,14 @@ static int tunnel_socket_open (CONNECTIO
      close (STDERR_FILENO);
-
+ 
      /* Don't let the subprocess think it can use the controlling tty */
 -    setsid ();
 +    //setsid ();
-
+ 
 -    execl (EXECSHELL, "sh", "-c", Tunnel, NULL);
 +    char *sysstr;
 +
@@ -107,10 +107,10 @@ Index: mutt-1.4.2.3/mutt_tunnel.c
      _exit (127);
    }
    mutt_unblock_signals_system (1);
-@@ -108,8 +115,11 @@
+@@ -108,8 +115,11 @@ static int tunnel_socket_open (CONNECTIO
    if (close (pin[1]) < 0 || close (pout[0]) < 0)
      mutt_perror ("close");
-
+ 
 -  fcntl (pin[0], F_SETFD, FD_CLOEXEC);
 -  fcntl (pout[1], F_SETFD, FD_CLOEXEC);
 + // fcntl (pin[0], F_SETFD, FD_CLOEXEC);
@@ -118,23 +118,23 @@ Index: mutt-1.4.2.3/mutt_tunnel.c
 + fclose(pin[0]);
 + fclose(pout[1]);
 +
-
+ 
    tunnel->readfd = pin[0];
    tunnel->writefd = pout[1];
 Index: mutt-1.4.2.3/regex.c
 ===================================================================
---- mutt-1.4.2.3.orig/regex.c	2007-05-23 03:17:54.000000000 +0200
-+++ mutt-1.4.2.3/regex.c	2009-08-24 09:03:54.000000000 +0200
+--- mutt-1.4.2.3.orig/regex.c
++++ mutt-1.4.2.3/regex.c
 @@ -34,6 +34,8 @@
   * 	                             tlr, 1999-02-25
   */
-
+ 
 +#include <wchar.h>
 +#include <wctype.h>
  /* The following doesn't mix too well with autoconfiguring
   * the use of alloca.  So let's disable it for AIX.
   */
-@@ -2211,7 +2213,9 @@
+@@ -2211,7 +2213,9 @@ regex_compile (pattern, size, syntax, bu
  #if defined _LIBC || (defined HAVE_WCTYPE_H && defined HAVE_WCHAR_H)
                          boolean is_lower = STREQ (str, "lower");
                          boolean is_upper = STREQ (str, "upper");
@@ -143,13 +143,13 @@ Index: mutt-1.4.2.3/regex.c
 +
 +			wchar_t wt;
                          int ch;
-
-			wt = wctype (str);
+ 
+ 			wt = wctype (str);
 Index: mutt-1.4.2.3/mbox.c
 ===================================================================
---- mutt-1.4.2.3.orig/mbox.c	2007-05-23 03:17:53.000000000 +0200
-+++ mutt-1.4.2.3/mbox.c	2009-08-24 09:03:54.000000000 +0200
-@@ -937,7 +937,7 @@
+--- mutt-1.4.2.3.orig/mbox.c
++++ mutt-1.4.2.3/mbox.c
+@@ -937,7 +937,7 @@ int mbox_sync_mailbox (CONTEXT *ctx, int
      if (i == 0)
      {
        ctx->size = ftell (ctx->fp); /* update the size of the mailbox */
@@ -157,23 +157,23 @@ Index: mutt-1.4.2.3/mbox.c
 +      //ftruncate (fileno (ctx->fp), ctx->size);
      }
    }
-
+ 
 Index: mutt-1.4.2.3/filter.c
 ===================================================================
---- mutt-1.4.2.3.orig/filter.c	2007-05-23 03:17:53.000000000 +0200
-+++ mutt-1.4.2.3/filter.c	2009-08-24 09:03:54.000000000 +0200
-@@ -30,6 +30,7 @@
-		       int fdin, int fdout, int fderr)
+--- mutt-1.4.2.3.orig/filter.c
++++ mutt-1.4.2.3/filter.c
+@@ -30,6 +30,7 @@ mutt_create_filter_fd (const char *cmd,
+ 		       int fdin, int fdout, int fderr)
  {
    int pin[2], pout[2], perr[2], thepid;
 +  char *syscmd;
-
+ 
    if (in)
    {
-@@ -113,7 +114,12 @@
+@@ -113,7 +114,12 @@ mutt_create_filter_fd (const char *cmd,
        close (fderr);
      }
-
+ 
 -    execl (EXECSHELL, "sh", "-c", cmd, NULL);
 +    syscmd = malloc(255);
 +
@@ -186,29 +186,29 @@ Index: mutt-1.4.2.3/filter.c
    else if (thepid == -1)
 Index: mutt-1.4.2.3/system.c
 ===================================================================
---- mutt-1.4.2.3.orig/system.c	2007-05-23 03:17:54.000000000 +0200
-+++ mutt-1.4.2.3/system.c	2009-08-24 09:03:54.000000000 +0200
+--- mutt-1.4.2.3.orig/system.c
++++ mutt-1.4.2.3/system.c
 @@ -30,6 +30,7 @@
-
+ 
  int _mutt_system (const char *cmd, int flags)
  {
 +  char *syscmd;
    int rc = -1;
    struct sigaction act;
    struct sigaction oldtstp;
-@@ -72,7 +73,7 @@
+@@ -72,7 +73,7 @@ int _mutt_system (const char *cmd, int f
        int fd;
-
+ 
        /* give up controlling terminal */
 -      setsid ();
 +      //setsid ();
-
+ 
        switch (fork ())
        {
-@@ -110,8 +111,13 @@
+@@ -110,8 +111,13 @@ int _mutt_system (const char *cmd, int f
      sigaction (SIGTSTP, &act, NULL);
      sigaction (SIGCONT, &act, NULL);
-
+ 
 -    execl (EXECSHELL, "sh", "-c", cmd, NULL);
 -    _exit (127); /* execl error */
 +    syscmd = malloc(256);
@@ -223,9 +223,9 @@ Index: mutt-1.4.2.3/system.c
    {
 Index: mutt-1.4.2.3/mx.c
 ===================================================================
---- mutt-1.4.2.3.orig/mx.c	2007-05-23 03:17:53.000000000 +0200
-+++ mutt-1.4.2.3/mx.c	2009-08-24 09:03:54.000000000 +0200
-@@ -1491,7 +1491,7 @@
+--- mutt-1.4.2.3.orig/mx.c
++++ mutt-1.4.2.3/mx.c
+@@ -1491,7 +1491,7 @@ int mx_commit_message (MESSAGE *msg, CON
    }
    
    if (r == 0 && (ctx->magic == M_MBOX || ctx->magic == M_MMDF || ctx->magic == M_KENDRA)
@@ -236,41 +236,56 @@ Index: mutt-1.4.2.3/mx.c
      r = -1;
 Index: mutt-1.4.2.3/mbyte.c
 ===================================================================
---- mutt-1.4.2.3.orig/mbyte.c	2007-05-23 03:17:53.000000000 +0200
-+++ mutt-1.4.2.3/mbyte.c	2009-08-24 09:03:54.000000000 +0200
-@@ -76,7 +76,7 @@
+--- mutt-1.4.2.3.orig/mbyte.c
++++ mutt-1.4.2.3/mbyte.c
+@@ -76,7 +76,7 @@ void mutt_set_charset (char *charset)
  #endif
  }
-
+ 
 -#ifndef HAVE_WC_FUNCS
 +#ifdef HAVE_WC_FUNCS
-
+ 
  /*
   * For systems that don't have them, we provide here our own
 Index: mutt-1.4.2.3/main.c
 ===================================================================
---- mutt-1.4.2.3.orig/main.c	2007-05-23 03:17:53.000000000 +0200
-+++ mutt-1.4.2.3/main.c	2009-08-24 09:03:54.000000000 +0200
-@@ -822,12 +900,14 @@
+--- mutt-1.4.2.3.orig/main.c
++++ mutt-1.4.2.3/main.c
+@@ -591,12 +591,14 @@ int main (int argc, char **argv)
+       exit (0);
+   }
+ 
++#if 0
+   /* Check for a batch send. */
+   if (!isatty (0))
+   {
+     set_option (OPTNOCURSES);
+     sendflags = SENDBATCH;
+   }
++#endif
+ 
+   /* This must come before mutt_init() because curses needs to be started
+      before calling the init_pair() function to set the color scheme.  */
+@@ -822,12 +824,14 @@ int main (int argc, char **argv)
        /* check to see if there are any messages in the folder */
        if (stat (folder, &st) != 0)
        {
 +
-	mutt_endwin (strerror (errno));
-	exit (1);
+ 	mutt_endwin (strerror (errno));
+ 	exit (1);
        }
-
+ 
        if (st.st_size == 0)
        {
 +          printf("Spack?\n");
-	mutt_endwin _("Mailbox is empty.");
-	exit (1);
+ 	mutt_endwin _("Mailbox is empty.");
+ 	exit (1);
        }
 Index: mutt-1.4.2.3/send.c
 ===================================================================
---- mutt-1.4.2.3.orig/send.c	2007-05-23 03:17:54.000000000 +0200
-+++ mutt-1.4.2.3/send.c	2009-08-24 09:03:54.000000000 +0200
-@@ -1144,17 +1144,17 @@
+--- mutt-1.4.2.3.orig/send.c
++++ mutt-1.4.2.3/send.c
+@@ -1144,17 +1144,17 @@ ci_send_message (int flags,		/* send mod
      if (option (OPTTEXTFLOWED))
        mutt_set_parameter ("format", "flowed", &msg->content->parameter);
      
@@ -293,6 +308,66 @@ Index: mutt-1.4.2.3/send.c
 +    //  tempfp = safe_fopen (tempfile, "a+");
 +     // msg->content->filename = safe_strdup (tempfile);
 +   // }
-
+ 
      if (!tempfp)
      {
+Index: mutt-1.4.2.3/lib.c
+===================================================================
+--- mutt-1.4.2.3.orig/lib.c
++++ mutt-1.4.2.3/lib.c
+@@ -371,6 +371,7 @@ int safe_open (const char *path, int fla
+  */
+ FILE *safe_fopen (const char *path, const char *mode)
+ {
++#if 0
+   if (mode[0] == 'w')
+   {
+     int fd;
+@@ -391,6 +392,7 @@ FILE *safe_fopen (const char *path, cons
+     return (fdopen (fd, mode));
+   }
+   else
++#endif
+     return (fopen (path, mode));
+ }
+ 
+Index: mutt-1.4.2.3/mutt_socket.c
+===================================================================
+--- mutt-1.4.2.3.orig/mutt_socket.c
++++ mutt-1.4.2.3/mutt_socket.c
+@@ -35,6 +35,7 @@
+ #include <sys/socket.h>
+ #include <string.h>
+ #include <errno.h>
++#include <syscall.h>
+ 
+ /* support for multiple socket connections */
+ static CONNECTION *Connections = NULL;
+@@ -356,8 +357,13 @@ int raw_socket_read (CONNECTION* conn, c
+ {
+   int rc;
+ 
++again:
+   if ((rc = read (conn->fd, buf, len)) == -1)
+   {
++    if (errno == EAGAIN) {
++        yield();
++        goto again;
++    }
+     mutt_error (_("Error talking to %s (%s)"), conn->account.host,
+ 		strerror (errno));
+     mutt_sleep (2);
+@@ -370,8 +376,13 @@ int raw_socket_write (CONNECTION* conn,
+ {
+   int rc;
+ 
++again:
+   if ((rc = write (conn->fd, buf, count)) == -1)
+   {
++    if (errno == EAGAIN) {
++        yield();
++        goto again;
++    }
+     mutt_error (_("Error talking to %s (%s)"), conn->account.host,
+ 		strerror (errno));
+     mutt_sleep (2);
