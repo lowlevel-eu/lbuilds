@@ -2,7 +2,7 @@ Index: Python-2.6.1/Objects/floatobject.c
 ===================================================================
 --- Python-2.6.1.orig/Objects/floatobject.c
 +++ Python-2.6.1/Objects/floatobject.c
-@@ -9,6 +9,16 @@
+@@ -9,6 +9,12 @@
  
  #include <ctype.h>
  #include <float.h>
@@ -10,12 +10,8 @@ Index: Python-2.6.1/Objects/floatobject.c
 +
 +// Dummies for tyndur
 +#define frexp(x, y) (0.0)
-+#define ldexp(x, y) (0.0)
 +#define fmod(x, y) (0.0)
 +#define modf(x, y) (0.0)
-+#define pow(x, y) (0.0)
-+#define floor(x) (x)
-+#define HUGE_VAL 1.7976931348623157e+308
  
  #undef MAX
  #undef MIN
@@ -23,19 +19,14 @@ Index: Python-2.6.1/Objects/longobject.c
 ===================================================================
 --- Python-2.6.1.orig/Objects/longobject.c
 +++ Python-2.6.1/Objects/longobject.c
-@@ -7,6 +7,16 @@
+@@ -7,6 +7,11 @@
  #include "Python.h"
  #include "longintrepr.h"
  
 +// Dummies for tyndur
 +#define frexp(x, y) (0.0)
-+#define ldexp(x, y) (0.0)
 +#define fmod(x, y) (0.0)
 +#define modf(x, y) (0.0)
-+#define pow(x, y) (0.0)
-+#define floor(x) (x)
-+#define log(x) (0)
-+#define HUGE_VAL 1.7976931348623157e+308
 +
  #include <ctype.h>
  
@@ -74,18 +65,6 @@ Index: Python-2.6.1/Python/pymath.c
 ===================================================================
 --- Python-2.6.1.orig/Python/pymath.c
 +++ Python-2.6.1/Python/pymath.c
-@@ -1,5 +1,11 @@
- #include "Python.h"
- 
-+#define HUGE_VAL 1.7976931348623157e+308
-+#define log(x) 0
-+#define pow(x,y) 0
-+#define sqrt(x) 0.0
-+#define atan2(x, y) 0.0
-+
- #ifndef HAVE_HYPOT
- double hypot(double x, double y)
- {
 @@ -21,7 +27,7 @@ double hypot(double x, double y)
  }
  #endif /* HAVE_HYPOT */
@@ -99,13 +78,12 @@ Index: Python-2.6.1/Objects/object.c
 ===================================================================
 --- Python-2.6.1.orig/Objects/object.c
 +++ Python-2.6.1/Objects/object.c
-@@ -7,6 +7,12 @@
+@@ -7,6 +7,11 @@
  extern "C" {
  #endif
  
 +// Dummies for tyndur
 +#define frexp(x, y) (0.0)
-+#define ldexp(x, y) (0.0)
 +#define fmod(x, y) (0.0)
 +#define modf(x, y) (0.0)
 +
@@ -124,18 +102,3 @@ Index: Python-2.6.1/Python/pystrtod.c
  
  /**
   * PyOS_ascii_strtod:
-Index: Python-2.6.1/Python/bltinmodule.c
-===================================================================
---- Python-2.6.1.orig/Python/bltinmodule.c
-+++ Python-2.6.1/Python/bltinmodule.c
-@@ -13,6 +13,10 @@
- #include "unixstuff.h"
- #endif
- 
-+// tyndur-Dummies
-+#define floor(x) x
-+#define ceil(x) x
-+
- /* The default encoding used by the platform file system APIs
-    Can remain NULL for all platforms that don't have such a concept
- */
