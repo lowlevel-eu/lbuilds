@@ -1,0 +1,4 @@
+3606c3606
+< 	mov	[image_base],8048000h
+---
+> 	mov	[image_base],40000000h

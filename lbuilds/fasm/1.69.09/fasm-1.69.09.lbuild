@@ -1,0 +1,33 @@
+include toolchain
+include lutils
+
+DESCRIPTION="Der Flatassembler (Intelsyntax)"
+HOMEPAGE="http://flatassembler.net/"
+SRC_URI="http://flatassembler.net/${P}.tar.gz"
+
+LICENSE="Proprietary"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+lunpack ${P}.tar.gz
+cd fasm
+
+    patch source/formats.inc ${F}/formats.patch || die "could not patch formats.inc"
+}
+
+src_compile() {
+	cd fasm
+	fasm source/libc/fasm.asm fasm.o || die "assembling failed"
+	i386-pc-tyndur-gcc fasm.o -o fasm || die "linking failed"
+	cd ..
+}
+
+src_install() {
+	cd fasm
+	install -d ${D}${R}/bin
+	cp fasm ${D}${R}/bin || die "could not install fasm"
+}

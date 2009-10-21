@@ -9,6 +9,7 @@ MAKEOPTS=-j3
 mkdir -p ${TMP}/cross-binutils/build
 mkdir -p ${TMP}/cross-gcc/build
 mkdir -p ${TMP}/cross-fpc
+mkdir -p ${TMP}/cross-fasm
 
 cd ${TMP}/cross-binutils
 echo "[binutils] Herunterladen..."
@@ -68,6 +69,26 @@ cp compiler/ppc386 ${PREFIX}/bin/fpc
 cp utils/fpcm/fpcmake ${PREFIX}/bin/fpcmake
 echo -e "[fpc] Abgeschlossen\n"
 
+cd ${TMP}/cross-fasm
+echo "[fasm] Herunterladen..."
+[ -f fasm-1.69.09.tar.gz ] || wget -q http://flatassembler.net/fasm-1.69.09.tar.gz || exit -1
+echo "[fasm] Entpacken..."
+tar -xzf fasm-1.69.09.tar.gz || exit -1
+echo "[fasm] Linux-FASM linken..."
+cd fasm
+gcc -m32 fasm.o -o fasm || exit -1
+echo "[fasm] Patch anwenden..."
+patch source/formats.inc ${PATCHES}/fasm/1.69.09/formats.patch || exit -1
+echo "[fasm] Assemblieren..."
+./fasm source/libc/fasm.asm fasm.o || exit -1
+echo "[fasm] Týndur-FASM linken..."
+gcc -m32 fasm.o -o fasm || exit -1
+echo "[fasm] Installieren..."
+cp fasm ${PREFIX}/bin/fasm
+echo -e "[fasm] Abgeschlossen\n"
+
+
 rm -rf ${TMP}/cross-binutils/binutils-2.18/
 rm -rf ${TMP}/cross-gcc/gcc-4.2.2/
 rm -rf ${TMP}/cross-fpc/fpc/
+rm -rf ${TMP}/cross-fasm/fasm/
