@@ -83,11 +83,12 @@ Index: src/git-1.6.4/compat/tyndur.h
 ===================================================================
 --- /dev/null
 +++ src/git-1.6.4/compat/tyndur.h
-@@ -0,0 +1,143 @@
+@@ -0,0 +1,156 @@
 +#ifndef COMPAT_TYNDUR_H
 +#define COMPAT_TYNDUR_H
 +
 +#include <stdio.h>
++#include <string.h>
 +#include <sys/socket.h>
 +#include <netinet/in.h>
 +#include <netdb.h>
@@ -100,9 +101,26 @@ Index: src/git-1.6.4/compat/tyndur.h
 +#include <errno.h>
 +#include <readline/readline.h>
 +
-+#define SIGCHLD 1000
-+#define ENAMETOOLONG 2000
 +#define ECONNABORTED 2001
++
++#define has_dos_drive_prefix(x) _service_absolute(x)
++
++static int _service_absolute(const char* path)
++{
++    const char* colon = strchr(path, ':');
++    const char* pipe = strchr(path, '|');
++    const char* slash = strchr(path, '/');
++
++    return
++        colon
++        && (!pipe || colon < pipe)
++        && (!slash || colon < slash);
++}
++
++
++static inline int _symlink(const char *oldpath, const char *newpath)
++{ errno = ENOSYS; return -1; }
++#define symlink _symlink
 +
 +/* fnmatch.h */
 +enum {
@@ -147,11 +165,6 @@ Index: src/git-1.6.4/compat/tyndur.h
 +#define SA_RESTART 0
 +
 +/* unistd.h */
-+static int getpagesize(void)
-+{
-+    return 0x1000;
-+}
-+
 +static int fsync(int fd)
 +{
 +    return 0;
@@ -494,3 +507,16 @@ Index: src/git-1.6.4/builtin-help.c
  }
  
  static void get_html_page_path(struct strbuf *page_path, const char *page)
+Index: src/git-1.6.4/editor.c
+===================================================================
+--- src.orig/git-1.6.4/editor.c
++++ src/git-1.6.4/editor.c
+@@ -19,7 +19,7 @@ int launch_editor(const char *path, stru
+ 		return error("Terminal is dumb but no VISUAL nor EDITOR defined.");
+ 
+ 	if (!editor)
+-		editor = "vi";
++		editor = "kedit";
+ 
+ 	if (strcmp(editor, ":")) {
+ 		size_t len = strlen(editor);
