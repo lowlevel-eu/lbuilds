@@ -1,0 +1,54 @@
+Index: src/ctris-0.42/game.c
+===================================================================
+--- src.orig/ctris-0.42/game.c
++++ src/ctris-0.42/game.c
+@@ -54,7 +54,7 @@ void remove_rows(WINDOW *win, char board
+ 	if(removed_rows > 0)
+ 	{
+ 		refresh_win(win);
+-		usleep(REMOVE_SPLASH_TIME);
++		msleep((REMOVE_SPLASH_TIME) / 1000);
+ 	}
+ }
+ 
+@@ -170,7 +170,7 @@ unsigned int start_game()
+ 					quit = 1;
+ 					break;
+ 			}
+-			usleep(SPEED_CONST_2 - level * SPEED_CONST_1);
++			msleep((SPEED_CONST_2 - level * SPEED_CONST_1) / 1000);
+ 			if(run > 15)
+ 			{
+ 				if(check_brick(board, cur_brick, x, y + 1) == 0)
+Index: src/ctris-0.42/ctris.c
+===================================================================
+--- src.orig/ctris-0.42/ctris.c
++++ src/ctris-0.42/ctris.c
+@@ -31,10 +31,14 @@ int main(int argc, char *argv[])
+ {
+ 	int optchr;
+ 	char *name;
++    const char* home_dir = getenv("HOME");
+ 	
+ 	rseed = time(NULL);
+ 	
+-	snprintf(highscore_file_path, 256, "%s/.ctris_highscore.dat", getenv("HOME"));
++    if (home_dir == NULL) {
++        home_dir = "file:/tmp/";
++    }
++	snprintf(highscore_file_path, 256, "%s/.ctris_highscore.dat", home_dir);
+ 	
+ 	if((name = getenv("USER")) != NULL)
+ 	{
+Index: src/ctris-0.42/screen.c
+===================================================================
+--- src.orig/ctris-0.42/screen.c
++++ src/ctris-0.42/screen.c
+@@ -433,6 +433,7 @@ char yes_no_question(const char *questio
+ 				break;
+ 			case ' ':
+ 			case 10:
++            case KEY_ENTER:
+ 				run = 1;
+ 				break;
+ 		}

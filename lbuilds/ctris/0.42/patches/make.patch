@@ -1,0 +1,26 @@
+Index: src/ctris-0.42/Makefile
+===================================================================
+--- src.orig/ctris-0.42/Makefile
++++ src/ctris-0.42/Makefile
+@@ -1,6 +1,6 @@
+ 
+-MANDIR=$(DESTDIR)/usr/share/man/man6/
+-BINDIR=$(DESTDIR)/usr/games/
++MANDIR=$(DESTDIR)/man
++BINDIR=$(DESTDIR)/bin
+ 
+ CC=gcc
+ MKDIR=mkdir -p
+@@ -36,9 +36,10 @@ clean:
+ 
+ 
+ install:
+-	$(MKDIR) $(BINDIR) $(MANDIR)
++	$(MKDIR) $(BINDIR)
+ 	$(INSTALL) $(OUTPUT) $(BINDIR)
+-	$(INSTALL) -m 644 $(MANS) $(MANDIR)
++#	$(MKDIR) $(MANDIR)
++#	$(INSTALL) -m 644 $(MANS) $(MANDIR)
+ 
+ 
+ 
