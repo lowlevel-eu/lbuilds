@@ -1,0 +1,646 @@
+Index: bash-3.2.48/expr.c
+===================================================================
+--- bash-3.2.48.orig/expr.c
++++ bash-3.2.48/expr.c
+@@ -153,7 +153,7 @@ static void	readtok __P((void));	/* lexi
+ 
+ static intmax_t	expr_streval __P((char *, int));
+ static intmax_t	strlong __P((char *));
+-static void	evalerror __P((char *));
++static void	evalerror __P((const char *));
+ 
+ static void	pushexp __P((void));
+ static void	popexp __P((void));
+@@ -1192,7 +1192,7 @@ readtok ()
+ 
+ static void
+ evalerror (msg)
+-     char *msg;
++     const char *msg;
+ {
+   char *name, *t;
+ 
+Index: bash-3.2.48/externs.h
+===================================================================
+--- bash-3.2.48.orig/externs.h
++++ bash-3.2.48/externs.h
+@@ -203,7 +203,7 @@ extern int getdtablesize __P((void));
+ #endif /* !HAVE_GETDTABLESIZE */
+ 
+ #if !defined (HAVE_GETHOSTNAME)
+-extern int gethostname __P((char *, int));
++extern int gethostname __P((char *, size_t));
+ #endif /* !HAVE_GETHOSTNAME */
+ 
+ extern int getmaxgroups __P((void));
+Index: bash-3.2.48/general.c
+===================================================================
+--- bash-3.2.48.orig/general.c
++++ bash-3.2.48/general.c
+@@ -330,7 +330,7 @@ sh_unset_nodelay_mode (fd)
+ {
+   int flags, bflags;
+ 
+-  if ((flags = fcntl (fd, F_GETFL, 0)) < 0)
++//  if ((flags = fcntl (fd, F_GETFL, 0)) < 0)
+     return -1;
+ 
+   bflags = 0;
+@@ -348,7 +348,8 @@ sh_unset_nodelay_mode (fd)
+   if (flags & bflags)
+     {
+       flags &= ~bflags;
+-      return (fcntl (fd, F_SETFL, flags));
++//      return (fcntl (fd, F_SETFL, flags));
++        return -1;
+     }
+ 
+   return 0;
+@@ -359,7 +360,8 @@ int
+ sh_validfd (fd)
+      int fd;
+ {
+-  return (fcntl (fd, F_GETFD, 0) >= 0);
++  //return (fcntl (fd, F_GETFD, 0) >= 0);
++  return (fdopen(fd, NULL) != NULL);
+ }
+ 
+ /* There is a bug in the NeXT 2.1 rlogind that causes opens
+@@ -378,6 +380,9 @@ check_dev_tty ()
+   int tty_fd;
+   char *tty;
+ 
++  return;
++
++#if 0
+   tty_fd = open ("/dev/tty", O_RDWR|O_NONBLOCK);
+ 
+   if (tty_fd < 0)
+@@ -388,6 +393,7 @@ check_dev_tty ()
+       tty_fd = open (tty, O_RDWR|O_NONBLOCK);
+     }
+   close (tty_fd);
++#endif
+ }
+ 
+ /* Return 1 if PATH1 and PATH2 are the same file.  This is kind of
+@@ -442,7 +448,7 @@ move_to_high_fd (fd, check_new, maxfd)
+     nfds = maxfd;
+ 
+   for (nfds--; check_new && nfds > 3; nfds--)
+-    if (fcntl (nfds, F_GETFD, &ignore) == -1)
++//  if (fcntl (nfds, F_GETFD, &ignore) == -1)
+       break;
+ 
+   if (nfds > 3 && fd != nfds && (script_fd = dup2 (fd, nfds)) != -1)
+Index: bash-3.2.48/include/filecntl.h
+===================================================================
+--- bash-3.2.48.orig/include/filecntl.h
++++ bash-3.2.48/include/filecntl.h
+@@ -30,8 +30,13 @@
+ 
+ #define FD_NCLOEXEC    0
+ 
++#ifndef TYNDUR
+ #define SET_CLOSE_ON_EXEC(fd)  (fcntl ((fd), F_SETFD, FD_CLOEXEC))
+ #define SET_OPEN_ON_EXEC(fd)   (fcntl ((fd), F_SETFD, FD_NCLOEXEC))
++#else
++#define SET_CLOSE_ON_EXEC(fd)  do { } while(0)
++#define SET_OPEN_ON_EXEC(fd)   do { } while(0)
++#endif
+ 
+ /* How to open a file in non-blocking mode, the Posix.1 way. */
+ #if !defined (O_NONBLOCK)
+Index: bash-3.2.48/include/posixwait.h
+===================================================================
+--- bash-3.2.48.orig/include/posixwait.h
++++ bash-3.2.48/include/posixwait.h
+@@ -32,6 +32,10 @@
+ #  endif
+ #endif  /* !HAVE_SYS_WAIT_H */
+ 
++#if defined(TYNDUR) && !defined(_POSIX_VERSION)
++#define _POSIX_VERSION
++#endif
++
+ /* How to get the status of a job.  For Posix, this is just an
+    int, but for other systems we have to crack the union wait. */
+ #if !defined (_POSIX_VERSION)
+Index: bash-3.2.48/include/shtty.h
+===================================================================
+--- bash-3.2.48.orig/include/shtty.h
++++ bash-3.2.48/include/shtty.h
+@@ -36,6 +36,10 @@
+ #  endif
+ #endif
+ 
++#if defined(TYNDUR) && !defined(TERMIOS_TTY_DRIVER)
++#define TERMIOS_TTY_DRIVER
++#endif
++
+ /*
+  * The _POSIX_SOURCE define is to avoid multiple symbol definitions
+  * between sys/ioctl.h and termios.h.  Ditto for the test against SunOS4
+Index: bash-3.2.48/syntax.h
+===================================================================
+--- bash-3.2.48.orig/syntax.h
++++ bash-3.2.48/syntax.h
+@@ -21,6 +21,8 @@
+ #ifndef _SYNTAX_H_
+ #define _SYNTAX_H_
+ 
++#include <ctype.h>
++
+ /* Defines for use by mksyntax.c */
+ 
+ #define slashify_in_quotes "\\`$\"\n"
+Index: bash-3.2.48/builtins/cd.def
+===================================================================
+--- bash-3.2.48.orig/builtins/cd.def
++++ bash-3.2.48/builtins/cd.def
+@@ -22,6 +22,8 @@ Foundation, 59 Temple Place, Suite 330,
+ $PRODUCES cd.c
+ #include <config.h>
+ 
++#define ENAMETOOLONG 1234
++
+ #if defined (HAVE_UNISTD_H)
+ #  ifdef _MINIX
+ #    include <sys/types.h>
+Index: bash-3.2.48/builtins/read.def
+===================================================================
+--- bash-3.2.48.orig/builtins/read.def
++++ bash-3.2.48/builtins/read.def
+@@ -66,6 +66,8 @@ $END
+ #  include <io.h>
+ #endif
+ 
++#define ESPIPE 1235
++
+ #include "../bashintl.h"
+ 
+ #include "../shell.h"
+Index: bash-3.2.48/builtins/ulimit.def
+===================================================================
+--- bash-3.2.48.orig/builtins/ulimit.def
++++ bash-3.2.48/builtins/ulimit.def
+@@ -99,7 +99,7 @@ extern int errno;
+ #    undef _KERNEL
+ #  endif
+ #else
+-#  include <sys/times.h>
++//#  include <sys/times.h>
+ #endif
+ 
+ #if defined (HAVE_LIMITS_H)
+Index: bash-3.2.48/input.c
+===================================================================
+--- bash-3.2.48.orig/input.c
++++ bash-3.2.48/input.c
+@@ -230,10 +230,10 @@ save_bash_input (fd, new_fd)
+ 
+   /* Now take care of duplicating the file descriptor that bash is
+      using for input, so we can reinitialize it later. */
+-  nfd = (new_fd == -1) ? fcntl (fd, F_DUPFD, 10) : new_fd;
++  nfd = (new_fd == -1) ? /*fcntl (fd, F_DUPFD, 10)*/ -1 : new_fd;
+   if (nfd == -1)
+     {
+-      if (fcntl (fd, F_GETFD, 0) == 0)
++      if (/*fcntl (fd, F_GETFD, 0) == 0*/ 1)
+ 	sys_error (_("cannot allocate new file descriptor for bash input from fd %d"), fd);
+       return -1;
+     }
+Index: bash-3.2.48/lib/glob/glob.c
+===================================================================
+--- bash-3.2.48.orig/lib/glob/glob.c
++++ bash-3.2.48/lib/glob/glob.c
+@@ -481,8 +481,8 @@ glob_vector (pat, dir, flags)
+ 	    break;
+ 
+ 	  /* If this directory entry is not to be used, try again. */
+-	  if (REAL_DIR_ENTRY (dp) == 0)
+-	    continue;
++/*	  if (REAL_DIR_ENTRY (dp) == 0)
++	    continue;*/
+ 
+ #if 0
+ 	  if (dp->d_name == 0 || *dp->d_name == 0)
+Index: bash-3.2.48/lib/malloc/malloc.c
+===================================================================
+--- bash-3.2.48.orig/lib/malloc/malloc.c
++++ bash-3.2.48/lib/malloc/malloc.c
+@@ -60,6 +60,8 @@ what you give them.   Help stamp out sof
+ /* SCO 3.2v4 getcwd and possibly other libc routines fail with MEMSCRAMBLE;
+    handled by configure. */
+ 
++#ifndef TYNDUR
++
+ #if defined (HAVE_CONFIG_H)
+ #  include <config.h>
+ #endif /* HAVE_CONFIG_H */
+@@ -549,6 +551,8 @@ lesscore (nu)			/* give system back some
+ #endif
+ }
+ 
++#define SIGCHLD 42
++
+ /* Ask system for more memory; add to NEXTF[NU].  BUSY[NU] must be set to 1. */  
+ static void
+ morecore (nu)
+@@ -1303,3 +1307,5 @@ cfree (mem)
+   internal_cfree (mem, (char *)NULL, 0, 0);
+ }
+ #endif
++
++#endif
+Index: bash-3.2.48/lib/readline/rltty.c
+===================================================================
+--- bash-3.2.48.orig/lib/readline/rltty.c
++++ bash-3.2.48/lib/readline/rltty.c
+@@ -152,6 +152,11 @@ set_winsize (tty)
+ #endif /* TIOCGWINSZ */
+ }
+ 
++#ifdef NEW_TTY_DRIVER
++#undef NEW_TTY_DRIVER
++//#define NO_TTY_DRIVER
++#endif
++
+ #if defined (NO_TTY_DRIVER)
+ /* Nothing */
+ #elif defined (NEW_TTY_DRIVER)
+@@ -788,7 +793,7 @@ rl_restart_output (count, key)
+       tcflow (fildes, TCOON);
+     }
+ #    else /* !ksr1 */
+-  tcflow (fildes, TCOON);		/* Simulate a ^Q. */
++//  tcflow (fildes, TCOON);		/* Simulate a ^Q. */
+ #    endif /* !ksr1 */
+ #  else /* !TERMIOS_TTY_DRIVER */
+ #    if defined (TCXONC)
+@@ -822,7 +827,7 @@ rl_stop_output (count, key)
+ #  if defined (__ksr1__)
+   ksrflow = 1;
+ #  endif /* ksr1 */
+-  tcflow (fildes, TCOOFF);
++//  tcflow (fildes, TCOOFF);
+ # else
+ #   if defined (TCXONC)
+   ioctl (fildes, TCXONC, TCOON);
+Index: bash-3.2.48/lib/readline/rltty.h
+===================================================================
+--- bash-3.2.48.orig/lib/readline/rltty.h
++++ bash-3.2.48/lib/readline/rltty.h
+@@ -24,6 +24,9 @@
+ #if !defined (_RLTTY_H_)
+ #define _RLTTY_H_
+ 
++#undef NEW_TTY_DRIVER
++#define TERMIOS_TTY_DRIVER
++
+ /* Posix systems use termios and the Posix signal functions. */
+ #if defined (TERMIOS_TTY_DRIVER)
+ #  include <termios.h>
+Index: bash-3.2.48/lib/sh/getcwd.c
+===================================================================
+--- bash-3.2.48.orig/lib/sh/getcwd.c
++++ bash-3.2.48/lib/sh/getcwd.c
+@@ -169,7 +169,7 @@ getcwd (buf, size)
+ 	      (d->d_name[1] == '\0' ||
+ 		(d->d_name[1] == '.' && d->d_name[2] == '\0')))
+ 	    continue;
+-	  if (mount_point || d->d_fileno == thisino)
++	  if (mount_point /*|| d->d_fileno == thisino*/)
+ 	    {
+ 	      char *name;
+ 
+Index: bash-3.2.48/lib/sh/oslib.c
+===================================================================
+--- bash-3.2.48.orig/lib/sh/oslib.c
++++ bash-3.2.48/lib/sh/oslib.c
+@@ -187,6 +187,10 @@ bzero (s, n)
+ }
+ #endif
+ 
++#ifdef TYNDUR
++#define HAVE_GETHOSTNAME
++#endif
++
+ #if !defined (HAVE_GETHOSTNAME)
+ #  if defined (HAVE_UNAME)
+ #    include <sys/utsname.h>
+Index: bash-3.2.48/lib/sh/strftime.c
+===================================================================
+--- bash-3.2.48.orig/lib/sh/strftime.c
++++ bash-3.2.48/lib/sh/strftime.c
+@@ -64,8 +64,8 @@
+ #endif
+ #if defined(TM_IN_SYS_TIME)
+ #include <sys/types.h>
+-#include <sys/time.h>
+ #endif
++#include <sys/time.h>
+ 
+ #include <stdlib.h>
+ #include <string.h>
+@@ -134,6 +134,10 @@ max(int a, int b)
+ 
+ /* strftime --- produce formatted time */
+ 
++struct timezone {
++    int tz_minuteswest;
++};
++
+ size_t
+ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
+ {
+@@ -206,7 +210,7 @@ strftime(char *s, size_t maxsize, const
+ 				strcpy(savetz, tz);
+ 			}
+ 		}
+-		tzset();
++//		tzset();
+ 		first = 0;
+ 	}
+ 	/* if we have a saved TZ, and it is different, recapture and reset */
+@@ -220,7 +224,7 @@ strftime(char *s, size_t maxsize, const
+ 			}
+ 		} else
+ 			strcpy(savetz, tz);
+-		tzset();
++//		tzset();
+ 	}
+ #endif	/* POSIX_SEMANTICS */
+ 
+@@ -522,8 +526,9 @@ strftime(char *s, size_t maxsize, const
+ 			strcpy(tbuf, timeptr->tm_name);
+ #else
+ 			gettimeofday(& tv, & zone);
+-			strcpy(tbuf, timezone(zone.tz_minuteswest,
+-						timeptr->tm_isdst > 0));
++			strcpy(tbuf, "$TZ");
++/*			strcpy(tbuf, timezone(zone.tz_minuteswest,
++						timeptr->tm_isdst > 0));*/
+ #endif /* HAVE_TM_NAME */
+ #endif /* HAVE_TM_ZONE */
+ #endif /* HAVE_TZNAME */
+Index: bash-3.2.48/lib/sh/strtod.c
+===================================================================
+--- bash-3.2.48.orig/lib/sh/strtod.c
++++ bash-3.2.48/lib/sh/strtod.c
+@@ -160,6 +160,7 @@ strtod (nptr, endptr)
+   /* Multiply NUM by 10 to the EXPONENT power,
+      checking for overflow and underflow.  */
+ 
++/*
+   if (exponent < 0)
+     {
+       if (num < DBL_MIN * pow (10.0, (double) -exponent))
+@@ -172,13 +173,14 @@ strtod (nptr, endptr)
+     }
+ 
+   num *= pow (10.0, (double) exponent);
++*/
+ 
+   return num * sign;
+ 
+ overflow:
+   /* Return an overflow error.  */
+   errno = ERANGE;
+-  return HUGE_VAL * sign;
++  return 0.0; //HUGE_VAL * sign;
+ 
+ underflow:
+   /* Return an underflow error.  */
+Index: bash-3.2.48/lib/sh/winsize.c
+===================================================================
+--- bash-3.2.48.orig/lib/sh/winsize.c
++++ bash-3.2.48/lib/sh/winsize.c
+@@ -28,7 +28,7 @@
+ #  include <unistd.h>
+ #endif
+ 
+-#include <sys/ioctl.h>
++//#include <sys/ioctl.h>
+ 
+ #if !defined (STRUCT_WINSIZE_IN_SYS_IOCTL)
+ /* For struct winsize on SCO */
+Index: bash-3.2.48/redir.c
+===================================================================
+--- bash-3.2.48.orig/redir.c
++++ bash-3.2.48/redir.c
+@@ -756,7 +756,7 @@ do_redirection_internal (redirect, flags
+ 	  if (flags & RX_UNDOABLE)
+ 	    {
+ 	      /* Only setup to undo it if the thing to undo is active. */
+-	      if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
++	      if ((fd != redirector) && /*(fcntl (redirector, F_GETFD, 0) != -1)*/ 1)
+ 		add_undo_redirect (redirector, ri);
+ 	      else
+ 		add_undo_close_redirect (redirector);
+@@ -835,7 +835,7 @@ do_redirection_internal (redirect, flags
+ 	      if (flags & RX_UNDOABLE)
+ 	        {
+ 		  /* Only setup to undo it if the thing to undo is active. */
+-		  if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
++		  if ((fd != redirector) && /*(fcntl (redirector, F_GETFD, 0) != -1)*/ 0)
+ 		    add_undo_redirect (redirector, ri);
+ 		  else
+ 		    add_undo_close_redirect (redirector);
+@@ -877,7 +877,7 @@ do_redirection_internal (redirect, flags
+ 	  if (flags & RX_UNDOABLE)
+ 	    {
+ 	      /* Only setup to undo it if the thing to undo is active. */
+-	      if (fcntl (redirector, F_GETFD, 0) != -1)
++	      if (/*fcntl (redirector, F_GETFD, 0) != -1*/ 0)
+ 		add_undo_redirect (redirector, ri);
+ 	      else
+ 		add_undo_close_redirect (redirector);
+@@ -910,7 +910,7 @@ do_redirection_internal (redirect, flags
+ 	  if (((fcntl (redir_fd, F_GETFD, 0) == 1) || redir_fd < 2 || (flags & RX_CLEXEC)) &&
+ 	       (redirector > 2))
+ #else
+-	  if (((fcntl (redir_fd, F_GETFD, 0) == 1) || (redir_fd < 2 && (flags & RX_INTERNAL)) || (flags & RX_CLEXEC)) &&
++	  if ((( /*fcntl (redir_fd, F_GETFD, 0) == 1*/ 0) || (redir_fd < 2 && (flags & RX_INTERNAL)) || (flags & RX_CLEXEC)) &&
+ 	       (redirector > 2))
+ #endif
+ 	    SET_CLOSE_ON_EXEC (redirector);
+@@ -924,7 +924,7 @@ do_redirection_internal (redirect, flags
+     case r_close_this:
+       if (flags & RX_ACTIVE)
+ 	{
+-	  if ((flags & RX_UNDOABLE) && (fcntl (redirector, F_GETFD, 0) != -1))
++	  if ((flags & RX_UNDOABLE) && 0 /*(fcntl (redirector, F_GETFD, 0) != -1)*/)
+ 	    add_undo_redirect (redirector, ri);
+ 
+ #if defined (BUFFERED_INPUT)
+@@ -958,7 +958,7 @@ add_undo_redirect (fd, ri)
+   int new_fd, clexec_flag;
+   REDIRECT *new_redirect, *closer, *dummy_redirect;
+ 
+-  new_fd = fcntl (fd, F_DUPFD, SHELL_FD_BASE);
++  new_fd = -1; //fcntl (fd, F_DUPFD, SHELL_FD_BASE);
+ 
+   if (new_fd < 0)
+     {
+@@ -966,7 +966,7 @@ add_undo_redirect (fd, ri)
+       return (-1);
+     }
+ 
+-  clexec_flag = fcntl (fd, F_GETFD, 0);
++  clexec_flag = 0; //fcntl (fd, F_GETFD, 0);
+ 
+   rd.dest = 0;
+   closer = make_redirection (new_fd, r_close_this, rd);
+Index: bash-3.2.48/shell.c
+===================================================================
+--- bash-3.2.48.orig/shell.c
++++ bash-3.2.48/shell.c
+@@ -1161,10 +1161,12 @@ uidget ()
+ void
+ disable_priv_mode ()
+ {
++#if 0
+   setuid (current_user.uid);
+   setgid (current_user.gid);
+   current_user.euid = current_user.uid;
+   current_user.egid = current_user.gid;
++#endif
+ }
+ 
+ static int
+@@ -1602,7 +1604,7 @@ get_current_user_info ()
+ 	  current_user.shell = savestring ("/bin/sh");
+ 	  current_user.home_dir = savestring ("/");
+ 	}
+-      endpwent ();
++//      endpwent ();
+     }
+ }
+ 
+Index: bash-3.2.48/findcmd.c
+===================================================================
+--- bash-3.2.48.orig/findcmd.c
++++ bash-3.2.48/findcmd.c
+@@ -165,12 +165,14 @@ executable_file (file)
+   return ((s & FS_EXECABLE) && ((s & FS_DIRECTORY) == 0));
+ }
+ 
++#ifndef TYNDUR
+ int
+ is_directory (file)
+      const char *file;
+ {
+   return (file_status (file) & FS_DIRECTORY);
+ }
++#endif
+ 
+ int
+ executable_or_directory (file)
+Index: bash-3.2.48/variables.c
+===================================================================
+--- bash-3.2.48.orig/variables.c
++++ bash-3.2.48/variables.c
+@@ -3155,15 +3155,23 @@ make_func_export_array ()
+ #define add_to_export_env(envstr,do_alloc) \
+ do \
+   { \
++    putenv(envstr); \
++  } while (0)
++
++#if 0
++#define add_to_export_env(envstr,do_alloc) \
++do \
++  { \
+     if (export_env_index >= (export_env_size - 1)) \
+       { \
+ 	export_env_size += 16; \
+ 	export_env = strvec_resize (export_env, export_env_size); \
+-	environ = export_env; \
++	environ = export_env;/ \
+       } \
+     export_env[export_env_index++] = (do_alloc) ? savestring (envstr) : envstr; \
+     export_env[export_env_index] = (char *)NULL; \
+   } while (0)
++#endif
+ 
+ /* Add ASSIGN to EXPORT_ENV, or supercede a previous assignment in the
+    array with the same left-hand side.  Return the new EXPORT_ENV. */
+@@ -3269,7 +3277,7 @@ maybe_make_export_env ()
+ 	{
+ 	  export_env_size = new_size;
+ 	  export_env = strvec_resize (export_env, export_env_size);
+-	  environ = export_env;
++	  //environ = export_env;
+ 	}
+       export_env[export_env_index = 0] = (char *)NULL;
+ 
+Index: bash-3.2.48/bashline.c
+===================================================================
+--- bash-3.2.48.orig/bashline.c
++++ bash-3.2.48/bashline.c
+@@ -1795,7 +1795,8 @@ bash_groupname_completion_function (text
+      const char *text;
+      int state;
+ {
+-#if defined (__WIN32__) || defined (__OPENNT) || !defined (HAVE_GRP_H)
++#if defined (__WIN32__) || defined (__OPENNT) || !defined (HAVE_GRP_H) \
++    ||  defined(TYNDUR)
+   return ((char *)NULL);
+ #else
+   static char *gname = (char *)NULL;
+Index: bash-3.2.48/execute_cmd.c
+===================================================================
+--- bash-3.2.48.orig/execute_cmd.c
++++ bash-3.2.48/execute_cmd.c
+@@ -3933,7 +3933,7 @@ shell_execve (command, args, env)
+   int sample_len;
+ 
+   SETOSTYPE (0);		/* Some systems use for USG/POSIX semantics */
+-  execve (command, args, env);
++//  execve (command, args, env);
+   i = errno;			/* error from execve() */
+   SETOSTYPE (1);
+ 
+Index: bash-3.2.48/lib/readline/complete.c
+===================================================================
+--- bash-3.2.48.orig/lib/readline/complete.c
++++ bash-3.2.48/lib/readline/complete.c
+@@ -1849,7 +1849,7 @@ rl_username_completion_function (text, s
+ 
+       username = savestring (&text[first_char_loc]);
+       namelen = strlen (username);
+-      setpwent ();
++//      setpwent ();
+     }
+ 
+ #if defined (HAVE_GETPWENT)
+Index: bash-3.2.48/lib/readline/signals.c
+===================================================================
+--- bash-3.2.48.orig/lib/readline/signals.c
++++ bash-3.2.48/lib/readline/signals.c
+@@ -29,6 +29,10 @@
+ #include <sys/types.h>
+ #include <signal.h>
+ 
++#define SIGTTIN 21
++#define SIGTTOU 22
++
++
+ #if defined (HAVE_UNISTD_H)
+ #  include <unistd.h>
+ #endif /* HAVE_UNISTD_H */
+Index: bash-3.2.48/nojobs.c
+===================================================================
+--- bash-3.2.48.orig/nojobs.c
++++ bash-3.2.48/nojobs.c
+@@ -34,6 +34,9 @@
+ #include <signal.h>
+ #include <errno.h>
+ 
++#define SIGTTIN 21
++#define SIGTTOU 22
++
+ #if defined (BUFFERED_INPUT)
+ #  include "input.h"
+ #endif

@@ -1,0 +1,50 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Bash"
+SRC_URI="http://ftp.gnu.org/gnu/bash/bash-3.2.48.tar.gz"
+
+LICENSE="GPL"
+
+RUN_DEPEND=""
+BUILD_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+	lunpack ${P}.tar.gz
+	cd ${MY_S}
+
+    ln -s ${F} patches
+    [ -f ${F}/series ] && ln -s ${F}/series series
+    for i in ${F}/*.patch; do
+        [ -L series ] || echo `basename $i` >> series
+        (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
+    done
+    (which quilt > /dev/null 2>&1) && quilt push -a || die "Fehler beim Anwenden der Patches"
+}
+
+src_configure() {
+	cd ${MY_S}
+
+	./configure \
+        CC=`tc-cc` \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+        --disable-nls \
+        --without-bash-malloc \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+	lmake
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+}

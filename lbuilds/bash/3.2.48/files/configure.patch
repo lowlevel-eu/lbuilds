@@ -1,0 +1,56 @@
+Index: bash-3.2.48/support/config.sub
+===================================================================
+--- bash-3.2.48.orig/support/config.sub
++++ bash-3.2.48/support/config.sub
+@@ -1115,7 +1115,7 @@ case $os in
+ 	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+-	      | -powermax* | -dnix*)
++	      | -powermax* | -dnix* | -tyndur* )
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: bash-3.2.48/configure
+===================================================================
+--- bash-3.2.48.orig/configure
++++ bash-3.2.48/configure
+@@ -25323,9 +25323,9 @@ if test "${bash_cv_getenv_redef+set}" =
+   echo $ECHO_N "(cached) $ECHO_C" >&6
+ else
+   if test "$cross_compiling" = yes; then
+-  { echo "$as_me:$LINENO: WARNING: cannot check getenv redefinition if cross compiling -- defaulting to yes" >&5
+-echo "$as_me: WARNING: cannot check getenv redefinition if cross compiling -- defaulting to yes" >&2;}
+-    bash_cv_getenv_redef=yes
++  { echo "$as_me:$LINENO: WARNING: cannot check getenv redefinition if cross compiling -- defaulting to no" >&5
++echo "$as_me: WARNING: cannot check getenv redefinition if cross compiling -- defaulting to no" >&2;}
++    bash_cv_getenv_redef=no
+ 
+ else
+   cat >conftest.$ac_ext <<_ACEOF
+@@ -25407,9 +25407,9 @@ if test "${bash_cv_getcwd_malloc+set}" =
+   echo $ECHO_N "(cached) $ECHO_C" >&6
+ else
+   if test "$cross_compiling" = yes; then
+-  { echo "$as_me:$LINENO: WARNING: cannot check whether getcwd allocates memory when cross-compiling -- defaulting to no" >&5
+-echo "$as_me: WARNING: cannot check whether getcwd allocates memory when cross-compiling -- defaulting to no" >&2;}
+-    bash_cv_getcwd_malloc=no
++  { echo "$as_me:$LINENO: WARNING: cannot check whether getcwd allocates memory when cross-compiling -- defaulting to yes" >&5
++echo "$as_me: WARNING: cannot check whether getcwd allocates memory when cross-compiling -- defaulting to yes" >&2;}
++    bash_cv_getcwd_malloc=yes
+ 
+ else
+   cat >conftest.$ac_ext <<_ACEOF
+@@ -26551,9 +26551,9 @@ if test "${bash_cv_unusable_rtsigs+set}"
+   echo $ECHO_N "(cached) $ECHO_C" >&6
+ else
+   if test "$cross_compiling" = yes; then
+-  { echo "$as_me:$LINENO: WARNING: cannot check real-time signals if cross compiling -- defaulting to yes" >&5
+-echo "$as_me: WARNING: cannot check real-time signals if cross compiling -- defaulting to yes" >&2;}
+-     bash_cv_unusable_rtsigs=yes
++  { echo "$as_me:$LINENO: WARNING: cannot check real-time signals if cross compiling -- defaulting to no" >&5
++echo "$as_me: WARNING: cannot check real-time signals if cross compiling -- defaulting to no" >&2;}
++     bash_cv_unusable_rtsigs=no
+ 
+ else
+   cat >conftest.$ac_ext <<_ACEOF
