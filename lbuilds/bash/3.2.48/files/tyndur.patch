@@ -496,7 +496,16 @@ Index: bash-3.2.48/shell.c
 ===================================================================
 --- bash-3.2.48.orig/shell.c
 +++ bash-3.2.48/shell.c
-@@ -1161,10 +1161,12 @@ uidget ()
+@@ -78,6 +78,8 @@
+ #  include <opennt/opennt.h>
+ #endif
+ 
++#define isatty(x) 1
++
+ #if !defined (HAVE_GETPW_DECLS)
+ extern struct passwd *getpwuid ();
+ #endif /* !HAVE_GETPW_DECLS */
+@@ -1161,10 +1163,12 @@ uidget ()
  void
  disable_priv_mode ()
  {
@@ -509,7 +518,7 @@ Index: bash-3.2.48/shell.c
  }
  
  static int
-@@ -1602,7 +1604,7 @@ get_current_user_info ()
+@@ -1602,7 +1606,7 @@ get_current_user_info ()
  	  current_user.shell = savestring ("/bin/sh");
  	  current_user.home_dir = savestring ("/");
  	}
@@ -644,3 +653,45 @@ Index: bash-3.2.48/nojobs.c
  #if defined (BUFFERED_INPUT)
  #  include "input.h"
  #endif
+Index: bash-3.2.48/lib/readline/input.c
+===================================================================
+--- bash-3.2.48.orig/lib/readline/input.c
++++ bash-3.2.48/lib/readline/input.c
+@@ -471,8 +471,12 @@ rl_getc (stream)
+ #endif
+       result = read (fileno (stream), &c, sizeof (unsigned char));
+ 
+-      if (result == sizeof (unsigned char))
++      if (result == sizeof (unsigned char)) {
++#ifdef TYNDUR
++          putchar(c);
++#endif
+ 	return (c);
++        }
+ 
+       /* If zero characters are returned, then the file that we are
+ 	 reading from is empty!  Return EOF in that case. */
+@@ -498,8 +502,10 @@ rl_getc (stream)
+ 
+       if (errno == X_EWOULDBLOCK || errno == X_EAGAIN)
+ 	{
++#ifndef TYNDUR
+ 	  if (sh_unset_nodelay_mode (fileno (stream)) < 0)
+ 	    return (EOF);
++#endif
+ 	  continue;
+ 	}
+ 
+Index: bash-3.2.48/parse.y
+===================================================================
+--- bash-3.2.48.orig/parse.y
++++ bash-3.2.48/parse.y
+@@ -1923,7 +1923,7 @@ shell_getc (remove_quoted_newline)
+ 	 that case, or we will have big trouble. */
+ 	  notify_and_cleanup ();
+ #else /* !JOB_CONTROL */
+-	  cleanup_dead_jobs ();
++//	  cleanup_dead_jobs ();
+ #endif /* !JOB_CONTROL */
+ 	}
+ 
