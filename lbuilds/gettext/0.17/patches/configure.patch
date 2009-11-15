@@ -1,0 +1,13 @@
+Index: src/gettext-0.17/build-aux/config.sub
+===================================================================
+--- src.orig/gettext-0.17/build-aux/config.sub
++++ src/gettext-0.17/build-aux/config.sub
+@@ -1219,7 +1219,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -tyndur* )
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)

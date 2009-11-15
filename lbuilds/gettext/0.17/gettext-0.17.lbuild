@@ -1,0 +1,41 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/gettext"
+SRC_URI="http://ftp.gnu.org/pub/gnu/gettext/gettext-0.17.tar.gz"
+PS="lib"
+
+LICENSE="GPL"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/${P}/gettext-runtime"
+
+src_configure() {
+	cd ${MY_S}
+
+	./configure \
+		CC=`tc-cc` \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+		|| die "configure failed"
+
+}
+
+src_compile() {
+	cd ${MY_S}
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+
+	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+
+    rm -rf ${D}${R}/bin ${D}${R}/share
+}
