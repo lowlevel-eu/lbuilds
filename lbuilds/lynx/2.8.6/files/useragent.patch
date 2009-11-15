@@ -1,0 +1,39 @@
+Index: lynx2-8-6/src/LYMain.c
+===================================================================
+--- lynx2-8-6.orig/src/LYMain.c
++++ lynx2-8-6/src/LYMain.c
+@@ -60,6 +60,10 @@
+ #include <LYexit.h>
+ #include <LYLeaks.h>
+ 
++#ifdef TYNDUR
++#include <sys/utsname.h>
++#endif
++
+ #ifdef FNAMES_8_3
+ #define COOKIE_FILE "cookies"
+ #define TRACE_FILE "LY-TRACE.LOG"
+@@ -1164,6 +1168,23 @@ int main(int argc,
+ 	StrAllocCat(LYUserAgent, " libwww-FM/");
+ 	StrAllocCat(LYUserAgent, HTLibraryVersion);
+     }
++
++#ifdef TYNDUR
++    {
++        struct utsname utsname;
++
++        uname(&utsname);
++
++        StrAllocCat(LYUserAgent, " (");
++        StrAllocCat(LYUserAgent, utsname.sysname);
++        StrAllocCat(LYUserAgent, " ");
++        StrAllocCat(LYUserAgent, utsname.release);
++        StrAllocCat(LYUserAgent, " ");
++        StrAllocCat(LYUserAgent, utsname.version);
++        StrAllocCat(LYUserAgent, ")");
++    }
++#endif
++
+ #ifdef USE_SSL
+     append_ssl_version(&LYUserAgent, "/");
+ #endif /* USE_SSL */
