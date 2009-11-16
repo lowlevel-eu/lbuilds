@@ -14,7 +14,7 @@ src_unpack() {
 	cd ${S}
 
 	git init -q
-	git pull -q git@git.tyndur.org:help.git
+	git pull -q git://git.tyndur.org/help.git
 }
 
 src_compile() {
