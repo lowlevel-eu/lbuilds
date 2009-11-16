@@ -1072,7 +1072,7 @@ Index: fpc/utils/fpcm/fpcmake.inc
 -const fpcmakeini : array[0..218] of string[240]=(
 +const fpcmakeini : array[0..220] of string[240]=(
  {$else Delphi}
--const fpcmakeini : array[0..218,1..240] of char=(
+-const fpcmakeini : array[0..219,1..240] of char=(
 +const fpcmakeini : array[0..220,1..240] of char=(
  {$endif Delphi}
    ';'#010+
