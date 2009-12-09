@@ -1,0 +1,69 @@
+Index: src/nasm-2.06rc2/compiler.h
+===================================================================
+--- src.orig/nasm-2.06rc2/compiler.h
++++ src/nasm-2.06rc2/compiler.h
+@@ -147,4 +147,6 @@ char *strsep(char **, const char *);
+ # define unlikely(x)	(!!(x))
+ #endif
+ 
++#include "nasmlib.h"
++
+ #endif	/* NASM_COMPILER_H */
+Index: src/nasm-2.06rc2/nasmlib.h
+===================================================================
+--- src.orig/nasm-2.06rc2/nasmlib.h
++++ src/nasm-2.06rc2/nasmlib.h
+@@ -18,6 +18,29 @@
+ #include <strings.h>
+ #endif
+ 
++#ifdef __TYNDUR__
++
++#define PRId32 "d"
++#define PRId64 "lld"
++
++#define PRIx8  "hhx"
++#define PRIx16 "hx"
++#define PRIx32 "x"
++#define PRIx64 "llx"
++
++#define PRIX32 "X"
++#define PRIX64 "llX"
++
++#define PRIu32 "u"
++#define PRIu64 "llu"
++
++#define INT32_MAX 0x7fffffff
++#define UINT64_C(n) n##ULL
++#define UINT32_C(n) n##U
++
++#endif
++
++
+ /*
+  * tolower table -- avoids a function call on some platforms.
+  * NOTE: unlike the tolower() function in ctype, EOF is *NOT*
+Index: src/nasm-2.06rc2/rdoff/rdfdump.c
+===================================================================
+--- src.orig/nasm-2.06rc2/rdoff/rdfdump.c
++++ src/nasm-2.06rc2/rdoff/rdfdump.c
+@@ -3,6 +3,7 @@
+  */
+ 
+ #include "compiler.h"
++#include "nasmlib.h"
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
+Index: src/nasm-2.06rc2/rdoff/rdoff.c
+===================================================================
+--- src.orig/nasm-2.06rc2/rdoff/rdoff.c
++++ src/nasm-2.06rc2/rdoff/rdoff.c
+@@ -16,6 +16,7 @@
+  */
+ 
+ #include "compiler.h"
++#include "nasmlib.h"
+ 
+ #include <stdio.h>
+ #include <stdlib.h>

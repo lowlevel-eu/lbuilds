@@ -1,0 +1,49 @@
+include lutils
+include toolchain
+
+DESCRIPTION="Tools necessary to build programs"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Nasm"
+SRC_URI="http://somewhere/${P}.tar.bz2"
+
+LICENSE="BSD"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+	lunpack ${P}.tar.bz2
+
+    ln -s ${F} patches
+    [ -f ${F}/series ] && ln -s ${F}/series series
+    for i in ${F}/*.patch; do
+        [ -L series ] || echo `basename $i` >> series
+        (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
+    done
+    (which quilt > /dev/null 2>&1) && quilt push -a || die "Fehler beim Anwenden der Patches"
+}
+
+src_configure() {
+	cd ${MY_S}
+	./configure \
+		--build=`tc-build` \
+		--host=`tc-host` \
+		--target=`tc-host` \
+		--prefix=${R} \
+		--disable-nls \
+		--disable-dependency-tracking \
+		|| die "configure failed"
+}
+
+
+src_compile() {
+	cd ${MY_S}
+	lmake || die "make failed"
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake INSTALLROOT="${D}" install || die "make install failed"
+	rm -r ${D}/${R}/share
+}
