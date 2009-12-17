@@ -1,0 +1,29 @@
+include toolchain
+DESCRIPTION="LOST libc"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Libc"
+SRC_URI=""
+PS="lib"
+
+LICENSE="GPL-2"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+
+src_unpack() {
+	cp -r ${ENVDIR}/include ${S}/include
+	cp -r ${ENVDIR}/lib ${S}/lib
+	rm -rf ${S}/lib/gcc
+	mv ${S}/include/arch/i386/* ${S}/include
+	rm -rf ${S}/include/arch
+}
+
+src_install() {
+	mkdir -p "${D}/system"
+	cp "${S}/include" "${S}/lib" -r "${D}/system"
+	lstrip --strip-debug ${S}/lib/libc.a
+
+	# HACK damit lpt erkennt dass das Paket installiert ist
+	mkdir -p "${D}/${R}/lib"
+	touch "${D}/${R}/lib/dummy.txt"
+}
