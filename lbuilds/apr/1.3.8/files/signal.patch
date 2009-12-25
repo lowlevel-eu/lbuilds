@@ -1,0 +1,13 @@
+Index: apr-1.3.8/threadproc/unix/signals.c
+===================================================================
+--- apr-1.3.8.orig/threadproc/unix/signals.c
++++ apr-1.3.8/threadproc/unix/signals.c
+@@ -129,6 +129,8 @@ const char *apr_signal_description_get(i
+ #define APR_NUMSIG _NSIG
+ #elif defined(__NSIG)
+ #define APR_NUMSIG __NSIG
++#elif defined(_SIGNO_MAX)
++#define APR_NUMSIG _SIGNO_MAX
+ #else
+ #define APR_NUMSIG 33   /* breaks on OS/390 with < 33; 32 is o.k. for most */
+ #endif
