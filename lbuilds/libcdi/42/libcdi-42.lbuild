@@ -1,0 +1,51 @@
+include toolchain
+include lutils
+
+DESCRIPTION="CDI-Bibliotheken"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/CDI"
+SRC_URI="http://git.tyndur.org/?p=tyndur.git;a=snapshot;sf=tgz"
+
+LICENSE="BSD"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/tyndur/src/modules/cdi/lib"
+
+src_unpack()
+{
+    cp "${DISTDIR}/?p=tyndur.git;a=snapshot;sf=tgz" ${DISTDIR}/tyndur-master.tar.gz || die "package not found"
+    lunpack tyndur-master.tar.gz || die "could not unpack"
+}
+
+src_compile()
+{
+    cd ${MY_S}
+
+    echo "CC = i386-pc-tyndur-gcc" > Makefile
+    echo "CFLAGS = -std=gnu99 -c -I../include" >> Makefile
+    echo "AR = i386-pc-tyndur-ar" >> Makefile
+    echo "OBJS = \$(patsubst %.c,%.o,\$(subst cdi.c,,\$(wildcard *.c)) \$(wildcard net/*.c) \$(wildcard scsi/*.c))" >> Makefile
+    echo ".PHONY: all" >> Makefile
+    echo "all: libcdi.a" >> Makefile
+    echo "libcdi.a: \$(OBJS)" >> Makefile
+    echo -e "\t\$(AR) rcf \$@ \$^" >> Makefile
+    echo "%.o: %.c" >> Makefile
+    echo -e "\t\$(CC) \$(CFLAGS) \$< -o \$@" >> Makefile
+    lmake || die "make failed"
+
+    cd ${S}
+}
+
+src_install()
+{
+    cd ${MY_S}
+
+    install -d ${D}/${R}/lib
+    install -d ${D}/${R}/include
+    cp libcdi.a ${D}/${R}/lib || die "installing libcdi failed"
+    cd ../include
+    cp -r * ${D}/${R}/include || die "installing CDI headers failed"
+
+    cd ${S}
+}
