@@ -84,7 +84,7 @@ internal_prepare_env() {
     # Buildtime-Dependencies abarbeiten
     for dep in ${BUILD_DEPEND}; do
         pack="${PACKSDIR}/${dep:1}.tar"
-        tar -C "${WORKDIR}/env" -xf "${pack}"
+        tar -C "${WORKDIR}/env" -xf "${pack}" || die "Abhaengigkeit ${dep:1} konnte nicht erfuellt werden."
     done
 
     cp -rf ${WORKDIR}/env/packages/*/*/* ${WORKDIR}/env/
