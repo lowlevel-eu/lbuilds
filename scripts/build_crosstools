@@ -46,12 +46,16 @@ echo -e "[gcc] Abgeschlossen\n"
 cd ${TMP}/cross-fpc
 echo "[fpc] Herunterladen..."
 # [ -f fpc-2.2.2.source.tar.gz ] || wget -q http://gd.tuwien.ac.at/languages/pascal/fpc/dist/source-2.2.2/fpc-2.2.2.source.tar.gz || exit -1
-[ -f fpc.zip ] || wget -q ftp://ftp.freepascal.org/pub/fpc/snapshot/trunk/source/fpc.zip || exit -1
+#[ -f fpc.zip ] || wget -q ftp://ftp.freepascal.org/pub/fpc/snapshot/trunk/source/fpc.zip || exit -1
+[ -f fpc-2.4.0.source.tar.gz ] || wget -q ftp://gd.tuwien.ac.at/languages/pascal/fpc/dist/2.4.0/source/fpc-2.4.0.source.tar.gz || exit -1
+
+
 echo "[fpc] Entpacken..."
 #tar -xzf fpc-2.2.2.source.tar.gz || exit -1
-unzip -qo fpc.zip || exit -1
+#unzip -qo fpc.zip || exit -1
+tar -xzf fpc-2.4.0.source.tar.gz || exit -1
 echo "[fpc] Patch anwenden..."
-patch -p0 < ${PATCHES}/fpc/2.3.x/fpc-2.3.x.patch >${LOGS}/fpc.log || exit -1
+patch -p0 < ${PATCHES}/fpc/2.4.0/fpc-2.4.0.patch >${LOGS}/fpc.log || exit -1
 #echo "[fpc] fpcmake bauen"
 #cd fpcbuild_2.0.4_exp/fpcsrc/utils/fpcm
 #make >>${LOGS}/fpc.log || exit -1
