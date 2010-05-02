@@ -62,7 +62,7 @@ patch -p0 < ${PATCHES}/fpc/2.4.0/fpc-2.4.0.patch >${LOGS}/fpc.log || exit -1
 #cd ..
 #cd ..
 echo "[fpc] Kompilieren"
-cd fpc
+cd fpc-2.4.0
 #utils/fpcm/fpcmake -Tall -r >>${LOGS}/fpc.log || exit -1
 # Hindweis: Die folgende Anweisung wird nicht erfolgreich beendet werden, aber der Crosscompiler steht danach zur Verfuegung
 make all CPU_TARGET=i386 OS_TARGET=linux >>${LOGS}/fpc.log 2>>${LOGS}/fpc.log
