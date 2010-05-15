@@ -65,7 +65,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 ===================================================================
 --- /dev/null
 +++ src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
-@@ -0,0 +1,131 @@
+@@ -0,0 +1,169 @@
 +/*
 +    SDL - Simple DirectMedia Layer
 +    Copyright (C) 1997-2009 Sam Lantinga
@@ -162,6 +162,15 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 +    return &keysym;
 +}
 +
++struct mousedata {
++    int32_t x;
++    int32_t y;
++    uint8_t buttons;
++    uint8_t btn_down;
++    uint8_t btn_up;
++    uint8_t padding;
++} __attribute__((packed));
++
 +void TYNDUR_PumpEvents(_THIS)
 +{
 +	/* Tastatur abfragen */
@@ -187,6 +196,35 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 +        }
 +        SDL_PrivateKeyboard(SDL_PRESSED, get_keysym(c));
 +        old_key = c;
++    }
++
++    /* Maus abfragen */
++    static int mouse_x = 0;
++    static int mouse_y = 0;
++
++    if (this->hidden->mousedata) {
++        struct mousedata in;
++        fread(&in, 1, sizeof(in), this->hidden->mousedata);
++
++        mouse_x += in.x;
++        if (mouse_x < 0) mouse_x = 0;
++        if (mouse_x >= this->hidden->w) mouse_x = this->hidden->w - 1;
++
++        mouse_y += in.y;
++        if (mouse_y < 0) mouse_y = 0;
++        if (mouse_y >= this->hidden->h) mouse_y = this->hidden->h - 1;
++
++        if (in.x || in.y) {
++            SDL_PrivateMouseMotion(0, 0, mouse_x, mouse_y);
++        }
++
++        if (in.btn_down & 0x1) SDL_PrivateMouseButton(SDL_PRESSED, 1, 0, 0);
++        if (in.btn_down & 0x2) SDL_PrivateMouseButton(SDL_PRESSED, 2, 0, 0);
++        if (in.btn_down & 0x4) SDL_PrivateMouseButton(SDL_PRESSED, 3, 0, 0);
++
++        if (in.btn_up & 0x1) SDL_PrivateMouseButton(SDL_RELEASED, 1, 0, 0);
++        if (in.btn_up & 0x2) SDL_PrivateMouseButton(SDL_RELEASED, 1, 0, 0);
++        if (in.btn_up & 0x4) SDL_PrivateMouseButton(SDL_RELEASED, 1, 0, 0);
 +    }
 +}
 +
@@ -308,7 +346,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 ===================================================================
 --- /dev/null
 +++ src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
-@@ -0,0 +1,274 @@
+@@ -0,0 +1,275 @@
 +/*
 +    SDL - Simple DirectMedia Layer
 +    Copyright (C) 1997-2009 Sam Lantinga
@@ -456,6 +494,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +	vformat->BytesPerPixel = 3;
 +
 +    this->hidden->buffer = NULL;
++    this->hidden->mousedata = fopen("kbc:/mouse/data", "r");
 +
 +	/* We're done! */
 +	return(0);
@@ -587,7 +626,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.h
 ===================================================================
 --- /dev/null
 +++ src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.h
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,44 @@
 +/*
 +    SDL - Simple DirectMedia Layer
 +    Copyright (C) 1997-2009 Sam Lantinga
@@ -628,6 +667,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.h
 +    void *buffer;
 +    driver_context_t* context;
 +    video_bitmap_t* front;
++    FILE* mousedata;
 +};
 +
 +#endif /* _SDL_tyndurvideo_h */
