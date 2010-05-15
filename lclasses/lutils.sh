@@ -69,6 +69,9 @@ lpatch() {
 
 #
 lstrip() {
+    if ! file $@ > /dev/null | grep ELF; then
+        return 0
+    fi
     strip $@
     return $?
 }

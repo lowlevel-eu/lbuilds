@@ -372,9 +372,13 @@ case $1 in
         internal_prepare_dirs || die "preparing dirs failed"
         internal_pkg_fetch_files || die "fetching files failed"
         internal_src_unpack || die "unpacking source failed"
+        touch "${WORKDIR}/.unpacked"
         internal_src_configure || die "configuring failed"
+        touch "${WORKDIR}/.configured"
         internal_src_compile || die "compiling source failed"
+        touch "${WORKDIR}/.compiled"
         internal_src_install || die "installing source failed"
+        touch "${WORKDIR}/.installed"
         internal_pack || die "packing failed"
         internal_pkg_clean || die "cleaning failed"
         ;;
