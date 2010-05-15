@@ -1,0 +1,44 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/SDL"
+SRC_URI="http://www.libsdl.org/projects/SDL_image/release/SDL_image-${PV}.tar.gz"
+
+LICENSE="LGPL-2"
+
+RUN_DEPEND=""
+BUILD_DEPEND="=sdl-1.2.14"
+
+MY_S="${S}/SDL_image-${PV}"
+
+src_configure() {
+	cd ${MY_S}
+
+    export PKG_CONFIG_PATH="`tc-libdir`/pkgconfig/"
+	./configure \
+		CC=`tc-cc` \
+		CFLAGS="-nostdinc -I `tc-incdir` -I `tc-incdir`/SDL -L`tc-libdir`" \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+        --disable-png \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+
+	# Sonst gibts Fehler
+	mkdir -p "${D}${R}/bin"
+	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+    cp showimage "${D}${R}/bin/"
+}

@@ -1,0 +1,29 @@
+Index: src/SDL-1.2.14/build-scripts/config.sub
+===================================================================
+--- src.orig/SDL-1.2.14/build-scripts/config.sub
++++ src/SDL-1.2.14/build-scripts/config.sub
+@@ -1297,7 +1297,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* | -tyndur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: src/SDL-1.2.14/configure.in
+===================================================================
+--- src.orig/SDL-1.2.14/configure.in
++++ src/SDL-1.2.14/configure.in
+@@ -2787,6 +2787,11 @@ case "$host" in
+         # The RISC OS platform requires special setup.
+         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ljpeg -ltiff -lpng -lz"
+         ;;
++    *-tyndur)
++        ARCH=tyndur
++        CheckDummyVideo
++        CheckDummyAudio
++        ;;
+     *)
+         AC_MSG_ERROR([
+ *** Unsupported host:  Please add to configure.in

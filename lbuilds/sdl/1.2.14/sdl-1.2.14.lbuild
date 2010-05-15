@@ -1,0 +1,42 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/SDL"
+SRC_URI="http://www.libsdl.org/release/SDL-${PV}.tar.gz"
+
+LICENSE="LGPL-2"
+
+RUN_DEPEND=""
+BUILD_DEPEND=""
+
+MY_S="${S}/SDL-${PV}"
+
+src_configure() {
+	cd ${MY_S}
+
+    ./autogen.sh
+	./configure \
+		CC=`tc-cc` \
+		CFLAGS="-I `tc-incdir` -L `tc-libdir`" \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+
+	# Sonst gibts Fehler
+	mkdir -p "${D}${R}/bin"
+	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+}
