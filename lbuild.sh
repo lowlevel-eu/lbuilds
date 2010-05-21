@@ -225,7 +225,11 @@ internal_src_compile() {
 
 # Quellcode fixen
 internal_src_fix() {
-    cd ${S}
+    if [ -n "${MY_S}" ]; then
+        cd ${MY_S}
+    else
+        cd ${S}
+    fi
     lstatus "Starte Umgebung zur Fehlerkorrektur, fertigstellen mit exit"
     bash
 }
