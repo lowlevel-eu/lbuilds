@@ -1,0 +1,27 @@
+Index: src/bochs-2.4.2/iodev/serial.cc
+===================================================================
+--- src.orig/bochs-2.4.2/iodev/serial.cc
++++ src/bochs-2.4.2/iodev/serial.cc
+@@ -56,6 +56,8 @@
+ 
+ #define LOG_THIS theSerialDevice->
+ 
++#define SOMAXCONN 42
++
+ bx_serial_c *theSerialDevice = NULL;
+ 
+ int libserial_LTX_plugin_init(plugin_t *plugin, plugintype_t type, int argc, char *argv[])
+Index: src/bochs-2.4.2/iodev/cdrom.cc
+===================================================================
+--- src.orig/bochs-2.4.2/iodev/cdrom.cc
++++ src/bochs-2.4.2/iodev/cdrom.cc
+@@ -242,7 +242,9 @@ typedef struct _CDROM_TOC_SESSION_DATA {
+ #else // all others (Irix, Tru64)
+ #include <sys/types.h>
+ #include <sys/stat.h>
++#ifndef TYNDUR
+ #include <sys/ioctl.h>
++#endif
+ #define BX_CD_FRAMESIZE 2048
+ #define CD_FRAMESIZE 2048
+ #endif

@@ -1,0 +1,45 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/bochs"
+SRC_URI="http://sourceforge.net/projects/bochs/files/bochs/2.4.2/${P}.tar.gz/download/"
+
+LICENSE="GPL-2"
+
+RUN_DEPEND=""
+BUILD_DEPEND="=ncurses-5.6 =libstdc++-4.2.2"
+
+MY_S="${S}/${P}"
+
+src_configure() {
+	cd ${MY_S}
+
+	./configure \
+		CC=`tc-cc` \
+		CFLAGS="-I `tc-incdir`/ncurses -I `tc-incdir`" \
+		CXXFLAGS="-I `tc-incdir`/ncurses -I `tc-incdir`" \
+        LDFLAGS="-L`tc-libdir`" \
+        LIBS="-lncursesw" \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+        --with-term \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+
+	# Sonst gibts Fehler
+	mkdir -p "${D}${R}/bin"
+	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+}
