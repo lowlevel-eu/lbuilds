@@ -1,0 +1,253 @@
+Index: src/gcc-4.2.2/libstdc++-v3/include/c_std/std_cmath.h
+===================================================================
+--- src.orig/gcc-4.2.2/libstdc++-v3/include/c_std/std_cmath.h
++++ src/gcc-4.2.2/libstdc++-v3/include/c_std/std_cmath.h
+@@ -194,6 +194,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+     cos(_Tp __x)
+     { return __builtin_cos(__x); }
+ 
++#if 0
+   using ::cosh;
+ 
+   inline float
+@@ -209,6 +210,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+ 					   double>::__type
+     cosh(_Tp __x)
+     { return __builtin_cosh(__x); }
++#endif
+ 
+   using ::exp;
+ 
+@@ -258,6 +260,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+     floor(_Tp __x)
+     { return __builtin_floor(__x); }
+ 
++#if 0
+   using ::fmod;
+ 
+   inline float
+@@ -283,6 +286,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+ 					   double>::__type
+     frexp(_Tp __x, int* __exp)
+     { return __builtin_frexp(__x, __exp); }
++#endif
+ 
+   using ::ldexp;
+ 
+@@ -332,6 +336,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+     log10(_Tp __x)
+     { return __builtin_log10(__x); }
+ 
++#if 0
+   using ::modf;
+ 
+   inline float
+@@ -341,6 +346,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   inline long double
+   modf(long double __x, long double* __iptr)
+   { return __builtin_modfl(__x, __iptr); }
++#endif
+ 
+   template<typename _Tp>
+     inline _Tp
+@@ -389,6 +395,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+     sin(_Tp __x)
+     { return __builtin_sin(__x); }
+ 
++#if 0
+   using ::sinh;
+ 
+   inline float
+@@ -404,6 +411,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+ 					   double>::__type
+     sinh(_Tp __x)
+     { return __builtin_sinh(__x); }
++#endif
+ 
+   using ::sqrt;
+ 
+@@ -437,6 +445,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+     tan(_Tp __x)
+     { return __builtin_tan(__x); }
+ 
++#if 0
+   using ::tanh;
+ 
+   inline float
+@@ -452,6 +461,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+ 					   double>::__type
+     tanh(_Tp __x)
+     { return __builtin_tanh(__x); }
++#endif
+ 
+ _GLIBCXX_END_NAMESPACE
+ 
+Index: src/gcc-4.2.2/libstdc++-v3/include/c_std/std_cstdio.h
+===================================================================
+--- src.orig/gcc-4.2.2/libstdc++-v3/include/c_std/std_cstdio.h
++++ src/gcc-4.2.2/libstdc++-v3/include/c_std/std_cstdio.h
+@@ -98,7 +98,7 @@
+ _GLIBCXX_BEGIN_NAMESPACE(std)
+ 
+   using ::FILE;
+-  using ::fpos_t;
++//  using ::fpos_t;
+ 
+   using ::clearerr;
+   using ::fclose;
+@@ -106,7 +106,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::ferror;
+   using ::fflush;
+   using ::fgetc;
+-  using ::fgetpos;
++//  using ::fgetpos;
+   using ::fgets;
+   using ::fopen;
+   using ::fprintf;
+@@ -116,7 +116,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::freopen;
+   using ::fscanf;
+   using ::fseek;
+-  using ::fsetpos;
++//  using ::fsetpos;
+   using ::ftell;
+   using ::fwrite;
+   using ::getc;
+@@ -136,7 +136,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::sprintf;
+   using ::sscanf;
+   using ::tmpfile;
+-  using ::tmpnam;
++//  using ::tmpnam;
+   using ::ungetc;
+   using ::vfprintf;
+   using ::vprintf;
+Index: src/gcc-4.2.2/libstdc++-v3/include/c_std/std_cstdlib.h
+===================================================================
+--- src.orig/gcc-4.2.2/libstdc++-v3/include/c_std/std_cstdlib.h
++++ src/gcc-4.2.2/libstdc++-v3/include/c_std/std_cstdlib.h
+@@ -103,8 +103,8 @@ _GLIBCXX_END_NAMESPACE
+ 
+ _GLIBCXX_BEGIN_NAMESPACE(std)
+ 
+-  using ::div_t;
+-  using ::ldiv_t;
++//  using ::div_t;
++//  using ::ldiv_t;
+ 
+   using ::abort;
+   using ::abs;
+@@ -114,12 +114,12 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::atol;
+   using ::bsearch;
+   using ::calloc;
+-  using ::div;
++//  using ::div;
+   using ::exit;
+   using ::free;
+   using ::getenv;
+   using ::labs;
+-  using ::ldiv;
++//  using ::ldiv;
+   using ::malloc;
+ #ifdef _GLIBCXX_HAVE_MBSTATE_T
+   using ::mblen;
+@@ -130,7 +130,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::rand;
+   using ::realloc;
+   using ::srand;
+-  using ::strtod;
++//  using ::strtod;
+   using ::strtol;
+   using ::strtoul;
+   using ::system;
+@@ -142,8 +142,10 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   inline long
+   abs(long __i) { return labs(__i); }
+ 
++#if 0
+   inline ldiv_t
+   div(long __i, long __j) { return ldiv(__i, __j); }
++#endif
+ 
+ _GLIBCXX_END_NAMESPACE
+ 
+Index: src/gcc-4.2.2/libstdc++-v3/include/c_std/std_cstring.h
+===================================================================
+--- src.orig/gcc-4.2.2/libstdc++-v3/include/c_std/std_cstring.h
++++ src/gcc-4.2.2/libstdc++-v3/include/c_std/std_cstring.h
+@@ -87,7 +87,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::strcmp;
+   using ::strcoll;
+   using ::strncmp;
+-  using ::strxfrm;
++//  using ::strxfrm;
+   using ::strcspn;
+   using ::strspn;
+   using ::strtok;
+Index: src/gcc-4.2.2/libstdc++-v3/include/c_std/std_ctime.h
+===================================================================
+--- src.orig/gcc-4.2.2/libstdc++-v3/include/c_std/std_ctime.h
++++ src/gcc-4.2.2/libstdc++-v3/include/c_std/std_ctime.h
+@@ -67,8 +67,8 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::time_t;
+   using ::tm;
+ 
+-  using ::clock;
+-  using ::difftime;
++//  using ::clock;
++//  using ::difftime;
+   using ::mktime;
+   using ::time;
+   using ::asctime;
+Index: src/gcc-4.2.2/libstdc++-v3/include/tr1/functional_hash.h
+===================================================================
+--- src.orig/gcc-4.2.2/libstdc++-v3/include/tr1/functional_hash.h
++++ src/gcc-4.2.2/libstdc++-v3/include/tr1/functional_hash.h
+@@ -204,7 +204,10 @@ _GLIBCXX_BEGIN_NAMESPACE(tr1)
+ 	std::size_t __result = 0;
+ 
+ 	int __exponent;
+-	__ldval = std::frexp(__ldval, &__exponent);
++    // FIXME Hoffentlich macht das den tollen Algo nicht kaputt ;-)
++	__ldval = 0.1337;
++    __exponent = 42;
++	//__ldval = std::frexp(__ldval, &__exponent);
+ 	__ldval = __ldval < 0.0l ? -(__ldval + 0.5l) : __ldval;
+ 
+ 	const long double __mult =
+Index: src/gcc-4.2.2/libstdc++-v3/config/locale/generic/collate_members.cc
+===================================================================
+--- src.orig/gcc-4.2.2/libstdc++-v3/config/locale/generic/collate_members.cc
++++ src/gcc-4.2.2/libstdc++-v3/config/locale/generic/collate_members.cc
+@@ -51,7 +51,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+     size_t
+     collate<char>::_M_transform(char* __to, const char* __from, 
+ 				size_t __n) const
+-    { return strxfrm(__to, __from, __n); }
++    { return 0; /*strxfrm(__to, __from, __n);*/ }
+ 
+ #ifdef _GLIBCXX_USE_WCHAR_T
+   template<>
+Index: src/gcc-4.2.2/libstdc++-v3/config/locale/generic/c_locale.cc
+===================================================================
+--- src.orig/gcc-4.2.2/libstdc++-v3/config/locale/generic/c_locale.cc
++++ src/gcc-4.2.2/libstdc++-v3/config/locale/generic/c_locale.cc
+@@ -59,7 +59,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+ #if defined(_GLIBCXX_HAVE_STRTOF)
+       float __f = strtof(__s, &__sanity);
+ #else
+-      double __d = strtod(__s, &__sanity);
++      double __d = 0.0; //strtod(__s, &__sanity);
+       float __f = static_cast<float>(__d);
+ #ifdef _GLIBCXX_HAVE_FINITEF
+       if (!finitef (__f))
+@@ -93,7 +93,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+       char* __old = strdup(setlocale(LC_ALL, NULL));
+       setlocale(LC_ALL, "C");
+       char* __sanity;
+-      double __d = strtod(__s, &__sanity);
++      double __d = 0; //strtod(__s, &__sanity);
+       if (__sanity != __s && errno != ERANGE)
+ 	__v = __d;
+       else

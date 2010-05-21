@@ -1,0 +1,31 @@
+Index: src/gcc-4.2.2/config.sub
+===================================================================
+--- src.orig/gcc-4.2.2/config.sub
++++ src/gcc-4.2.2/config.sub
+@@ -1219,7 +1219,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -tyndur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: src/gcc-4.2.2/libstdc++-v3/crossconfig.m4
+===================================================================
+--- src.orig/gcc-4.2.2/libstdc++-v3/crossconfig.m4
++++ src/gcc-4.2.2/libstdc++-v3/crossconfig.m4
+@@ -411,6 +411,13 @@ case "${host}" in
+     AC_DEFINE(HAVE_TANHF)
+     AC_DEFINE(HAVE_TANHL)
+     ;;
++  *-tyndur*)
++    GLIBCXX_CHECK_COMPILER_FEATURES
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_BUILTIN_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    ;;
+   *)
+     AC_MSG_ERROR([No support for this host/target combination.])
+    ;;
