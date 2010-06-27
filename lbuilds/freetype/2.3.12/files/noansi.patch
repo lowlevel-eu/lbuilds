@@ -1,0 +1,48 @@
+Index: freetype-2.3.12/builds/compiler/gcc-dev.mk
+===================================================================
+--- freetype-2.3.12.orig/builds/compiler/gcc-dev.mk	2009-03-14 14:45:26.000000000 +0100
++++ freetype-2.3.12/builds/compiler/gcc-dev.mk	2010-05-14 22:11:47.000000000 +0200
+@@ -83,7 +83,7 @@
+ 
+ # ANSIFLAGS: Put there the flags used to make your compiler ANSI-compliant.
+ #
+-ANSIFLAGS := -ansi -pedantic
++ANSIFLAGS :=
+ 
+ 
+ # Library linking
+Index: freetype-2.3.12/builds/compiler/gcc.mk
+===================================================================
+--- freetype-2.3.12.orig/builds/compiler/gcc.mk	2009-07-03 15:28:24.000000000 +0200
++++ freetype-2.3.12/builds/compiler/gcc.mk	2010-05-14 22:11:47.000000000 +0200
+@@ -65,7 +65,7 @@
+ 
+ # ANSIFLAGS: Put there the flags used to make your compiler ANSI-compliant.
+ #
+-ANSIFLAGS := -ansi -pedantic
++ANSIFLAGS :=
+ 
+ 
+ # Library linking
+Index: freetype-2.3.12/builds/unix/configure
+===================================================================
+--- freetype-2.3.12.orig/builds/unix/configure	2010-05-14 22:14:31.000000000 +0200
++++ freetype-2.3.12/builds/unix/configure	2010-05-14 22:14:37.000000000 +0200
+@@ -3489,7 +3489,7 @@
+ 
+ if test "x$GCC" = xyes; then
+   XX_CFLAGS="-Wall"
+-  XX_ANSIFLAGS="-pedantic -ansi"
++  XX_ANSIFLAGS=""
+ else
+   case "$host" in
+   *-dec-osf*)
+@@ -14778,7 +14778,7 @@
+ if test -n "$CONFIG_FILES"; then
+ 
+ 
+-ac_cr=''
++ac_cr=''
+ ac_cs_awk_cr=`$AWK 'BEGIN { print "a\rb" }' </dev/null 2>/dev/null`
+ if test "$ac_cs_awk_cr" = "a${ac_cr}b"; then
+   ac_cs_awk_cr='\\r'
