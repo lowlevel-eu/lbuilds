@@ -1,0 +1,49 @@
+include toolchain
+include lutils
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/freetype2"
+SRC_URI="http://downloads.sourceforge.net/project/freetype/freetype2/${PV}/freetype-${PV}.tar.gz"
+PS="lib"
+
+LICENSE="ftl"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+    lunpack ${P}.tar.gz
+    cd ${MY_S}
+
+    ln -s ${F} patches
+    [ -f ${F}/series ] && ln -s ${F}/series series
+    for i in ${F}/*.patch; do
+        [ -L series ] || echo `basename $i` >> series
+        (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
+    done
+    (which quilt > /dev/null 2>&1) && quilt push -a || die "Fehler beim Anwenden der Patches"
+}
+
+src_compile() {
+    cd ${MY_S}
+
+    ./configure \
+        CC=`tc-cc` \
+        --build=`tc-build` \
+        --target=`tc-host` \
+        --host=`tc-host` \
+        --prefix="${R}" \
+        || die "configure failed"
+
+    lmake || die "make failed"
+}
+
+src_install() {
+    cd ${MY_S}
+
+    lmake install prefix="${D}${R}" || die "make install failed"
+    rm -rf ${D}${R}/share
+    rm ${D}${R}/bin/freetype-config
+}
