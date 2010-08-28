@@ -1,0 +1,44 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Dosbox"
+SRC_URI="http://downloads.sourceforge.net/project/dosbox/dosbox/0.74/dosbox-0.74.tar.gz"
+
+LICENSE="?"
+
+RUN_DEPEND=""
+BUILD_DEPEND="=sdl-1.2.14 =libstdc++-4.2.2"
+
+MY_S="${S}/${P}"
+
+src_configure() {
+	cd ${MY_S}
+
+	./configure \
+		CC=`tc-cc` \
+		CFLAGS="-nostdinc -I `tc-incdir` -I `tc-incdir`/c++/4.2.2 -I `tc-incdir`/c++/4.2.2/i386-pc-tyndur -I `tc-incdir`/SDL -L`tc-libdir`" \
+		CXXFLAGS="-nostdinc -I `tc-incdir` -I `tc-incdir`/c++/4.2.2 -I `tc-incdir`/c++/4.2.2/i386-pc-tyndur -I `tc-incdir`/SDL -L`tc-libdir`" \
+        LIBS="" \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+        --disable-fpu \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+
+	# Sonst gibts Fehler
+	mkdir -p "${D}${R}/bin"
+	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+}

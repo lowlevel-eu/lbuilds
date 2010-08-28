@@ -1,0 +1,682 @@
+diff -urp src/dosbox-0.74/src/cpu/callback.cpp src/cpu/callback.cpp
+--- src/dosbox-0.74/src/cpu/callback.cpp	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/cpu/callback.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -103,6 +103,7 @@ void CALLBACK_RunRealInt(Bit8u intnum) {
+ 	Bit16u oldcs=SegValue(cs);
+ 	reg_eip=CB_SOFFSET+(CB_MAX*CB_SIZE)+(intnum*6);
+ 	SegSet16(cs,CB_SEG);
++LOG_MSG("DOSBOX_RunMachine");
+ 	DOSBOX_RunMachine();
+ 	reg_eip=oldeip;
+ 	SegSet16(cs,oldcs);
+diff -urp src/dosbox-0.74/src/dos/dev_con.h src/dos/dev_con.h
+--- src/dosbox-0.74/src/dos/dev_con.h	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/dos/dev_con.h	2010-08-28 14:43:01.000000000 +0200
+@@ -56,6 +56,9 @@ private:
+ bool device_CON::Read(Bit8u * data,Bit16u * size) {
+ 	Bit16u oldax=reg_ax;
+ 	Bit16u count=0;
++
++
++LOG_MSG("CON::Read");
+ 	if ((readcache) && (*size)) {
+ 		data[count++]=readcache;
+ 		if(dos.echo) INT10_TeletypeOutput(readcache,7);
+@@ -63,7 +66,10 @@ bool device_CON::Read(Bit8u * data,Bit16
+ 	}
+ 	while (*size>count) {
+ 		reg_ah=(IS_EGAVGA_ARCH)?0x10:0x0;
++LOG_MSG("CALLBACK_RunRealInt(0x16)");
+ 		CALLBACK_RunRealInt(0x16);
++LOG_MSG("reg_al = %x", reg_al);
++
+ 		switch(reg_al) {
+ 		case 13:
+ 			data[count++]=0x0D;
+diff -urp src/dosbox-0.74/src/dos/dos_files.cpp src/dos/dos_files.cpp
+--- src/dosbox-0.74/src/dos/dos_files.cpp	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/dos/dos_files.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -368,6 +368,7 @@ bool DOS_ReadFile(Bit16u entry,Bit8u * d
+ 	}
+ */
+ 	Bit16u toread=*amount;
++//    LOG_MSG("Read with read()");
+ 	bool ret=Files[handle]->Read(data,&toread);
+ 	*amount=toread;
+ 	return ret;
+diff -urp src/dosbox-0.74/src/dosbox.cpp src/dosbox.cpp
+--- src/dosbox-0.74/src/dosbox.cpp	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/dosbox.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -127,8 +127,11 @@ bool ticksLocked;
+ 
+ static Bitu Normal_Loop(void) {
+ 	Bits ret;
++//LOG_MSG("Normal_Loop");
+ 	while (1) {
++//        LOG_MSG("Try PIC_RunQueue");
+ 		if (PIC_RunQueue()) {
++//            LOG_MSG("PIC_RunQueue");
+ 			ret=(*cpudecoder)();
+ 			if (GCC_UNLIKELY(ret<0)) return 1;
+ 			if (ret>0) {
+@@ -139,6 +142,7 @@ static Bitu Normal_Loop(void) {
+ 			if (DEBUG_ExitLoop()) return 0;
+ #endif
+ 		} else {
++//            LOG_MSG("GFX_Events");
+ 			GFX_Events();
+ 			if (ticksRemain>0) {
+ 				TIMER_AddTick();
+@@ -147,6 +151,7 @@ static Bitu Normal_Loop(void) {
+ 		}
+ 	}
+ increaseticks:
++//LOG_MSG("Normal_Loop: done looping");
+ 	if (GCC_UNLIKELY(ticksLocked)) {
+ 		ticksRemain=5;
+ 		/* Reset any auto cycle guessing for this frame */
+@@ -157,8 +162,10 @@ increaseticks:
+ 	} else {
+ 		Bit32u ticksNew;
+ 		ticksNew=GetTicks();
++//LOG_MSG("Normal_Loop: [a]");
+ 		ticksScheduled += ticksAdded;
+ 		if (ticksNew > ticksLast) {
++//LOG_MSG("Normal_Loop: [b]");
+ 			ticksRemain = ticksNew-ticksLast;
+ 			ticksLast = ticksNew;
+ 			ticksDone += ticksRemain;
+@@ -167,6 +174,7 @@ increaseticks:
+ 			}
+ 			ticksAdded = ticksRemain;
+ 			if (CPU_CycleAutoAdjust && !CPU_SkipCycleAutoAdjust) {
++//LOG_MSG("Normal_Loop: [c]");
+ 				if (ticksScheduled >= 250 || ticksDone >= 250 || (ticksAdded > 15 && ticksScheduled >= 5) ) {
+ 					if(ticksDone < 1) ticksDone = 1; // Protect against div by zero
+ 					/* ratio we are aiming for is around 90% usage*/
+@@ -220,6 +228,7 @@ increaseticks:
+ 				}
+ 			}
+ 		} else {
++//LOG_MSG("Normal_Loop: [d]");
+ 			ticksAdded = 0;
+ 			SDL_Delay(1);
+ 			ticksDone -= GetTicks() - ticksNew;
+@@ -227,6 +236,7 @@ increaseticks:
+ 				ticksDone = 0;
+ 		}
+ 	}
++//LOG_MSG("Normal_Loop: done");
+ 	return 0;
+ }
+ 
+diff -urp src/dosbox-0.74/src/gui/render.cpp src/gui/render.cpp
+--- src/dosbox-0.74/src/gui/render.cpp	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/gui/render.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -146,14 +146,18 @@ static void RENDER_ClearCacheHandler(con
+ }
+ 
+ bool RENDER_StartUpdate(void) {
++//    LOG_MSG("RENDER_StartUpdate");
+ 	if (GCC_UNLIKELY(render.updating))
+ 		return false;
++  //  LOG_MSG("RENDER_StartUpdate [a]");
+ 	if (GCC_UNLIKELY(!render.active))
+ 		return false;
++//    LOG_MSG("RENDER_StartUpdate [b]");
+ 	if (GCC_UNLIKELY(render.frameskip.count<render.frameskip.max)) {
+ 		render.frameskip.count++;
+ 		return false;
+ 	}
++  //  LOG_MSG("RENDER_StartUpdate [c]");
+ 	render.frameskip.count=0;
+ 	if (render.scale.inMode == scalerMode8) {
+ 		Check_Palette();
+@@ -175,6 +179,7 @@ bool RENDER_StartUpdate(void) {
+ 		render.scale.clearCache = false;
+ 		RENDER_DrawLine = RENDER_ClearCacheHandler;
+ 	} else {
++//    LOG_MSG("RENDER_StartUpdate [d]");
+ 		if (render.pal.changed) {
+ 			/* Assume pal changes always do a full screen update anyway */
+ 			if (GCC_UNLIKELY(!GFX_StartUpdate( render.scale.outWrite, render.scale.outPitch )))
+@@ -190,6 +195,7 @@ bool RENDER_StartUpdate(void) {
+ 		}
+ 	}
+ 	render.updating = true;
++  //  LOG_MSG("RENDER_StartUpdate done");
+ 	return true;
+ }
+ 
+@@ -267,6 +273,7 @@ static void RENDER_Reset( void ) {
+ 	double gfx_scalew;
+ 	double gfx_scaleh;
+ 	
++    LOG_MSG("RENDER_Reset (w/h = %d x %d)", width, height);
+ 	Bitu gfx_flags, xscale, yscale;
+ 	ScalerSimpleBlock_t		*simpleBlock = &ScaleNormal1x;
+ 	ScalerComplexBlock_t	*complexBlock = 0;
+@@ -356,6 +363,7 @@ forcenormal:
+ 		complexBlock = 0;
+ 		simpleBlock = &ScaleNormal1x;
+ 	}
++    LOG_MSG("RENDER_Reset [a]");
+ 	if (complexBlock) {
+ #if RENDER_USE_ADVANCED_SCALERS>1
+ 		if ((width >= SCALER_COMPLEXWIDTH - 16) || height >= SCALER_COMPLEXHEIGHT - 16) {
+@@ -375,6 +383,7 @@ forcenormal:
+ 		yscale = simpleBlock->yscale;
+ //		LOG_MSG("Scaler:%s",simpleBlock->name);
+ 	}
++    LOG_MSG("scale = %g / %g", xscale, yscale);
+ 	switch (render.src.bpp) {
+ 	case 8:
+ 		render.src.start = ( render.src.width * 1) / sizeof(Bitu);
+@@ -420,7 +429,9 @@ forcenormal:
+ 		}
+ 	}
+ /* Setup the scaler variables */
++    LOG_MSG("RENDER_Reset [b] (w/h = %d x %d)", width, height);
+ 	gfx_flags=GFX_SetSize(width,height,gfx_flags,gfx_scalew,gfx_scaleh,&RENDER_CallBack);
++    LOG_MSG("RENDER_Reset [c] %x\n", gfx_flags);
+ 	if (gfx_flags & GFX_CAN_8)
+ 		render.scale.outMode = scalerMode8;
+ 	else if (gfx_flags & GFX_CAN_15)
+@@ -515,7 +526,9 @@ static void RENDER_CallBack( GFX_CallBac
+ }
+ 
+ void RENDER_SetSize(Bitu width,Bitu height,Bitu bpp,float fps,double ratio,bool dblw,bool dblh) {
++    LOG_MSG("RENDER_SetSize");
+ 	RENDER_Halt( );
++    LOG_MSG("RENDER_Halted");
+ 	if (!width || !height || width > SCALER_MAXWIDTH || height > SCALER_MAXHEIGHT) { 
+ 		return;	
+ 	}
+@@ -533,6 +546,7 @@ void RENDER_SetSize(Bitu width,Bitu heig
+ 	render.src.fps=fps;
+ 	render.src.ratio=ratio;
+ 	RENDER_Reset( );
++    LOG_MSG("RENDER_SetSize done");
+ }
+ 
+ extern void GFX_SetTitle(Bit32s cycles, Bits frameskip,bool paused);
+diff -urp src/dosbox-0.74/src/gui/sdlmain.cpp src/gui/sdlmain.cpp
+--- src/dosbox-0.74/src/gui/sdlmain.cpp	2010-08-28 14:43:39.000000000 +0200
++++ src/dosbox-0.74/src/gui/sdlmain.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -410,6 +410,9 @@ Bitu GFX_SetSize(Bitu width,Bitu height,
+ 	if (sdl.updating)
+ 		GFX_EndUpdate( 0 );
+ 
++
++    LOG_MSG("GFX_SetSize: %d x %d", width, height);
++
+ 	sdl.draw.width=width;
+ 	sdl.draw.height=height;
+ 	sdl.draw.callback=callback;
+@@ -433,6 +436,8 @@ dosurface:
+ 		sdl.desktop.type=SCREEN_SURFACE;
+ 		sdl.clip.w=width;
+ 		sdl.clip.h=height;
++
++    LOG_MSG("GFX_SetSize: %d x %d, %d bpp", width, height, bpp);
+ 		if (sdl.desktop.fullscreen) {
+ 			if (sdl.desktop.full.fixed) {
+ 				sdl.clip.x=(Sint16)((sdl.desktop.full.width-width)/2);
+@@ -451,7 +456,8 @@ dosurface:
+ 			}
+ 		} else {
+ 			sdl.clip.x=0;sdl.clip.y=0;
+-			sdl.surface=SDL_SetVideoMode(width,height,bpp,(flags & GFX_CAN_RANDOM) ? SDL_SWSURFACE : SDL_HWSURFACE);
++//			sdl.surface=SDL_SetVideoMode(width,height,bpp,(flags & GFX_CAN_RANDOM) ? SDL_SWSURFACE : SDL_HWSURFACE);
++  			sdl.surface=SDL_SetVideoMode(800, 600,24,(flags & GFX_CAN_RANDOM) ? SDL_SWSURFACE : SDL_HWSURFACE);
+ #ifdef WIN32
+ 			if (sdl.surface == NULL) {
+ 				SDL_QuitSubSystem(SDL_INIT_VIDEO);
+@@ -482,6 +488,7 @@ dosurface:
+ 			case 16:
+ 				retFlags = GFX_CAN_16;
+                 break;
++			case 24:
+ 			case 32:
+ 				retFlags = GFX_CAN_32;
+                 break;
+@@ -696,6 +703,7 @@ static void SwitchFullScreen(bool presse
+ 
+ 
+ bool GFX_StartUpdate(Bit8u * & pixels,Bitu & pitch) {
++//    LOG_MSG("GFX_StartUpdate: %d", sdl.updating);
+ 	if (!sdl.active || sdl.updating)
+ 		return false;
+ 	switch (sdl.desktop.type) {
+@@ -750,9 +758,13 @@ void GFX_EndUpdate( const Bit16u *change
+ #if (HAVE_DDRAW_H) && defined(WIN32)
+ 	int ret;
+ #endif
+-	if (!sdl.updating)
++//    LOG_MSG("GFX_EndUpdate");
++	if (!sdl.updating) {
++        LOG_MSG("GFX_EndUpdate: !updating");
+ 		return;
++    }
+ 	sdl.updating=false;
++//    LOG_MSG("GFX_EndUpdate: sdl.desktyp.type = %d", sdl.desktop.type);
+ 	switch (sdl.desktop.type) {
+ 	case SCREEN_SURFACE:
+ 		if (SDL_MUSTLOCK(sdl.surface)) {
+@@ -763,6 +775,7 @@ void GFX_EndUpdate( const Bit16u *change
+ 			} else {
+ 				SDL_UnlockSurface(sdl.surface);
+ 			}
++//    LOG_MSG("GFX_EndUpdate: SDL_Flip");
+ 			SDL_Flip(sdl.surface);
+ 		} else if (changedLines) {
+ 			Bitu y = 0, index = 0, rectCount = 0;
+@@ -848,6 +861,7 @@ void GFX_EndUpdate( const Bit16u *change
+ 	default:
+ 		break;
+ 	}
++//    LOG_MSG("GFX_EndUpdate: done");
+ }
+ 
+ 
+@@ -1320,6 +1334,15 @@ void GFX_Events() {
+ 		MAPPER_UpdateJoysticks();
+ 	}
+ #endif
++//    LOG_MSG("GFX_Events");
++
++    {
++        static int reduce_poll = 0;
++        if (reduce_poll++ % 8) {
++            return;
++        }
++    }
++
+ 	while (SDL_PollEvent(&event)) {
+ 		switch (event.type) {
+ 		case SDL_ACTIVEEVENT:
+@@ -1735,6 +1758,7 @@ int main(int argc, char* argv[]) {
+ #endif
+ 
+ 	/* Display Welcometext in the console */
++stdout = NULL;
+ 	LOG_MSG("DOSBox version %s",VERSION);
+ 	LOG_MSG("Copyright 2002-2010 DOSBox Team, published under GNU GPL.");
+ 	LOG_MSG("---");
+@@ -1743,10 +1767,11 @@ int main(int argc, char* argv[]) {
+ #if SDL_VERSION_ATLEAST(1, 2, 14)
+ 	putenv(const_cast<char*>("SDL_DISABLE_LOCK_KEYS=1"));
+ #endif
+-	if ( SDL_Init( SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER|SDL_INIT_CDROM
++	if ( SDL_Init( /*SDL_INIT_AUDIO|*/SDL_INIT_VIDEO|SDL_INIT_TIMER/*|SDL_INIT_CDROM*/
+ 		|SDL_INIT_NOPARACHUTE
+ 		) < 0 ) E_Exit("Can't init SDL %s",SDL_GetError());
+ 	sdl.inited = true;
++LOG_MSG("(a)");
+ 
+ #ifndef DISABLE_JOYSTICK
+ 	//Initialise Joystick seperately. This way we can warn when it fails instead
+@@ -1756,6 +1781,7 @@ int main(int argc, char* argv[]) {
+ 
+ 	sdl.laltstate = SDL_KEYUP;
+ 	sdl.raltstate = SDL_KEYUP;
++LOG_MSG("(b)");
+ 
+ #if defined (WIN32)
+ #if SDL_VERSION_ATLEAST(1, 2, 10)
+@@ -1812,6 +1838,7 @@ int main(int argc, char* argv[]) {
+ 		}
+ 	}
+ 
++LOG_MSG("(c)");
+ 	//Second parse -conf entries
+ 	while(control->cmdline->FindString("-conf",config_file,true))
+ 		if (control->ParseConfigFile(config_file.c_str())) parsed_anyconfigfile = true;
+@@ -1843,6 +1870,7 @@ int main(int argc, char* argv[]) {
+ 			LOG_MSG("CONFIG: Using default settings. Create a configfile to change them");
+ 		}
+ 	}
++LOG_MSG("(d)");
+ 
+ 
+ #if (ENVIRON_LINKED)
+@@ -1852,22 +1880,28 @@ int main(int argc, char* argv[]) {
+ //		if (control->cmdline->FindExist("-startui")) UI_Run(false);
+ 		/* Init all the sections */
+ 		control->Init();
++LOG_MSG("(e)");
+ 		/* Some extra SDL Functions */
+ 		Section_prop * sdl_sec=static_cast<Section_prop *>(control->GetSection("sdl"));
+ 
++LOG_MSG("(f)");
+ 		if (control->cmdline->FindExist("-fullscreen") || sdl_sec->Get_bool("fullscreen")) {
+ 			if(!sdl.desktop.fullscreen) { //only switch if not allready in fullscreen
+ 				GFX_SwitchFullScreen();
+ 			}
+ 		}
++LOG_MSG("(g)");
+ 
+ 		/* Init the keyMapper */
+ 		MAPPER_Init();
++LOG_MSG("(h)");
+ 		if (control->cmdline->FindExist("-startmapper")) MAPPER_RunInternal();
+ 		/* Start up main machine */
++LOG_MSG("(i)");
+ 		control->StartUp();
+ 		/* Shutdown everything */
+ 	} catch (char * error) {
++		LOG_MSG("Exit to error: %s",error);
+ 		GFX_ShowMsg("Exit to error: %s",error);
+ 		fflush(NULL);
+ 		if(sdl.wait_on_error) {
+diff -urp src/dosbox-0.74/src/gui/sdl_mapper.cpp src/gui/sdl_mapper.cpp
+--- src/dosbox-0.74/src/gui/sdl_mapper.cpp	2010-05-10 20:58:06.000000000 +0200
++++ src/dosbox-0.74/src/gui/sdl_mapper.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -415,7 +415,7 @@ Bitu GetKeyCode(SDL_keysym keysym) {
+ 			/* try to retrieve key from symbolic key as scancode is zero */
+ 			if (keysym.sym<MAX_SDLKEYS) key=scancode_map[(Bitu)keysym.sym];
+ 		} 
+-#if !defined (WIN32) && !defined (MACOSX) && !defined(OS2)
++#if defined(LINUX)
+ 		/* Linux adds 8 to all scancodes */
+ 		else key-=8;
+ #endif
+@@ -497,7 +497,7 @@ public:
+ 	bool CheckEvent(SDL_Event * event) {
+ 		if (event->type!=SDL_KEYDOWN && event->type!=SDL_KEYUP) return false;
+ 		Bitu key=GetKeyCode(event->key.keysym);
+-//		LOG_MSG("key type %i is %x [%x %x]",event->type,key,event->key.keysym.sym,event->key.keysym.scancode);
++		LOG_MSG("key type %i is %x [%x %x]",event->type,key,event->key.keysym.sym,event->key.keysym.scancode);
+ 		assert(Bitu(event->key.keysym.sym)<keys);
+ 		if (event->type==SDL_KEYDOWN) ActivateBindList(&lists[key],0x7fff,true);
+ 		else DeactivateBindList(&lists[key],true);
+@@ -2151,6 +2151,7 @@ static bool MAPPER_LoadBinds(void) {
+ }
+ 
+ void MAPPER_CheckEvent(SDL_Event * event) {
++    LOG_MSG("MAPPER_CheckEvent");
+ 	for (CBindGroup_it it=bindgroups.begin();it!=bindgroups.end();it++) {
+ 		if ((*it)->CheckEvent(event)) return;
+ 	}
+@@ -2397,7 +2398,7 @@ void MAPPER_StartUp(Section * sec) {
+ 
+ 	usescancodes = false;
+ 
+-	if (section->Get_bool("usescancodes")) {
++	if (0 && section->Get_bool("usescancodes")) {
+ 		usescancodes=true;
+ 
+ 		/* Note: table has to be tested/updated for various OSs */
+diff -urp src/dosbox-0.74/src/hardware/memory.cpp src/hardware/memory.cpp
+--- src/dosbox-0.74/src/hardware/memory.cpp	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/hardware/memory.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -137,6 +137,7 @@ PageHandler * MEM_GetPageHandler(Bitu ph
+ 	if (phys_page<memory.pages) {
+ 		return memory.phandlers[phys_page];
+ 	} else if ((phys_page>=memory.lfb.start_page) && (phys_page<memory.lfb.end_page)) {
++        LOG_MSG("lfb handler");
+ 		return memory.lfb.handler;
+ 	} else if ((phys_page>=memory.lfb.start_page+0x01000000/4096) &&
+ 				(phys_page<memory.lfb.start_page+0x01000000/4096+16)) {
+diff -urp src/dosbox-0.74/src/hardware/pic.cpp src/hardware/pic.cpp
+--- src/dosbox-0.74/src/hardware/pic.cpp	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/hardware/pic.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -467,7 +467,9 @@ bool PIC_RunQueue(void) {
+ 		pic_queue.next_entry=entry->next;
+ 
+ 		srv_lag = entry->index;
++//        LOG_MSG("PIC Event Handler");
+ 		(entry->pic_event)(entry->value); // call the event handler
++//        LOG_MSG("PIC Event Handler Returned");
+ 
+ 		/* Put the entry in the free list */
+ 		entry->next=pic_queue.free_entry;
+@@ -521,6 +523,7 @@ void TIMER_AddTickHandler(TIMER_TickHand
+ }
+ 
+ void TIMER_AddTick(void) {
++//    LOG_MSG("TIMER_AddTick");
+ 	/* Setup new amount of cycles for PIC */
+ 	CPU_CycleLeft=CPU_CycleMax;
+ 	CPU_Cycles=0;
+@@ -535,7 +538,9 @@ void TIMER_AddTick(void) {
+ 	TickerBlock * ticker=firstticker;
+ 	while (ticker) {
+ 		TickerBlock * nextticker=ticker->next;
++//    LOG_MSG("TIMER_AddTick: Call %p", ticker->handler);
+ 		ticker->handler();
++//    LOG_MSG("TIMER_AddTick: Returned");
+ 		ticker=nextticker;
+ 	}
+ }
+diff -urp src/dosbox-0.74/src/hardware/vga_draw.cpp src/hardware/vga_draw.cpp
+--- src/dosbox-0.74/src/hardware/vga_draw.cpp	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/hardware/vga_draw.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -28,8 +28,8 @@
+ #include "pic.h"
+ 
+ //#undef C_DEBUG
+-//#define C_DEBUG 1
+-//#define LOG(X,Y) LOG_MSG
++#define C_DEBUG 1
++#define LOG(X,Y) LOG_MSG
+ 
+ #define VGA_PARTS 4
+ 
+@@ -784,6 +784,7 @@ static void VGA_VerticalTimer(Bitu /*val
+ 		break;
+ 	}
+ 	//Check if we can actually render, else skip the rest (frameskip)
++//    LOG_MSG("VGA_VerticalTimer: RENDER_StartUpdate");
+ 	if (!RENDER_StartUpdate())
+ 		return;
+ 
+@@ -970,6 +971,9 @@ void VGA_ActivateHardwareCursor(void) {
+ }
+ 
+ void VGA_SetupDrawing(Bitu /*val*/) {
++
++    LOG_MSG("VGA_SetupDrawing");
++
+ 	if (vga.mode==M_ERROR) {
+ 		PIC_RemoveEvents(VGA_VerticalTimer);
+ 		PIC_RemoveEvents(VGA_PanningLatch);
+@@ -1485,7 +1489,9 @@ void VGA_SetupDrawing(Bitu /*val*/) {
+ 		LOG(LOG_VGA,LOG_NORMAL)("%s width, %s height aspect %f",
+ 			doublewidth ? "double":"normal",doubleheight ? "double":"normal",aspect_ratio);
+ #endif
++    LOG_MSG("RENDER_SetSize");
+ 		RENDER_SetSize(width,height,bpp,(float)fps,aspect_ratio,doublewidth,doubleheight);
++    LOG_MSG("VGA_SetupDrawing done");
+ 	}
+ }
+ 
+diff -urp src/dosbox-0.74/src/hardware/vga_memory.cpp src/hardware/vga_memory.cpp
+--- src/dosbox-0.74/src/hardware/vga_memory.cpp	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/hardware/vga_memory.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -759,6 +759,7 @@ void VGA_SetupHandlers(void) {
+ 	vga.svga.bank_write_full = vga.svga.bank_write*vga.svga.bank_size;
+ 
+ 	PageHandler *newHandler;
++    LOG_MSG("VGA_SetupHandlers: %d", machine);
+ 	switch (machine) {
+ 	case MCH_CGA:
+ 	case MCH_PCJR:
+@@ -801,6 +802,7 @@ void VGA_SetupHandlers(void) {
+ 	}
+ 
+ 	/* This should be vga only */
++    LOG_MSG("VGA Mode = %d", vga.mode);
+ 	switch (vga.mode) {
+ 	case M_ERROR:
+ 	default:
+@@ -850,6 +852,7 @@ void VGA_SetupHandlers(void) {
+ 	}
+ 	switch ((vga.gfx.miscellaneous >> 2) & 3) {
+ 	case 0:
++        LOG_MSG("SetPageHandler for A0 (SVGA)");
+ 		vgapages.base = VGA_PAGE_A0;
+ 		switch (svgaCard) {
+ 		case SVGA_TsengET3K:
+@@ -864,12 +867,14 @@ void VGA_SetupHandlers(void) {
+ 		MEM_SetPageHandler(VGA_PAGE_A0, 32, newHandler );
+ 		break;
+ 	case 1:
++        LOG_MSG("SetPageHandler for A0");
+ 		vgapages.base = VGA_PAGE_A0;
+ 		vgapages.mask = 0xffff;
+ 		MEM_SetPageHandler( VGA_PAGE_A0, 16, newHandler );
+ 		MEM_ResetPageHandler( VGA_PAGE_B0, 16);
+ 		break;
+ 	case 2:
++        LOG_MSG("SetPageHandler for B0");
+ 		vgapages.base = VGA_PAGE_B0;
+ 		vgapages.mask = 0x7fff;
+ 		MEM_SetPageHandler( VGA_PAGE_B0, 8, newHandler );
+@@ -877,6 +882,7 @@ void VGA_SetupHandlers(void) {
+ 		MEM_ResetPageHandler( VGA_PAGE_B8, 8 );
+ 		break;
+ 	case 3:
++        LOG_MSG("SetPageHandler for B8");
+ 		vgapages.base = VGA_PAGE_B8;
+ 		vgapages.mask = 0x7fff;
+ 		MEM_SetPageHandler( VGA_PAGE_B8, 8, newHandler );
+diff -urp src/dosbox-0.74/src/ints/int10_char.cpp src/ints/int10_char.cpp
+--- src/dosbox-0.74/src/ints/int10_char.cpp	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/ints/int10_char.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -26,6 +26,8 @@
+ #include "inout.h"
+ #include "int10.h"
+ 
++#include <stdio.h>
++
+ static void CGA2_CopyRow(Bit8u cleft,Bit8u cright,Bit8u rold,Bit8u rnew,PhysPt base) {
+ 	Bit8u cheight = real_readb(BIOSMEM_SEG,BIOSMEM_CHAR_HEIGHT);
+ 	PhysPt dest=base+((CurMode->twidth*rnew)*(cheight/2)+cleft);
+@@ -595,6 +597,7 @@ static void INT10_TeletypeOutputAttr(Bit
+ 		break;
+ 	default:
+ 		/* Draw the actual Character */
++        printf("%c", chr);
+ 		WriteChar(cur_col,cur_row,page,chr,attr,useattr);
+ 		cur_col++;
+ 	}
+diff -urp src/dosbox-0.74/src/misc/setup.cpp src/misc/setup.cpp
+--- src/dosbox-0.74/src/misc/setup.cpp	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/misc/setup.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -850,6 +850,7 @@ void Config::SetStartUp(void (*_function
+ 
+ 
+ void Config::StartUp(void) {
++LOG_MSG("Config::StartUp: %p", _start_function);
+ 	(*_start_function)();
+ }
+ 
+diff -urp src/dosbox-0.74/src/misc/support.cpp src/misc/support.cpp
+--- src/dosbox-0.74/src/misc/support.cpp	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/misc/support.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -181,5 +181,6 @@ void E_Exit(const char * format,...) {
+ 	va_end(msg);
+ 	strcat(buf,"\n");
+ 
++    LOG_MSG(format);
+ 	throw(buf);
+ }
+diff -urp src/dosbox-0.74/src/shell/shell.cpp src/shell/shell.cpp
+--- src/dosbox-0.74/src/shell/shell.cpp	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/shell/shell.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -286,6 +286,7 @@ void DOS_Shell::RunInternal(void)
+ void DOS_Shell::Run(void) {
+ 	char input_line[CMD_MAXLINE] = {0};
+ 	std::string line;
++    LOG_MSG("DOS_Shell::Run %s", cmd->GetFileName());
+ 	if (cmd->FindStringRemain("/C",line)) {
+ 		strcpy(input_line,line.c_str());
+ 		char* sep = strpbrk(input_line,"\r\n"); //GTA installer
+@@ -293,6 +294,7 @@ void DOS_Shell::Run(void) {
+ 		DOS_Shell temp;
+ 		temp.echo = echo;
+ 		temp.ParseLine(input_line);		//for *.exe *.com  |*.bat creates the bf needed by runinternal;
++        LOG_MSG("DOS_Shell: temp.RunInternal");
+ 		temp.RunInternal();				// exits when no bf is found.
+ 		return;
+ 	}
+@@ -315,21 +317,27 @@ void DOS_Shell::Run(void) {
+ 			if(bf->ReadLine(input_line)) {
+ 				if (echo) {
+ 					if (input_line[0]!='@') {
++        LOG_MSG("DOS_Shell: ShowPrompt");
+ 						ShowPrompt();
+ 						WriteOut_NoParsing(input_line);
+ 						WriteOut_NoParsing("\n");
+ 					};
+ 				};
++        LOG_MSG("DOS_Shell: ParseLine '%s', input_line");
+ 				ParseLine(input_line);
+ 				if (echo) WriteOut("\n");
+ 			}
+ 		} else {
++        LOG_MSG("DOS_Shell: ShowPrompt (2)");
+ 			if (echo) ShowPrompt();
++        LOG_MSG("DOS_Shell: InputCommand (2)");
+ 			InputCommand(input_line);
++        LOG_MSG("DOS_Shell: ParseLine '%s' (2)", input_line);
+ 			ParseLine(input_line);
+ 			if (echo && !bf) WriteOut_NoParsing("\n");
+ 		}
+ 	} while (!exit);
++    LOG_MSG("DOS_Shell::Run - exiting");
+ }
+ 
+ void DOS_Shell::SyntaxError(void) {
+@@ -454,6 +462,7 @@ static char const * const full_name="Z:\
+ static char const * const init_line="/INIT AUTOEXEC.BAT";
+ 
+ void SHELL_Init() {
++    LOG_MSG("SHELL_Init");
+ 	/* Add messages */
+ 	MSG_Add("SHELL_ILLEGAL_PATH","Illegal Path.\n");
+ 	MSG_Add("SHELL_CMD_HELP","If you want a list of all supported commands type \033[33;1mhelp /all\033[0m .\nA short list of the most often used commands:\n");
+@@ -621,6 +630,7 @@ void SHELL_Init() {
+ 	DOS_PSP psp(psp_seg);
+ 	psp.MakeNew(0);
+ 	dos.psp(psp_seg);
++    LOG_MSG("SHELL_Init: Env set");
+    
+ 	/* The start of the filetable in the psp must look like this:
+ 	 * 01 01 01 00 02
+@@ -634,6 +644,7 @@ void SHELL_Init() {
+ 	DOS_ForceDuplicateEntry(1,2);				/* STDERR */
+ 	DOS_OpenFile("CON",OPEN_READWRITE,&dummy);	/* STDAUX */
+ 	DOS_OpenFile("CON",OPEN_READWRITE,&dummy);	/* STDPRN */
++    LOG_MSG("SHELL_Init: Files opened");
+ 
+ 	psp.SetParent(psp_seg);
+ 	/* Set the environment */
+@@ -649,6 +660,7 @@ void SHELL_Init() {
+ 	dos.psp(psp_seg);
+ 
+ 	
++    LOG_MSG("SHELL_Init: Start first shell");
+ 	SHELL_ProgramStart(&first_shell);
+ 	first_shell->Run();
+ 	delete first_shell;
+diff -urp src/dosbox-0.74/src/shell/shell_misc.cpp src/shell/shell_misc.cpp
+--- src/dosbox-0.74/src/shell/shell_misc.cpp	2010-05-10 19:43:54.000000000 +0200
++++ src/dosbox-0.74/src/shell/shell_misc.cpp	2010-08-28 14:43:01.000000000 +0200
+@@ -53,12 +53,14 @@ void DOS_Shell::InputCommand(char * line
+ 
+ 	while (size) {
+ 		dos.echo=false;
++        LOG_MSG("DOS_ReadFile");
+ 		while(!DOS_ReadFile(input_handle,&c,&n)) {
+ 			Bit16u dummy;
+ 			DOS_CloseFile(input_handle);
+ 			DOS_OpenFile("con",2,&dummy);
+ 			LOG(LOG_MISC,LOG_ERROR)("Reopening the input handle.This is a bug!");
+ 		}
++        LOG_MSG("DOS_ReadFile done");
+ 		if (!n) {
+ 			size=0;			//Kill the while loop
+ 			continue;
+

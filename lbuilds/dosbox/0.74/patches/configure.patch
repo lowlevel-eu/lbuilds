@@ -1,0 +1,26 @@
+Index: src/dosbox-0.74/config.sub
+===================================================================
+--- src.orig/dosbox-0.74/config.sub
++++ src/dosbox-0.74/config.sub
+@@ -1309,7 +1309,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* | -tyndur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: src/dosbox-0.74/src/cpu/cpu.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/cpu/cpu.cpp
++++ src/dosbox-0.74/src/cpu/cpu.cpp
+@@ -22,7 +22,7 @@
+ #include <sstream>
+ #include "dosbox.h"
+ #include "cpu.h"
+-#include "memory.h"
++//#include "memory.h"
+ #include "debug.h"
+ #include "mapper.h"
+ #include "setup.h"
