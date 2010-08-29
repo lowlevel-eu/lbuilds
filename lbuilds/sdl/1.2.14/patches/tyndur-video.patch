@@ -68,7 +68,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 ===================================================================
 --- /dev/null
 +++ src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
-@@ -0,0 +1,169 @@
+@@ -0,0 +1,175 @@
 +/*
 +    SDL - Simple DirectMedia Layer
 +    Copyright (C) 1997-2009 Sam Lantinga
@@ -221,13 +221,19 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 +            SDL_PrivateMouseMotion(0, 0, mouse_x, mouse_y);
 +        }
 +
-+        if (in.btn_down & 0x1) SDL_PrivateMouseButton(SDL_PRESSED, 1, 0, 0);
-+        if (in.btn_down & 0x2) SDL_PrivateMouseButton(SDL_PRESSED, 2, 0, 0);
-+        if (in.btn_down & 0x4) SDL_PrivateMouseButton(SDL_PRESSED, 3, 0, 0);
++        if (in.btn_down & 0x1)
++            SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_LEFT, 0, 0);
++        if (in.btn_down & 0x2)
++            SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_RIGHT, 0, 0);
++        if (in.btn_down & 0x4)
++            SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_MIDDLE, 0, 0);
 +
-+        if (in.btn_up & 0x1) SDL_PrivateMouseButton(SDL_RELEASED, 1, 0, 0);
-+        if (in.btn_up & 0x2) SDL_PrivateMouseButton(SDL_RELEASED, 1, 0, 0);
-+        if (in.btn_up & 0x4) SDL_PrivateMouseButton(SDL_RELEASED, 1, 0, 0);
++        if (in.btn_up & 0x1)
++            SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_LEFT, 0, 0);
++        if (in.btn_up & 0x2)
++            SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_RIGHT, 0, 0);
++        if (in.btn_up & 0x4)
++            SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_MIDDLE, 0, 0);
 +    }
 +}
 +
@@ -349,7 +355,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 ===================================================================
 --- /dev/null
 +++ src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
-@@ -0,0 +1,275 @@
+@@ -0,0 +1,272 @@
 +/*
 +    SDL - Simple DirectMedia Layer
 +    Copyright (C) 1997-2009 Sam Lantinga
@@ -504,7 +510,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +}
 +
 +static SDL_Rect* modelist[] = {
-+/*    & (SDL_Rect) { .w =  640, .h = 480 }, */
++    & (SDL_Rect) { .w =  640, .h = 480 },
 +    & (SDL_Rect) { .w =  800, .h = 600 },
 +    & (SDL_Rect) { .w = 1024, .h = 768 },
 +    NULL,
@@ -514,7 +520,8 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +
 +SDL_Rect **TYNDUR_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 +{
-+    if (format->BitsPerPixel != 24) {
++    /* TODO Check real mode list */
++    if (format->BitsPerPixel != 24 && format->BitsPerPixel != 32) {
 +        return modelist_empty;
 +    }
 +
@@ -528,10 +535,6 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +		SDL_free( this->hidden->buffer );
 +	}
 +
-+    if (bpp != 24) {
-+        return NULL;
-+    }
-+
 +    /* Modus wechseln */
 +    this->hidden->context = libvideo_create_driver_context("vesa");
 +    libvideo_use_driver_context(this->hidden->context);
@@ -540,7 +543,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +    libvideo_change_device(0);
 +    libvideo_change_color(0, 255, 0, 0);
 +    libvideo_do_command_buffer();
-+    if (libvideo_change_display_resolution(0, width, height, 24) != 0) {
++    if (libvideo_change_display_resolution(0, width, height, bpp) != 0) {
 +        SDL_SetError("Modus setzen fehlgeschlagen");
 +        return NULL;
 +    }
@@ -573,8 +576,8 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +	this->hidden->h = current->h = height;
 +	current->pitch = current->w * (bpp / 8);
 +	current->pixels = this->hidden->buffer;
-+    current->format->BitsPerPixel = 24;
-+    current->format->BytesPerPixel = 3;
++    current->format->BitsPerPixel = bpp;
++    current->format->BytesPerPixel = bpp / 8;
 +
 +	/* We're done */
 +	return(current);
