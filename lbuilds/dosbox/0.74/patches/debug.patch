@@ -1,6 +1,7 @@
-diff -urp src/dosbox-0.74/src/cpu/callback.cpp src/cpu/callback.cpp
---- src/dosbox-0.74/src/cpu/callback.cpp	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/cpu/callback.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/cpu/callback.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/cpu/callback.cpp
++++ src/dosbox-0.74/src/cpu/callback.cpp
 @@ -103,6 +103,7 @@ void CALLBACK_RunRealInt(Bit8u intnum) {
  	Bit16u oldcs=SegValue(cs);
  	reg_eip=CB_SOFFSET+(CB_MAX*CB_SIZE)+(intnum*6);
@@ -9,9 +10,10 @@ diff -urp src/dosbox-0.74/src/cpu/callback.cpp src/cpu/callback.cpp
  	DOSBOX_RunMachine();
  	reg_eip=oldeip;
  	SegSet16(cs,oldcs);
-diff -urp src/dosbox-0.74/src/dos/dev_con.h src/dos/dev_con.h
---- src/dosbox-0.74/src/dos/dev_con.h	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/dos/dev_con.h	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/dos/dev_con.h
+===================================================================
+--- src.orig/dosbox-0.74/src/dos/dev_con.h
++++ src/dosbox-0.74/src/dos/dev_con.h
 @@ -56,6 +56,9 @@ private:
  bool device_CON::Read(Bit8u * data,Bit16u * size) {
  	Bit16u oldax=reg_ax;
@@ -33,9 +35,10 @@ diff -urp src/dosbox-0.74/src/dos/dev_con.h src/dos/dev_con.h
  		switch(reg_al) {
  		case 13:
  			data[count++]=0x0D;
-diff -urp src/dosbox-0.74/src/dos/dos_files.cpp src/dos/dos_files.cpp
---- src/dosbox-0.74/src/dos/dos_files.cpp	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/dos/dos_files.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/dos/dos_files.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/dos/dos_files.cpp
++++ src/dosbox-0.74/src/dos/dos_files.cpp
 @@ -368,6 +368,7 @@ bool DOS_ReadFile(Bit16u entry,Bit8u * d
  	}
  */
@@ -44,9 +47,10 @@ diff -urp src/dosbox-0.74/src/dos/dos_files.cpp src/dos/dos_files.cpp
  	bool ret=Files[handle]->Read(data,&toread);
  	*amount=toread;
  	return ret;
-diff -urp src/dosbox-0.74/src/dosbox.cpp src/dosbox.cpp
---- src/dosbox-0.74/src/dosbox.cpp	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/dosbox.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/dosbox.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/dosbox.cpp
++++ src/dosbox-0.74/src/dosbox.cpp
 @@ -127,8 +127,11 @@ bool ticksLocked;
  
  static Bitu Normal_Loop(void) {
@@ -110,9 +114,10 @@ diff -urp src/dosbox-0.74/src/dosbox.cpp src/dosbox.cpp
  	return 0;
  }
  
-diff -urp src/dosbox-0.74/src/gui/render.cpp src/gui/render.cpp
---- src/dosbox-0.74/src/gui/render.cpp	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/gui/render.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/gui/render.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/gui/render.cpp
++++ src/dosbox-0.74/src/gui/render.cpp
 @@ -146,14 +146,18 @@ static void RENDER_ClearCacheHandler(con
  }
  
@@ -200,9 +205,10 @@ diff -urp src/dosbox-0.74/src/gui/render.cpp src/gui/render.cpp
  }
  
  extern void GFX_SetTitle(Bit32s cycles, Bits frameskip,bool paused);
-diff -urp src/dosbox-0.74/src/gui/sdlmain.cpp src/gui/sdlmain.cpp
---- src/dosbox-0.74/src/gui/sdlmain.cpp	2010-08-28 14:43:39.000000000 +0200
-+++ src/dosbox-0.74/src/gui/sdlmain.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/gui/sdlmain.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/gui/sdlmain.cpp
++++ src/dosbox-0.74/src/gui/sdlmain.cpp
 @@ -410,6 +410,9 @@ Bitu GFX_SetSize(Bitu width,Bitu height,
  	if (sdl.updating)
  		GFX_EndUpdate( 0 );
@@ -228,7 +234,7 @@ diff -urp src/dosbox-0.74/src/gui/sdlmain.cpp src/gui/sdlmain.cpp
  			sdl.clip.x=0;sdl.clip.y=0;
 -			sdl.surface=SDL_SetVideoMode(width,height,bpp,(flags & GFX_CAN_RANDOM) ? SDL_SWSURFACE : SDL_HWSURFACE);
 +//			sdl.surface=SDL_SetVideoMode(width,height,bpp,(flags & GFX_CAN_RANDOM) ? SDL_SWSURFACE : SDL_HWSURFACE);
-+  			sdl.surface=SDL_SetVideoMode(800, 600,24,(flags & GFX_CAN_RANDOM) ? SDL_SWSURFACE : SDL_HWSURFACE);
++  			sdl.surface=SDL_SetVideoMode(800, 600,bpp,(flags & GFX_CAN_RANDOM) ? SDL_SWSURFACE : SDL_HWSURFACE);
  #ifdef WIN32
  			if (sdl.surface == NULL) {
  				SDL_QuitSubSystem(SDL_INIT_VIDEO);
@@ -369,9 +375,10 @@ diff -urp src/dosbox-0.74/src/gui/sdlmain.cpp src/gui/sdlmain.cpp
  		GFX_ShowMsg("Exit to error: %s",error);
  		fflush(NULL);
  		if(sdl.wait_on_error) {
-diff -urp src/dosbox-0.74/src/gui/sdl_mapper.cpp src/gui/sdl_mapper.cpp
---- src/dosbox-0.74/src/gui/sdl_mapper.cpp	2010-05-10 20:58:06.000000000 +0200
-+++ src/dosbox-0.74/src/gui/sdl_mapper.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/gui/sdl_mapper.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/gui/sdl_mapper.cpp
++++ src/dosbox-0.74/src/gui/sdl_mapper.cpp
 @@ -415,7 +415,7 @@ Bitu GetKeyCode(SDL_keysym keysym) {
  			/* try to retrieve key from symbolic key as scancode is zero */
  			if (keysym.sym<MAX_SDLKEYS) key=scancode_map[(Bitu)keysym.sym];
@@ -407,9 +414,10 @@ diff -urp src/dosbox-0.74/src/gui/sdl_mapper.cpp src/gui/sdl_mapper.cpp
  		usescancodes=true;
  
  		/* Note: table has to be tested/updated for various OSs */
-diff -urp src/dosbox-0.74/src/hardware/memory.cpp src/hardware/memory.cpp
---- src/dosbox-0.74/src/hardware/memory.cpp	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/hardware/memory.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/hardware/memory.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/hardware/memory.cpp
++++ src/dosbox-0.74/src/hardware/memory.cpp
 @@ -137,6 +137,7 @@ PageHandler * MEM_GetPageHandler(Bitu ph
  	if (phys_page<memory.pages) {
  		return memory.phandlers[phys_page];
@@ -418,9 +426,10 @@ diff -urp src/dosbox-0.74/src/hardware/memory.cpp src/hardware/memory.cpp
  		return memory.lfb.handler;
  	} else if ((phys_page>=memory.lfb.start_page+0x01000000/4096) &&
  				(phys_page<memory.lfb.start_page+0x01000000/4096+16)) {
-diff -urp src/dosbox-0.74/src/hardware/pic.cpp src/hardware/pic.cpp
---- src/dosbox-0.74/src/hardware/pic.cpp	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/hardware/pic.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/hardware/pic.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/hardware/pic.cpp
++++ src/dosbox-0.74/src/hardware/pic.cpp
 @@ -467,7 +467,9 @@ bool PIC_RunQueue(void) {
  		pic_queue.next_entry=entry->next;
  
@@ -449,9 +458,10 @@ diff -urp src/dosbox-0.74/src/hardware/pic.cpp src/hardware/pic.cpp
  		ticker=nextticker;
  	}
  }
-diff -urp src/dosbox-0.74/src/hardware/vga_draw.cpp src/hardware/vga_draw.cpp
---- src/dosbox-0.74/src/hardware/vga_draw.cpp	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/hardware/vga_draw.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/hardware/vga_draw.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/hardware/vga_draw.cpp
++++ src/dosbox-0.74/src/hardware/vga_draw.cpp
 @@ -28,8 +28,8 @@
  #include "pic.h"
  
@@ -491,9 +501,10 @@ diff -urp src/dosbox-0.74/src/hardware/vga_draw.cpp src/hardware/vga_draw.cpp
  	}
  }
  
-diff -urp src/dosbox-0.74/src/hardware/vga_memory.cpp src/hardware/vga_memory.cpp
---- src/dosbox-0.74/src/hardware/vga_memory.cpp	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/hardware/vga_memory.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/hardware/vga_memory.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/hardware/vga_memory.cpp
++++ src/dosbox-0.74/src/hardware/vga_memory.cpp
 @@ -759,6 +759,7 @@ void VGA_SetupHandlers(void) {
  	vga.svga.bank_write_full = vga.svga.bank_write*vga.svga.bank_size;
  
@@ -541,9 +552,10 @@ diff -urp src/dosbox-0.74/src/hardware/vga_memory.cpp src/hardware/vga_memory.cp
  		vgapages.base = VGA_PAGE_B8;
  		vgapages.mask = 0x7fff;
  		MEM_SetPageHandler( VGA_PAGE_B8, 8, newHandler );
-diff -urp src/dosbox-0.74/src/ints/int10_char.cpp src/ints/int10_char.cpp
---- src/dosbox-0.74/src/ints/int10_char.cpp	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/ints/int10_char.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/ints/int10_char.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/ints/int10_char.cpp
++++ src/dosbox-0.74/src/ints/int10_char.cpp
 @@ -26,6 +26,8 @@
  #include "inout.h"
  #include "int10.h"
@@ -561,9 +573,10 @@ diff -urp src/dosbox-0.74/src/ints/int10_char.cpp src/ints/int10_char.cpp
  		WriteChar(cur_col,cur_row,page,chr,attr,useattr);
  		cur_col++;
  	}
-diff -urp src/dosbox-0.74/src/misc/setup.cpp src/misc/setup.cpp
---- src/dosbox-0.74/src/misc/setup.cpp	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/misc/setup.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/misc/setup.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/misc/setup.cpp
++++ src/dosbox-0.74/src/misc/setup.cpp
 @@ -850,6 +850,7 @@ void Config::SetStartUp(void (*_function
  
  
@@ -572,9 +585,10 @@ diff -urp src/dosbox-0.74/src/misc/setup.cpp src/misc/setup.cpp
  	(*_start_function)();
  }
  
-diff -urp src/dosbox-0.74/src/misc/support.cpp src/misc/support.cpp
---- src/dosbox-0.74/src/misc/support.cpp	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/misc/support.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/misc/support.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/misc/support.cpp
++++ src/dosbox-0.74/src/misc/support.cpp
 @@ -181,5 +181,6 @@ void E_Exit(const char * format,...) {
  	va_end(msg);
  	strcat(buf,"\n");
@@ -582,9 +596,10 @@ diff -urp src/dosbox-0.74/src/misc/support.cpp src/misc/support.cpp
 +    LOG_MSG(format);
  	throw(buf);
  }
-diff -urp src/dosbox-0.74/src/shell/shell.cpp src/shell/shell.cpp
---- src/dosbox-0.74/src/shell/shell.cpp	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/shell/shell.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/shell/shell.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/shell/shell.cpp
++++ src/dosbox-0.74/src/shell/shell.cpp
 @@ -286,6 +286,7 @@ void DOS_Shell::RunInternal(void)
  void DOS_Shell::Run(void) {
  	char input_line[CMD_MAXLINE] = {0};
@@ -661,9 +676,10 @@ diff -urp src/dosbox-0.74/src/shell/shell.cpp src/shell/shell.cpp
  	SHELL_ProgramStart(&first_shell);
  	first_shell->Run();
  	delete first_shell;
-diff -urp src/dosbox-0.74/src/shell/shell_misc.cpp src/shell/shell_misc.cpp
---- src/dosbox-0.74/src/shell/shell_misc.cpp	2010-05-10 19:43:54.000000000 +0200
-+++ src/dosbox-0.74/src/shell/shell_misc.cpp	2010-08-28 14:43:01.000000000 +0200
+Index: src/dosbox-0.74/src/shell/shell_misc.cpp
+===================================================================
+--- src.orig/dosbox-0.74/src/shell/shell_misc.cpp
++++ src/dosbox-0.74/src/shell/shell_misc.cpp
 @@ -53,12 +53,14 @@ void DOS_Shell::InputCommand(char * line
  
  	while (size) {
@@ -679,4 +695,3 @@ diff -urp src/dosbox-0.74/src/shell/shell_misc.cpp src/shell/shell_misc.cpp
  		if (!n) {
  			size=0;			//Kill the while loop
  			continue;
-
