@@ -1,0 +1,13 @@
+Index: src/supertux-0.1.3/config.sub
+===================================================================
+--- src.orig/supertux-0.1.3/config.sub
++++ src/supertux-0.1.3/config.sub
+@@ -1181,7 +1181,7 @@ case $os in
+ 	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+-	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly*)
++	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* | -tyndur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
