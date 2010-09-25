@@ -68,7 +68,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 ===================================================================
 --- /dev/null
 +++ src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
-@@ -0,0 +1,175 @@
+@@ -0,0 +1,235 @@
 +/*
 +    SDL - Simple DirectMedia Layer
 +    Copyright (C) 1997-2009 Sam Lantinga
@@ -102,52 +102,10 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 +#include "SDL_tyndurvideo.h"
 +#include "SDL_tyndurevents_c.h"
 +
-+static int read_escape_sequence(void)
-+{
-+    switch (fgetc(stdin)) {
-+        case 'O':
-+            switch (fgetc(stdin)) {
-+                case 'P': return(SDLK_F1);
-+                case 'Q': return(SDLK_F2);
-+                case 'R': return(SDLK_F3);
-+                case 'S': return(SDLK_F4);
-+            }
-+            break;
++#include <init.h>
++#include <kbd.h>
++#include <syscall.h>
 +
-+        case '[':
-+            switch (fgetc(stdin)) {
-+                case 'A': return(SDLK_UP);
-+                case 'B': return(SDLK_DOWN);
-+                case 'C': return(SDLK_RIGHT);
-+                case 'D': return(SDLK_LEFT);
-+                case 'F': return(SDLK_END);
-+                case 'H': return(SDLK_HOME);
-+
-+                case '3': if (fgetc(stdin) == '~') return(SDLK_DELETE);
-+                case '5': if (fgetc(stdin) == '~') return(SDLK_PAGEUP);
-+                case '6': if (fgetc(stdin) == '~') return(SDLK_PAGEDOWN);
-+
-+                case '1':
-+                      switch (fgetc(stdin)) {
-+                          case '5': if (fgetc(stdin) == '~') return(SDLK_F5);
-+                          case '7': if (fgetc(stdin) == '~') return(SDLK_F6);
-+                          case '8': if (fgetc(stdin) == '~') return(SDLK_F7);
-+                          case '9': if (fgetc(stdin) == '~') return(SDLK_F8);
-+                      }
-+
-+                case '2':
-+                      switch (fgetc(stdin)) {
-+                          case '0': if (fgetc(stdin) == '~') return(SDLK_F9);
-+                          case '1': if (fgetc(stdin) == '~') return(SDLK_F10);
-+                          case '3': if (fgetc(stdin) == '~') return(SDLK_F11);
-+                          case '4': if (fgetc(stdin) == '~') return(SDLK_F12);
-+                          case '~': return(SDLK_INSERT);
-+                      }
-+            }
-+    }
-+
-+    return EOF;
-+}
 +
 +static SDL_keysym* get_keysym(int c)
 +{
@@ -165,6 +123,133 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 +    return &keysym;
 +}
 +
++static pid_t kbc_pid;
++
++struct kbd_data {
++    uint8_t keycode;
++    uint8_t release;
++};
++
++struct keymap_entry {
++    wchar_t normal;
++    wchar_t shift;
++    wchar_t altgr;
++    wchar_t ctrl;
++};
++
++static struct keymap_entry keymap[128];
++
++static int get_sdl_keycode(uint8_t keycode)
++{
++    int c;
++
++    switch (keycode) {
++
++        case KEYCODE_ARROW_UP:      return SDLK_UP;
++        case KEYCODE_ARROW_DOWN:    return SDLK_DOWN;
++        case KEYCODE_ARROW_LEFT:    return SDLK_LEFT;
++        case KEYCODE_ARROW_RIGHT:   return SDLK_RIGHT;
++
++        case KEYCODE_INSERT:        return SDLK_INSERT;
++        case KEYCODE_DELETE:        return SDLK_DELETE;
++        case KEYCODE_HOME:          return SDLK_HOME;
++        case KEYCODE_END:           return SDLK_END;
++        case KEYCODE_PAGE_UP:       return SDLK_PAGEUP;
++        case KEYCODE_PAGE_DOWN:     return SDLK_PAGEDOWN;
++
++        case KEYCODE_SHIFT_LEFT:    return SDLK_LSHIFT;
++        case KEYCODE_SHIFT_RIGHT:   return SDLK_RSHIFT;
++        case KEYCODE_CONTROL_LEFT:  return SDLK_LCTRL;
++        case KEYCODE_CONTROL_RIGHT: return SDLK_RCTRL;
++        case KEYCODE_ALT:           return SDLK_LALT;
++        case KEYCODE_ALTGR:         return SDLK_MODE;
++
++        case KEYCODE_F1:            return SDLK_F1;
++        case KEYCODE_F2:            return SDLK_F2;
++        case KEYCODE_F3:            return SDLK_F3;
++        case KEYCODE_F4:            return SDLK_F4;
++        case KEYCODE_F5:            return SDLK_F5;
++        case KEYCODE_F6:            return SDLK_F6;
++        case KEYCODE_F7:            return SDLK_F7;
++        case KEYCODE_F8:            return SDLK_F8;
++        case KEYCODE_F9:            return SDLK_F9;
++        case KEYCODE_F10:           return SDLK_F10;
++        case KEYCODE_F11:           return SDLK_F11;
++        case KEYCODE_F12:           return SDLK_F12;
++
++        default:
++            c = keymap[keycode].normal;
++            if (c == '\n') {
++                return SDLK_RETURN;
++            }
++
++            return c;
++    }
++}
++
++static void rpc_kbd_callback(pid_t pid, uint32_t cid, size_t data_size,
++    void* data)
++{
++    struct kbd_data* kbd_data = data;
++    SDL_keysym* keysym;
++    int keycode;
++
++    /* Pruefen, ob die Nachricht in Ordnung ist */
++    if ((pid != kbc_pid) || (data_size != 2)) {
++        return;
++    }
++
++    /* Keycode anhand von vterm:/keymap uebersetzen */
++    if (kbd_data->keycode > 127) {
++        return;
++    }
++
++    p();
++
++    keycode = get_sdl_keycode(kbd_data->keycode);
++    keysym = get_keysym(keycode);
++
++    if (kbd_data->release) {
++        SDL_PrivateKeyboard(SDL_RELEASED, keysym);
++    } else {
++        SDL_PrivateKeyboard(SDL_PRESSED, keysym);
++    }
++
++    v();
++}
++
++int TYNDUR_init_events(void)
++{
++    FILE* f;
++    int ret;
++
++    /* Keymap einlesen */
++    f = fopen("vterm:/keymap", "r");
++    if (!f) {
++        return -1;
++    }
++
++    ret = fread(keymap, sizeof(struct keymap_entry), 128, f);
++    fclose(f);
++
++    /* TODO 2048 ist nur Workaround fuer LIOv1 */
++    if (ret != 128 && ret != 2048) {
++        return -1;
++    }
++
++    /* RPC-Handler fuer die Callbacks von kbc einrichten */
++    register_message_handler(KBD_RPC_CALLBACK, rpc_kbd_callback);
++
++    /* Bei kbc registrieren */
++    kbc_pid = init_service_get("kbc");
++    if (!kbc_pid) {
++        return -1;
++    }
++
++    /* Callback registrtrieren bei kbc */
++    return -!rpc_get_dword(kbc_pid, KBD_RPC_REGISTER_CALLBACK, 0, NULL);
++}
++
 +struct mousedata {
 +    int32_t x;
 +    int32_t y;
@@ -176,31 +261,6 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 +
 +void TYNDUR_PumpEvents(_THIS)
 +{
-+	/* Tastatur abfragen */
-+    static int old_key = 0;
-+
-+    int c = fgetc(stdin);
-+    if (c != EOF) {
-+        if (old_key != 0) {
-+            SDL_PrivateKeyboard(SDL_RELEASED, get_keysym(old_key));
-+            old_key = 0;
-+        }
-+
-+        switch (c) {
-+            case 10:
-+                c = 13;
-+                break;
-+
-+            case 27:
-+                c = read_escape_sequence();
-+                if (c == EOF)
-+                    c = 27;
-+                break;
-+        }
-+        SDL_PrivateKeyboard(SDL_PRESSED, get_keysym(c));
-+        old_key = c;
-+    }
-+
 +    /* Maus abfragen */
 +    static int mouse_x = 0;
 +    static int mouse_y = 0;
@@ -355,7 +415,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 ===================================================================
 --- /dev/null
 +++ src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
-@@ -0,0 +1,272 @@
+@@ -0,0 +1,277 @@
 +/*
 +    SDL - Simple DirectMedia Layer
 +    Copyright (C) 1997-2009 Sam Lantinga
@@ -423,6 +483,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +static void TYNDUR_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 +
 +/* TYNDUR driver bootstrap functions */
++extern int TYNDUR_init_events(void);
 +
 +static int TYNDUR_Available(void)
 +{
@@ -481,6 +542,10 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +	device->PumpEvents = TYNDUR_PumpEvents;
 +
 +	device->free = TYNDUR_DeleteDevice;
++
++    if (TYNDUR_init_events() < 0) {
++        return NULL;
++    }
 +
 +	return device;
 +}
