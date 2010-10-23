@@ -7,8 +7,13 @@ int main(void)
 {
     stdout = NULL;
 
-    video_switch_mode();
-    video_draw();
+    video_init();
+
+    while (1) {
+        video_draw();
+    }
+
+    video_deinit();
 
     return 0;
 }

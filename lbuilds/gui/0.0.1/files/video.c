@@ -79,6 +79,8 @@ void video_switch_mode(void)
         fprintf(stderr, "Framebuffer hat unerwartete Größe\n");
         exit(1);
     }
+
+    libvideo_request_backbuffers(fb_bitmap, 2);
 }
 
 /*
@@ -104,33 +106,39 @@ static int video_handle_text(const wchar_t* text)
 }
 
 static void draw_char(FT_GlyphSlot slot, uint8_t* buf, int pitch, int sx,
-    uint32_t color)
+    uint32_t color, uint32_t bgcolor)
 {
     uint8_t* p = buf;
     int x, y;
 
     for (y = 0; y < slot->bitmap.rows; y++) {
         p = buf + y * pitch + sx;
-        for (x = 0; x < slot->bitmap.width; x++, p += 4) {
+        for (x = 0; x < slot->bitmap.width; x++) {
 
             /* Kein Pixel zu setzen? */
             int pixel = 8 * y * slot->bitmap.pitch + x;
             int byte = pixel / 8;
             int bit = 7 - (pixel % 8);
+            uint32_t c;
 
             if ((slot->bitmap.buffer[byte] & (1 << bit)) == 0) {
-                continue;
+                c = bgcolor;
+            } else {
+                c = color;
             }
 
-            p[0] = (color >> 24) & 0xFF;
-            p[1] = (color >> 16) & 0xFF;
-            p[2] = (color >>  8) & 0xFF;
-            p[3] = (color >>  0) & 0xFF;
+            p[0] = (c >> 24) & 0xFF;
+            p[1] = (c >> 16) & 0xFF;
+            p[2] = (c >>  8) & 0xFF;
+            p[3] = (c >>  0) & 0xFF;
+
+            p += 4;
         }
     }
 }
 
-video_bitmap_t* video_get_text(const wchar_t* text, uint32_t color)
+video_bitmap_t* video_get_text(const wchar_t* text, uint32_t color,
+    uint32_t bgcolor)
 {
     FT_GlyphSlot slot = font->glyph;
     video_bitmap_t* bitmap;
@@ -141,7 +149,6 @@ video_bitmap_t* video_get_text(const wchar_t* text, uint32_t color)
 
     /* Breite des Texts berechnen */
     width = video_handle_text(text);
-printf("width = %x\n", width);
     if (width < 0) {
         return NULL;
     }
@@ -164,7 +171,7 @@ printf("width = %x\n", width);
             return NULL;
         }
 
-        draw_char(slot, buf, 4 * width, x, color);
+        draw_char(slot, buf, 4 * width, x, color, bgcolor);
 
         x += 4 * slot->advance.x / 64;
         text++;
@@ -186,26 +193,132 @@ void video_free_text(video_bitmap_t* bitmap)
     libvideo_destroy_bitmap(bitmap);
 }
 
-void video_draw(void)
+
+static video_bitmap_t* bmp_win_close;
+
+void ctl_window_init(void)
+{
+    /* Bitmap fuer Schliessen */
+#define W 0xffffffff,
+#define _ 0x00003300,
+    static uint32_t raw_win_close[14 * 14] = {
+        _ _ _ _ _ _ _ _ _ _ _ _ _ _
+        _ _ _ _ _ _ _ _ _ _ _ _ _ _
+        _ _ _ W _ _ _ _ _ _ W _ _ _
+        _ _ W W W _ _ _ _ W W W _ _
+        _ _ _ W W W _ _ W W W _ _ _
+        _ _ _ _ W W W W W W _ _ _ _
+        _ _ _ _ _ W W W W _ _ _ _ _
+        _ _ _ _ _ W W W W _ _ _ _ _
+        _ _ _ _ W W W W W W _ _ _ _
+        _ _ _ W W W _ _ W W W _ _ _
+        _ _ W W W _ _ _ _ W W W _ _
+        _ _ _ W _ _ _ _ _ _ W _ _ _
+        _ _ _ _ _ _ _ _ _ _ _ _ _ _
+        _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    };
+#undef W
+#undef _
+    video_bitmap_t* bitmap;
+    bmp_win_close = libvideo_create_bitmap(14, 14, 4 * 14 * 14, raw_win_close);
+    libvideo_upload_bitmap(bmp_win_close);
+    libvideo_do_command_buffer();
+}
+
+void ctl_window_deinit(void) {
+    libvideo_destroy_bitmap(bmp_win_close);
+}
+
+void ctl_window_draw(void)
 {
     video_bitmap_t* text;
-printf("video_draw\n");
 
-    /* Hintergrund zeichnen */
-    libvideo_change_target(fb_bitmap);
-    libvideo_change_color(0, 0, 128, 64);
-    libvideo_draw_rectangle(0, 0, RES_X, RES_Y);
-printf("video_draw [a]\n");
+    int x = 100;
+    int y = 100;
+    int w = 400;
+    int h = 150;
+
+    /* Fenster zeichnen */
+    libvideo_change_color(0xff, 0xff, 0xff, 0xff);
+    libvideo_draw_rectangle(x, y, w, h);
+
+    libvideo_change_color(0xff, 0x00, 0x66, 0x00);
+    libvideo_draw_rectangle(x + 1, y + 1, w - 2, 20);
+
+    libvideo_draw_bitmap(bmp_win_close, x + w - 18, y + 4);
     libvideo_do_command_buffer();
-printf("video_draw [b]\n");
 
-    text = video_get_text(L"Allar GUI ykkar eru í eigu okkar!", 0x00ffff00);
-
-printf("video_draw [c]\n");
-    libvideo_draw_bitmap(text, 100, 100);
-printf("video_draw [d]\n");
+/*
+    text = video_get_text(L"Allar GUI ykkar eru í eigu okkar!",
+        0x00ffffff, 0x00660000);
+    libvideo_draw_bitmap(text, x + 5, y + 3);
     libvideo_do_command_buffer();
-printf("video_draw [e]\n");
 
     video_free_text(text);
+*/
+}
+
+static video_bitmap_t* bmp_mouse;
+
+void ctl_mouse_init(void)
+{
+    /* Bitmap fuer Schliessen */
+#define W 0xffffffff,
+#define _ 0x00000000,
+    static uint32_t raw_mouse[14 * 14] = {
+        _ _ _ _ _ _ _ _ _ _ _ _ _ _
+        _ _ _ _ _ _ _ _ _ _ _ _ _ _
+        _ _ W W W W W W W W W W W _
+        _ _ W W W W W W W W W W _ _
+        _ _ W W W W W W W W W _ _ _
+        _ _ W W W W W W W W _ _ _ _
+        _ _ W W W W W W W W _ _ _ _
+        _ _ W W W W W W W W W _ _ _
+        _ _ W W W W W W W W W W _ _
+        _ _ W W W W W W W W W W W _
+        _ _ W W W _ _ W W W W W _ _
+        _ _ W W _ _ _ _ W W W _ _ _
+        _ _ W _ _ _ _ _ _ W _ _ _ _
+        _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    };
+#undef W
+#undef _
+    video_bitmap_t* bitmap;
+    bmp_mouse = libvideo_create_bitmap(14, 14, 4 * 14 * 14, raw_mouse);
+    libvideo_upload_bitmap(bmp_mouse);
+    libvideo_do_command_buffer();
+}
+
+void ctl_mouse_draw(void)
+{
+    static int x = 10;
+    libvideo_draw_bitmap(bmp_mouse, x++, 200);
+    libvideo_do_command_buffer();
+}
+
+void video_draw(void)
+{
+    /* Hintergrund zeichnen */
+    libvideo_change_target(fb_bitmap);
+    libvideo_change_color(0, 0, 16, 0);
+    libvideo_draw_rectangle(0, 0, RES_X, RES_Y);
+    libvideo_do_command_buffer();
+
+    /* Ein Fenster */
+    ctl_window_draw();
+    ctl_mouse_draw();
+
+    libvideo_flip_buffers(fb_bitmap);
+}
+
+void video_init(void)
+{
+    video_switch_mode();
+    ctl_window_init();
+    ctl_mouse_init();
+}
+
+void video_deinit(void)
+{
+    ctl_window_deinit();
 }
