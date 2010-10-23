@@ -1,0 +1,40 @@
+include toolchain
+include lutils
+
+DESCRIPTION="Eine grafische Benutzeroberfläche"
+HOMEPAGE=""
+SRC_URI=""
+
+LICENSE="none"
+
+BUILD_DEPEND="=freetype-2.4.1"
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+	cd ${S}
+    ln -s ${F} ${P}
+}
+
+src_configure() {
+	cd ${MY_S}
+cat > config.mak <<EOF
+CC=`tc-cc`
+CFLAGS=-I "`tc-incdir`" -I "`tc-incdir`/freetype2"
+LDFLAGS=-L `tc-libdir`
+EOF
+}
+
+src_compile() {
+	cd ${MY_S}
+
+    make
+}
+
+src_install() {
+	cd ${MY_S}
+
+	mkdir -p "${D}${R}/bin"
+	cp gui "${D}${R}/bin/gui"
+}
