@@ -74,6 +74,9 @@ void ctl_image_create(struct ctl* ctl)
     width   = png_get_image_width(png, info);
     height  = png_get_image_height(png, info);
 
+    png_set_bgr(png);
+    png_read_update_info(png, info);
+
     raw = malloc(4 * width * height);
     row_pointers = malloc(height * sizeof(png_byte*));
     for (i = 0; i < height; i++) {

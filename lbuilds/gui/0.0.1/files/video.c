@@ -218,7 +218,9 @@ void video_init(void)
     ctl->x = 120;
     ctl->y = 140;
 
-    ctl_create(&ctl_window);
+    ctl = ctl_create(&ctl_window);
+    ctl->x = 100;
+    ctl->y = 100;
 }
 
 void video_deinit(void)

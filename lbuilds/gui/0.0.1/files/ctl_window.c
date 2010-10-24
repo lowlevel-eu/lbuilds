@@ -64,21 +64,19 @@ void ctl_window_draw(struct ctl* ctl)
 {
     struct ctl_window* c = from_ctl(ctl);
 
-    int x = 100;
-    int y = 100;
     int w = 400;
     int h = 450;
 
     /* Fenster zeichnen */
     libvideo_change_color(0xff, 0xff, 0xff, 0xff);
-    libvideo_draw_rectangle(x, y, w, h);
+    libvideo_draw_rectangle(ctl->x, ctl->y, w, h);
 
     libvideo_change_color(0xff, 0x00, 0x66, 0x00);
-    libvideo_draw_rectangle(x + 1, y + 1, w - 2, 20);
+    libvideo_draw_rectangle(ctl->x + 1, ctl->y + 1, w - 2, 20);
 
-    libvideo_draw_bitmap(c->bmp_title, x + 5, y + 3);
+    libvideo_draw_bitmap(c->bmp_title, ctl->x + 5, ctl->y + 3);
 
-    libvideo_draw_bitmap(bmp_win_close, x + w - 18, y + 4);
+    libvideo_draw_bitmap(bmp_win_close, ctl->x + w - 18, ctl->y + 4);
 
 }
 
