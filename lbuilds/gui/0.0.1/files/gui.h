@@ -3,11 +3,18 @@
 
 #include <video/video.h>
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+
 struct ctl_driver;
 
 struct ctl {
     struct ctl_driver*  drv;
     struct ctl*         next;
+
+    int x;
+    int y;
 };
 
 struct ctl_driver {
