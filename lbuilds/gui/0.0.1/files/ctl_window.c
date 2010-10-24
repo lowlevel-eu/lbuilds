@@ -67,7 +67,7 @@ void ctl_window_draw(struct ctl* ctl)
     int x = 100;
     int y = 100;
     int w = 400;
-    int h = 150;
+    int h = 450;
 
     /* Fenster zeichnen */
     libvideo_change_color(0xff, 0xff, 0xff, 0xff);

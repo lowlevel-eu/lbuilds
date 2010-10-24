@@ -209,8 +209,15 @@ void video_draw(void)
 
 void video_init(void)
 {
+    struct ctl* ctl;
+
     video_switch_mode();
     ctl_create(&ctl_mouse);
+
+    ctl = ctl_create(&ctl_image);
+    ctl->x = 120;
+    ctl->y = 140;
+
     ctl_create(&ctl_window);
 }
 

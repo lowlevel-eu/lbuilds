@@ -2,7 +2,7 @@ SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
 DEP = $(addprefix .,$(SRC:.c=.o.dep))
 
-LIBS = -lfreetype
+LIBS = -lfreetype -lpng -lz
 
 run_silent = $(if $(V),$(2),@echo $(1) && $(2))
 

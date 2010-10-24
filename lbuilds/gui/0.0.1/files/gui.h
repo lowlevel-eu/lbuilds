@@ -56,5 +56,11 @@ struct ctl_mouse {
     struct ctl      ctl;
 };
 
+extern struct ctl_driver ctl_image;
+struct ctl_image {
+    struct ctl      ctl;
+    video_bitmap_t* bitmap;
+};
+
 
 #endif
