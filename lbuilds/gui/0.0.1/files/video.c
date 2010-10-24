@@ -159,8 +159,6 @@ video_bitmap_t* video_get_text(const wchar_t* text, uint32_t color,
     /* Text zeichnen */
     x = 0;
     while (*text) {
-        int i;
-
         ret = FT_Load_Char(font, *text, FT_LOAD_MONOCHROME);
         if (ret) {
             return NULL;
@@ -193,109 +191,6 @@ void video_free_text(video_bitmap_t* bitmap)
     libvideo_destroy_bitmap(bitmap);
 }
 
-
-static video_bitmap_t* bmp_win_close;
-
-void ctl_window_init(void)
-{
-    /* Bitmap fuer Schliessen */
-#define W 0xffffffff,
-#define _ 0x00003300,
-    static uint32_t raw_win_close[14 * 14] = {
-        _ _ _ _ _ _ _ _ _ _ _ _ _ _
-        _ _ _ _ _ _ _ _ _ _ _ _ _ _
-        _ _ _ W _ _ _ _ _ _ W _ _ _
-        _ _ W W W _ _ _ _ W W W _ _
-        _ _ _ W W W _ _ W W W _ _ _
-        _ _ _ _ W W W W W W _ _ _ _
-        _ _ _ _ _ W W W W _ _ _ _ _
-        _ _ _ _ _ W W W W _ _ _ _ _
-        _ _ _ _ W W W W W W _ _ _ _
-        _ _ _ W W W _ _ W W W _ _ _
-        _ _ W W W _ _ _ _ W W W _ _
-        _ _ _ W _ _ _ _ _ _ W _ _ _
-        _ _ _ _ _ _ _ _ _ _ _ _ _ _
-        _ _ _ _ _ _ _ _ _ _ _ _ _ _
-    };
-#undef W
-#undef _
-    video_bitmap_t* bitmap;
-    bmp_win_close = libvideo_create_bitmap(14, 14, 4 * 14 * 14, raw_win_close);
-    libvideo_upload_bitmap(bmp_win_close);
-    libvideo_do_command_buffer();
-}
-
-void ctl_window_deinit(void) {
-    libvideo_destroy_bitmap(bmp_win_close);
-}
-
-void ctl_window_draw(void)
-{
-    video_bitmap_t* text;
-
-    int x = 100;
-    int y = 100;
-    int w = 400;
-    int h = 150;
-
-    /* Fenster zeichnen */
-    libvideo_change_color(0xff, 0xff, 0xff, 0xff);
-    libvideo_draw_rectangle(x, y, w, h);
-
-    libvideo_change_color(0xff, 0x00, 0x66, 0x00);
-    libvideo_draw_rectangle(x + 1, y + 1, w - 2, 20);
-
-    libvideo_draw_bitmap(bmp_win_close, x + w - 18, y + 4);
-    libvideo_do_command_buffer();
-
-/*
-    text = video_get_text(L"Allar GUI ykkar eru í eigu okkar!",
-        0x00ffffff, 0x00660000);
-    libvideo_draw_bitmap(text, x + 5, y + 3);
-    libvideo_do_command_buffer();
-
-    video_free_text(text);
-*/
-}
-
-static video_bitmap_t* bmp_mouse;
-
-void ctl_mouse_init(void)
-{
-    /* Bitmap fuer Schliessen */
-#define W 0xffffffff,
-#define _ 0x00000000,
-    static uint32_t raw_mouse[14 * 14] = {
-        _ _ _ _ _ _ _ _ _ _ _ _ _ _
-        _ _ _ _ _ _ _ _ _ _ _ _ _ _
-        _ _ W W W W W W W W W W W _
-        _ _ W W W W W W W W W W _ _
-        _ _ W W W W W W W W W _ _ _
-        _ _ W W W W W W W W _ _ _ _
-        _ _ W W W W W W W W _ _ _ _
-        _ _ W W W W W W W W W _ _ _
-        _ _ W W W W W W W W W W _ _
-        _ _ W W W W W W W W W W W _
-        _ _ W W W _ _ W W W W W _ _
-        _ _ W W _ _ _ _ W W W _ _ _
-        _ _ W _ _ _ _ _ _ W _ _ _ _
-        _ _ _ _ _ _ _ _ _ _ _ _ _ _
-    };
-#undef W
-#undef _
-    video_bitmap_t* bitmap;
-    bmp_mouse = libvideo_create_bitmap(14, 14, 4 * 14 * 14, raw_mouse);
-    libvideo_upload_bitmap(bmp_mouse);
-    libvideo_do_command_buffer();
-}
-
-void ctl_mouse_draw(void)
-{
-    static int x = 10;
-    libvideo_draw_bitmap(bmp_mouse, x++, 200);
-    libvideo_do_command_buffer();
-}
-
 void video_draw(void)
 {
     /* Hintergrund zeichnen */
@@ -305,20 +200,21 @@ void video_draw(void)
     libvideo_do_command_buffer();
 
     /* Ein Fenster */
-    ctl_window_draw();
-    ctl_mouse_draw();
+    ctls_draw();
+    libvideo_do_command_buffer();
 
     libvideo_flip_buffers(fb_bitmap);
+    libvideo_do_command_buffer();
 }
 
 void video_init(void)
 {
     video_switch_mode();
-    ctl_window_init();
-    ctl_mouse_init();
+    ctl_create(&ctl_mouse);
+    ctl_create(&ctl_window);
 }
 
 void video_deinit(void)
 {
-    ctl_window_deinit();
+    /* TODO Modus zuruecksetzen */
 }

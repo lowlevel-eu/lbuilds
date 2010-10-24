@@ -11,6 +11,8 @@ all: gui
 include config.mak
 -include $(DEP)
 
+CFLAGS += -Wall -Werror
+
 gui: $(OBJ)
 	$(call run_silent,"  LINK  $@",$(CC) $(LDFLAGS) -o $@ $^ $(LIBS))
 
