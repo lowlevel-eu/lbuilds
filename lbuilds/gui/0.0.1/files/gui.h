@@ -12,6 +12,7 @@ struct ctl_driver;
 struct ctl {
     struct ctl_driver*  drv;
     struct ctl*         next;
+    struct ctl*         children;
 
     int x;
     int y;
@@ -42,7 +43,7 @@ void video_free_text(video_bitmap_t* bitmap);
 void ctls_init(void);
 void ctls_deinit(void);
 void ctls_draw(void);
-struct ctl* ctl_create(struct ctl_driver* drv);
+struct ctl* ctl_create(struct ctl* parent, struct ctl_driver* drv);
 
 
 extern struct ctl_driver ctl_window;

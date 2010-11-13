@@ -191,6 +191,9 @@ void video_free_text(video_bitmap_t* bitmap)
     libvideo_destroy_bitmap(bitmap);
 }
 
+
+static struct ctl* win;
+
 void video_draw(void)
 {
     /* Hintergrund zeichnen */
@@ -205,6 +208,8 @@ void video_draw(void)
 
     libvideo_flip_buffers(fb_bitmap);
     libvideo_do_command_buffer();
+
+    win->x++;
 }
 
 void video_init(void)
@@ -212,15 +217,16 @@ void video_init(void)
     struct ctl* ctl;
 
     video_switch_mode();
-    ctl_create(&ctl_mouse);
+    ctl_create(NULL, &ctl_mouse);
 
-    ctl = ctl_create(&ctl_image);
+    win = ctl = ctl_create(NULL, &ctl_window);
+    ctl->x = 100;
+    ctl->y = 100;
+
+    ctl = ctl_create(win, &ctl_image);
     ctl->x = 120;
     ctl->y = 140;
 
-    ctl = ctl_create(&ctl_window);
-    ctl->x = 100;
-    ctl->y = 100;
 }
 
 void video_deinit(void)

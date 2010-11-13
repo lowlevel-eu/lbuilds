@@ -41,19 +41,35 @@ void ctls_deinit(void)
     }
 }
 
-struct ctl* ctl_create(struct ctl_driver* drv)
+struct ctl* ctl_create(struct ctl* parent, struct ctl_driver* drv)
 {
     struct ctl* obj;
 
     obj = calloc(1, drv->size);
     obj->drv = drv;
-    obj->next = first_ctl;
 
-    first_ctl = obj;
+    if (parent == NULL) {
+        obj->next = first_ctl;
+        first_ctl = obj;
+    } else {
+        obj->next = parent->children;
+        parent->children = obj;
+    }
 
     drv->create(obj);
 
     return obj;
+}
+
+static void ctl_draw(struct ctl* ctl)
+{
+    struct ctl* p;
+
+    ctl->drv->draw(ctl);
+
+    for (p = ctl->children; p; p = p->next) {
+        ctl_draw(p);
+    }
 }
 
 void ctls_draw(void)
@@ -61,6 +77,6 @@ void ctls_draw(void)
     struct ctl* p;
 
     for (p = first_ctl; p; p = p->next) {
-        p->drv->draw(p);
+        ctl_draw(p);
     }
 }
