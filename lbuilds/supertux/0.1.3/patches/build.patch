@@ -1,18 +1,3 @@
-Index: src/supertux-0.1.3/src/defines.h
-===================================================================
---- src.orig/supertux-0.1.3/src/defines.h
-+++ src/supertux-0.1.3/src/defines.h
-@@ -21,6 +21,10 @@
- 
- #if !defined( SUPERTUX_DEFINES_H )
- 
-+#ifdef TYNDUR
-+#define fmodf(x,y) 0.0
-+#endif
-+
- #define SUPERTUX_DEFINES_H
- /* Version: */
- 
 Index: src/supertux-0.1.3/src/menu.h
 ===================================================================
 --- src.orig/supertux-0.1.3/src/menu.h
