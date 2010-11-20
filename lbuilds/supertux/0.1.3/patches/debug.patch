@@ -1,0 +1,113 @@
+Index: src/supertux-0.1.3/src/level.cpp
+===================================================================
+--- src.orig/supertux-0.1.3/src/level.cpp
++++ src/supertux-0.1.3/src/level.cpp
+@@ -105,6 +105,7 @@ void LevelSubset::load(char *subset)
+     snprintf(filename, 1024, "%s/levels/%s/info", datadir.c_str(), subset);
+   if(faccessible(filename))
+     {
++#if 0
+       fi = fopen(filename, "r");
+       if (fi == NULL)
+         {
+@@ -113,6 +114,8 @@ void LevelSubset::load(char *subset)
+       lisp_stream_t stream;
+       lisp_stream_init_file (&stream, fi);
+       root_obj = lisp_read (&stream);
++#endif
++      root_obj = lisp_read_from_file(filename);
+ 
+       if (root_obj->type == LISP_TYPE_EOF || root_obj->type == LISP_TYPE_PARSE_ERROR)
+         {
+@@ -133,7 +136,9 @@ void LevelSubset::load(char *subset)
+         }
+ 
+       lisp_free(root_obj);
++#if 0
+       fclose(fi);
++#endif
+ 
+       snprintf(str, 1024, "%s.png", filename);
+       if(faccessible(str))
+Index: src/supertux-0.1.3/src/lispreader.cpp
+===================================================================
+--- src.orig/supertux-0.1.3/src/lispreader.cpp
++++ src/supertux-0.1.3/src/lispreader.cpp
+@@ -1368,6 +1368,9 @@ lisp_object_t* lisp_read_from_file(const
+ {
+   lisp_stream_t stream;
+ 
++stdout = NULL;
++printf("lisp_read_from_file: %s\n", filename.c_str());
++
+   if (has_suffix(filename.c_str(), ".gz"))
+     {
+       return lisp_read_from_gzfile(filename.c_str());
+@@ -1379,8 +1382,20 @@ lisp_object_t* lisp_read_from_file(const
+ 
+       if (in)
+         {
+-          lisp_stream_init_file(&stream, in);
++            int filesize;
++            void* buf;
++
++            fseek(in, 0, SEEK_END);
++            filesize = ftell(in);
++
++            buf = malloc(filesize);
++            fseek(in, 0, SEEK_SET);
++            fread(buf, 1, filesize, in);
++
++//          lisp_stream_init_file(&stream, in);
++            lisp_stream_init_string(&stream, (char*) buf);
+           obj = lisp_read(&stream);
++          free(buf);
+           fclose(in);
+         }
+ 
+Index: src/supertux-0.1.3/src/supertux.cpp
+===================================================================
+--- src.orig/supertux-0.1.3/src/supertux.cpp
++++ src/supertux-0.1.3/src/supertux.cpp
+@@ -36,6 +36,7 @@
+ 
+ int main(int argc, char * argv[])
+ {
++    stdout = NULL;
+   st_directory_setup();
+   parseargs(argc, argv);
+   
+Index: src/supertux-0.1.3/src/worldmap.cpp
+===================================================================
+--- src.orig/supertux-0.1.3/src/worldmap.cpp
++++ src/supertux-0.1.3/src/worldmap.cpp
+@@ -515,8 +515,9 @@ void WorldMap::get_level_title(Levels::p
+   /** get level's title */
+   level->title = "<no title>";
+ 
+-  FILE * fi;
+   lisp_object_t* root_obj = 0;
++#if 0
++  FILE * fi;
+   fi = fopen((datadir +  "/levels/" + level->name).c_str(), "r");
+   if (fi == NULL)
+   {
+@@ -527,6 +528,8 @@ void WorldMap::get_level_title(Levels::p
+   lisp_stream_t stream;
+   lisp_stream_init_file (&stream, fi);
+   root_obj = lisp_read (&stream);
++#endif
++  root_obj = lisp_read_from_file(datadir +  "/levels/" + level->name);
+ 
+   if (root_obj->type == LISP_TYPE_EOF || root_obj->type == LISP_TYPE_PARSE_ERROR)
+   {
+@@ -541,7 +544,9 @@ void WorldMap::get_level_title(Levels::p
+ 
+   lisp_free(root_obj);
+ 
++#if 0
+   fclose(fi);
++#endif
+ }
+ 
+ void
