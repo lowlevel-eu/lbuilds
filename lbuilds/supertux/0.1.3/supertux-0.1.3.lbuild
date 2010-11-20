@@ -19,8 +19,6 @@ src_configure() {
 		CC=`tc-cc` \
 		CXXFLAGS="-nostdinc -I `tc-incdir` -I `tc-incdir`/c++/4.2.2 -I `tc-incdir`/c++/4.2.2/i386-pc-tyndur -I `tc-incdir`/SDL -L`tc-libdir`" \
         LIBS="-lpng -lz -ljpeg" \
-		--build=`tc-build` \
-		--target=`tc-host` \
 		--host=`tc-host` \
 		--prefix="${R}" \
 		|| die "configure failed"
