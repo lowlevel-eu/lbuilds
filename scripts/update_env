@@ -34,14 +34,14 @@ cp ${LOST_SRC}/src/modules/lib/crt0.o ${ENV}/lib/crttyndur.o
 # Header verlinken
 for h in ${LOST_SRC}/src/include/* ${LOST_SRC}/src/include/arch/${ARCH}/* ${LOST_SRC}/src/modules/include/* ${LOST_SRC}/src/modules/include/arch/${ARCH}/*; do
     echo $h
-    cp -rLf $h ${ENV}/include/
+    [ -e $h ] && cp -rLf $h ${ENV}/include/
 done
 rm -rf `find ${ENV}/ -name .svn`
 
 # Libc erstellen
 rm -f ${ENV}/lib/libc.a
 ar rs ${ENV}/lib/libc.a `find ${LOST_SRC}/src/lib -name '*.o'` `find ${LOST_SRC}/src/modules/lib -name '*.o'` > /dev/null
-ar rs ${ENV}/lib/libm.a  ${LOST_SRC}/src/modules/lib/stdlibc/math.o
+ar rs ${ENV}/lib/libm.a  ${LOST_SRC}/src/modules/lib/stdlibc/math/*.o
 ln -s -f ${ENV}/lib/libc.a ${ENV}/lib/libg.a
 
 # Pascal-Kram nur kopieren wenn er auch kompiliert wurde
