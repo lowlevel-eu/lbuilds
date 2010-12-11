@@ -92,6 +92,10 @@ lunpack() {
             tar -xjf ${fn}
             ;;
 
+        *.tar.lzma)
+            lzma -dc ${fn} | tar -x
+            ;;
+
         *.zip)
             unzip -qo ${fn}
             ;;
