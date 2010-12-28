@@ -2,3 +2,4 @@ build.patch
 makeinfo.patch
 targetdef.patch
 libiberty.patch
+getopt.patch
