@@ -1,0 +1,39 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/pcc"
+SRC_URI="ftp://pcc.ludd.ltu.se/pub/pcc/pcc-101222.tgz"
+
+LICENSE="BSD"
+
+RUN_DEPEND=""
+BUILD_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_configure() {
+	cd ${MY_S}
+
+    autoconf
+	./configure \
+		CC=`tc-cc` \
+		CFLAGS="-I `tc-incdir` -L `tc-libdir`" \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+}
