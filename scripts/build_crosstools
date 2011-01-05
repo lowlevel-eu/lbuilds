@@ -6,6 +6,15 @@ TMP=`pwd`/tmp
 LOGS=${TMP}
 MAKEOPTS=-j3
 
+die() {
+    echo -e "$1"
+    exit -1
+}
+
+[ -d $PATCHES ] || die "$PATCHES nicht gefunden. Ist das Arbeitsverzeichnis korrekt?\nBitte im lbuilds-Wurzelverzeichnis als scripts/build_crosstools aufrufen."
+
+(which makeinfo > /dev/null 2>&1) || die "binutils benoetigt makeinfo. Bitte das Paket 'texinfo' installieren."
+
 mkdir -p ${TMP}/cross-binutils/build
 mkdir -p ${TMP}/cross-gcc/build
 mkdir -p ${TMP}/cross-fpc
