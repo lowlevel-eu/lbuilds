@@ -2,7 +2,7 @@ Index: lynx2-8-6/WWW/Library/Implementation/www_tcp.h
 ===================================================================
 --- lynx2-8-6.orig/WWW/Library/Implementation/www_tcp.h
 +++ lynx2-8-6/WWW/Library/Implementation/www_tcp.h
-@@ -56,6 +56,42 @@ Default values
+@@ -56,6 +56,37 @@ Default values
  #define INVSOC (-1)		/* Unix invalid socket */
  		/* NB: newer libwww has something different for Windows */
  
@@ -12,11 +12,6 @@ Index: lynx2-8-6/WWW/Library/Implementation/www_tcp.h
 +#undef IOCTL
 +#define IOCTL(a,b,c) -1		/* disables ioctl function            */
 +#define NO_IOCTL		/* flag to check if ioctl is disabled */
-+
-+static inline double strtod(const char *nptr, char **endptr)
-+{
-+    return (double) strtol(nptr, endptr, 10);
-+}
 +
 +#include <errno.h>
 +static inline ssize_t readlink(const char *path, char *buf, size_t bufsiz)
@@ -45,7 +40,7 @@ Index: lynx2-8-6/WWW/Library/Implementation/www_tcp.h
  #ifndef VMS
  
  #include <sys/types.h>
-@@ -94,7 +130,8 @@ Default values
+@@ -94,7 +125,8 @@ Default values
  # endif
  #endif /* HAVE_DIRENT_H */
  
@@ -55,7 +50,7 @@ Index: lynx2-8-6/WWW/Library/Implementation/www_tcp.h
  #define STRUCT_DIRENT__D_INO 1
  #endif
  
-@@ -910,4 +947,53 @@ typedef struct sockaddr_in SockA;
+@@ -910,4 +942,53 @@ typedef struct sockaddr_in SockA;
  #define MAXHOSTNAMELEN 128	/* Max label is 63. Should handle 2 of those */
  #endif /* MAXHOSTNAMELEN */
  
