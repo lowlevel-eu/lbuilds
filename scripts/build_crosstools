@@ -20,6 +20,8 @@ mkdir -p ${TMP}/cross-gcc/build
 mkdir -p ${TMP}/cross-fpc
 mkdir -p ${TMP}/cross-fasm
 
+if [ ! -f $PREFIX/bin/i386-pc-tyndur-ld ]; then
+rm -rf ${TMP}/cross-binutils/binutils-2.18/
 cd ${TMP}/cross-binutils
 echo "[binutils] Herunterladen..."
 [ -f binutils-2.18.tar.bz2 ] || wget -q http://ftp.gnu.org/gnu/binutils/binutils-2.18.tar.bz2 || exit -1
@@ -35,7 +37,10 @@ make ${MAKEOPTS} >>${LOGS}/binutils.log 2>>${LOGS}/binutils.log || exit -1
 echo "[binutils] Installieren..."
 make install ${MAKEOPTS} >>${LOGS}/binutils.log 2>>${LOGS}/binutils.log || exit -1
 echo -e "[binutils] Abgeschlossen\n"
+fi
 
+if [ ! -f $PREFIX/bin/i386-pc-tyndur-gcc ]; then
+rm -rf ${TMP}/cross-gcc/gcc-4.2.2/
 cd ${TMP}/cross-gcc
 echo "[gcc] Herunterladen..."
 [ -f gcc-core-4.2.2.tar.bz2 ] || wget -q http://ftp.gnu.org/gnu/gcc/gcc-4.2.2/gcc-core-4.2.2.tar.bz2 || exit -1
@@ -53,13 +58,16 @@ make all-gcc ${MAKEOPTS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log || exit -1
 echo "[gcc] Installieren..."
 make install-gcc ${MAKEOPTS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log || exit -1
 echo -e "[gcc] Abgeschlossen\n"
+fi
 
+if [ ! -f $PREFIX/bin/fpc ]; then
+
+rm -rf ${TMP}/cross-fpc/fpc-2.4.0/
 cd ${TMP}/cross-fpc
 echo "[fpc] Herunterladen..."
 # [ -f fpc-2.2.2.source.tar.gz ] || wget -q http://gd.tuwien.ac.at/languages/pascal/fpc/dist/source-2.2.2/fpc-2.2.2.source.tar.gz || exit -1
 #[ -f fpc.zip ] || wget -q ftp://ftp.freepascal.org/pub/fpc/snapshot/trunk/source/fpc.zip || exit -1
 [ -f fpc-2.4.0.source.tar.gz ] || wget -q ftp://gd.tuwien.ac.at/languages/pascal/fpc/dist/2.4.0/source/fpc-2.4.0.source.tar.gz || exit -1
-
 
 echo "[fpc] Entpacken..."
 #tar -xzf fpc-2.2.2.source.tar.gz || exit -1
@@ -72,8 +80,23 @@ patch -p0 < ${PATCHES}/fpc/2.4.0/fpc-2.4.0.patch >${LOGS}/fpc.log || exit -1
 #make >>${LOGS}/fpc.log || exit -1
 #cd ..
 #cd ..
-echo "[fpc] Kompilieren"
+
+echo "[fpc] Erzeuge Hilfsskripte..."
 cd fpc-2.4.0
+
+cat >> i386-linux-ld <<"EOF"
+#!/bin/sh
+ld -melf_i386 "$@"
+EOF
+cat >> i386-linux-as <<"EOF"
+#!/bin/sh
+as --32 "$@"
+EOF
+
+chmod 755 i386-linux-ld i386-linux-as
+export PATH="$PATH:`pwd`"
+
+echo "[fpc] Kompilieren"
 #utils/fpcm/fpcmake -Tall -r >>${LOGS}/fpc.log || exit -1
 # Hindweis: Die folgende Anweisung wird nicht erfolgreich beendet werden, aber der Crosscompiler steht danach zur Verfuegung
 make all CPU_TARGET=i386 OS_TARGET=linux >>${LOGS}/fpc.log 2>>${LOGS}/fpc.log
@@ -83,7 +106,10 @@ echo "[fpc] Installieren"
 cp compiler/ppc386 ${PREFIX}/bin/fpc
 cp utils/fpcm/fpcmake ${PREFIX}/bin/fpcmake
 echo -e "[fpc] Abgeschlossen\n"
+fi
 
+if [ ! -f $PREFIX/bin/fasm ]; then
+rm -rf ${TMP}/cross-fasm/fasm/
 cd ${TMP}/cross-fasm
 echo "[fasm] Herunterladen..."
 [ -f fasm-1.69.09.tar.gz ] || wget -q http://flatassembler.net/fasm-1.69.09.tar.gz || exit -1
@@ -101,9 +127,4 @@ gcc -m32 fasm.o -o fasm || exit -1
 echo "[fasm] Installieren..."
 cp fasm ${PREFIX}/bin/fasm
 echo -e "[fasm] Abgeschlossen\n"
-
-
-rm -rf ${TMP}/cross-binutils/binutils-2.18/
-rm -rf ${TMP}/cross-gcc/gcc-4.2.2/
-rm -rf ${TMP}/cross-fpc/fpc/
-rm -rf ${TMP}/cross-fasm/fasm/
+fi
