@@ -3,7 +3,7 @@ include toolchain
 
 DESCRIPTION="Tools necessary to build programs"
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Nasm"
-SRC_URI="http://somewhere/${P}.tar.bz2"
+SRC_URI="http://www.nasm.us/pub/nasm/releasebuilds/2.06rc2/${P}.tar.bz2"
 
 LICENSE="BSD"
 
