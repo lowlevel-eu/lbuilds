@@ -15,7 +15,7 @@ MY_S="${S}/SDL-${PV}"
 src_configure() {
 	cd ${MY_S}
 
-    ./autogen.sh
+    ./autogen.sh || die "autoconf ist fehlgeschlagen"
 	./configure \
 		CC=`tc-cc` \
 		CFLAGS="-I `tc-incdir` -L `tc-libdir`" \

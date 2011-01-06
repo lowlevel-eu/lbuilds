@@ -15,7 +15,7 @@ MY_S="${S}/${P}"
 src_configure() {
 	cd ${MY_S}
 
-    autoconf
+    autoconf || die "autoconf ist fehlgeschlagen"
 	./configure \
         CC=`tc-cc` \
         SKIP_FTRUNCATE_CHECK=yes \
