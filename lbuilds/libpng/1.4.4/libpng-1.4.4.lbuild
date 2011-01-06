@@ -2,8 +2,8 @@ include lutils
 include toolchain
 
 DESCRIPTION=""
-HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/SDL"
-SRC_URI="ftp://ftp.simplesystems.org/pub/libpng/png/src/${P}.tar.gz"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/libpng"
+SRC_URI="ftp://ftp.simplesystems.org/pub/libpng/png/src/history/${P}.tar.gz"
 
 LICENSE="libpng license"
 
