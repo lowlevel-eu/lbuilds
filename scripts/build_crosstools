@@ -1,10 +1,35 @@
 #!/bin/bash
+
+# Versionen der Tools
+BINUTILS_VERSION=2.21
+GCC_VERSION=4.5.2
+NEEDS_GMP_MAJOR=4
+NEEDS_GMP_MINOR=3
+NEEDS_GMP_PATCHLEVEL=2
+NEEDS_MPFR_MAJOR=2
+NEEDS_MPFR_MINOR=4
+NEEDS_MPFR_PATCHLEVEL=2
+NEEDS_MPC_MAJOR=0
+NEEDS_MPC_MINOR=8
+NEEDS_MPC_PATCHLEVEL=1
+GMP_VERSION=5.0.1
+MPFR_VERSION=3.0.0
+MPC_VERSION=0.8.2
+FPC_VERSION=2.4.0
+FASM_VERSION=1.69.09
+
 PREFIX=`pwd`/env
 TARGET=i386-pc-tyndur
 PATCHES=`pwd`/patches
 TMP=`pwd`/tmp
 LOGS=${TMP}
 MAKEOPTS=-j3
+
+# interne Variablen
+GCC_CONFIGURE_PARAMS=
+BUILD_GMP=
+BUILD_MPFR=
+BUILD_MPC=
 
 die() {
     echo -e "$1"
@@ -20,18 +45,97 @@ mkdir -p ${TMP}/cross-gcc/build
 mkdir -p ${TMP}/cross-fpc
 mkdir -p ${TMP}/cross-fasm
 
+#
+# User nerven
+#
+
+# Überprüfen ob GMP in richtiger Version installiert
+cat <<EOF > libgmp-test.c
+#include <gmp.h>
+#if __GNU_MP_VERSION < ${NEEDS_GMP_MAJOR} || (__GNU_MP_VERSION == ${NEEDS_GMP_MAJOR} && (__GNU_MP_VERSION_MINOR < ${NEEDS_GMP_MINOR} || (__GNU_MP_VERSION_MINOR == ${NEEDS_GMP_MINOR} && __GNU_MP_VERSION_PATCHLEVEL < ${NEEDS_GMP_PATCHLEVEL})))
+#error unsupported version
+#endif
+int main(){}
+EOF
+
+gcc libgmp-test.c -lgmp -o libgmp-test &> /dev/null
+gcc_state=$?
+rm -f libgmp-test libgmp-test.c
+if [ $gcc_state != 0 ]; then
+  echo "Entweder die Entwicklerpakete für GMP sind nicht installiert oder in einer veralteten Version (< ${NEEDS_GMP_MAJOR}.${NEEDS_GMP_MINOR}.${NEEDS_GMP_PATCHLEVEL})."\
+       "Wollen Sie die Pakete von Hand nachinstallieren bzw. updaten ('j' eingeben)? Falls Ihre Distribution keine so aktuellen Pakete zur Verfügung stellt,"\
+       "geben Sie bitte 'n' ein und der GMP-Quellcode wird automatisch heruntergeladen und installiert (ohne eine vorhandene Installation von GMP zu beeinträchtigen)"
+
+  read should_die
+  [ "$should_die" == "n" ] || die "Fehler: GMP-Bibliothek in Version >= ${NEEDS_GMP_MAJOR}.${NEEDS_GMP_MINOR}.${NEEDS_GMP_PATCHLEVEL} (inklusive -dev Paket) benötigt";
+
+  BUILD_GMP=1
+  GCC_CONFIGURE_PARAMS+="--with-gmp-include=${TMP}/cross-gcc/build/gmp --with-gmp-lib=${TMP}/cross-gcc/build/gmp/.libs"
+fi
+
+# Überprüfen ob MPFR in richtiger Version installiert
+cat <<EOF > libmpfr-test.c
+#include <mpfr.h>
+#if MPFR_VERSION_MAJOR < ${NEEDS_MPFR_MAJOR} || (MPFR_VERSION_MAJOR == ${NEEDS_MPFR_MAJOR} && (MPFR_VERSION_MINOR < ${NEEDS_MPFR_MINOR} || (MPFR_VERSION_MINOR == ${NEEDS_MPFR_MINOR} && MPFR_VERSION_PATCHLEVEL < ${NEEDS_MPFR_PATCHLEVEL})))
+#error unsupported version
+#endif
+int main(){}
+EOF
+
+gcc libmpfr-test.c -lgmp -o libmpfr-test &> /dev/null
+gcc_state=$?
+rm -f libmpfr-test libmpfr-test.c
+if [ $gcc_state != 0 ]; then
+  echo "Entweder die Entwicklerpakete für MPFR sind nicht installiert oder in einer veralteten Version (< ${NEEDS_MPFR_MAJOR}.${NEEDS_MPFR_MINOR}.${NEEDS_MPFR_PATCHLEVEL})."\
+       "Wollen Sie die Pakete von Hand nachinstallieren bzw. updaten ('j' eingeben)? Falls Ihre Distribution keine so aktuellen Pakete zur Verfügung stellt,"\
+       "geben Sie bitte 'n' ein und der MPFR-Quellcode wird automatisch heruntergeladen und installiert (ohne eine vorhandene Installation von MPFR zu beeinträchtigen)"
+
+  read should_die
+  [ "$should_die" == "n" ] || die "Fehler: MPFR-Bibliothek in Version >= ${NEEDS_MPFR_MAJOR}.${NEEDS_MPFR_MINOR}.${NEEDS_MPFR_PATCHLEVEL} (inklusive -dev Paket) benötigt";
+
+  BUILD_MPFR=1
+fi
+
+# Überprüfen ob MPC in richtiger Version installiert
+cat <<EOF > libmpc-test.c
+#include <mpc.h>
+#if MPC_VERSION_MAJOR < ${NEEDS_MPC_MAJOR} || (MPC_VERSION_MAJOR == ${NEEDS_MPC_MAJOR} && (MPC_VERSION_MINOR < ${NEEDS_MPC_MINOR} || (MPC_VERSION_MINOR == ${NEEDS_MPC_MINOR} && MPC_VERSION_PATCHLEVEL < ${NEEDS_MPC_PATCHLEVEL})))
+#error unsupported version
+#endif
+int main(){}
+EOF
+
+gcc libmpc-test.c -lgmp -o libmpc-test &> /dev/null
+gcc_state=$?
+rm -f libmpc-test.c libmpc-test
+if [ $gcc_state != 0 ]; then
+  echo "Entweder die Entwicklerpakete für MPC sind nicht installiert oder in einer veralteten Version (< ${NEEDS_MPC_MAJOR}.${NEEDS_MPC_MINOR}.${NEEDS_MPC_PATCHLEVEL})."\
+       "Wollen Sie die Pakete von Hand nachinstallieren bzw. updaten ('j' eingeben)? Falls Ihre Distribution keine so aktuellen Pakete zur Verfügung stellt,"\
+       "geben Sie bitte 'n' ein und der MPC-Quellcode wird automatisch heruntergeladen und installiert (ohne eine vorhandene Installation von MPC zu beeinträchtigen)"
+
+  read should_die
+  [ "$should_die" == "n" ] || die "Fehler: MPC-Bibliothek in Version >= ${NEEDS_MPC_MAJOR}.${NEEDS_MPC_MINOR}.${NEEDS_MPC_PATCHLEVEL} (inklusive -dev Paket) benötigt";
+
+  BUILD_MPC=1
+fi
+
+
+#
+# Binutils
+#
 if [ ! -f $PREFIX/bin/i386-pc-tyndur-ld ]; then
-rm -rf ${TMP}/cross-binutils/binutils-2.18/
+rm -rf ${TMP}/cross-binutils/binutils-${BINUTILS_VERSION}/
 cd ${TMP}/cross-binutils
+echo "[binutils] Version " ${BINUTILS_VERSION}
 echo "[binutils] Herunterladen..."
-[ -f binutils-2.18.tar.bz2 ] || wget -q http://ftp.gnu.org/gnu/binutils/binutils-2.18.tar.bz2 || die "Fehler beim Herunterladen.\nSiehe tmp/binutils.log für Details."
+[ -f binutils-${BINUTILS_VERSION}.tar.bz2 ] || wget -q http://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.bz2 || die "Fehler beim Herunterladen."
 echo "[binutils] Entpacken..."
-tar -xjf binutils-2.18.tar.bz2 || die "Fehler beim Entpacken.\nSiehe tmp/binutils.log für Details."
+tar -xjf binutils-${BINUTILS_VERSION}.tar.bz2 || die "Fehler beim Entpacken."
 echo "[binutils] Patch anwenden..."
-patch -p0 -d binutils-2.18/ < ${PATCHES}/binutils/2.18/binutils-2.18.patch >${LOGS}/binutils.log || die "Fehler beim Anwenden des Patches.\nSiehe tmp/binutils.log für Details."
+patch -p0 -d binutils-${BINUTILS_VERSION}/ < ${PATCHES}/binutils/${BINUTILS_VERSION}/binutils-${BINUTILS_VERSION}.patch >${LOGS}/binutils.log || die "Fehler beim Anwenden des Patches.\nSiehe tmp/binutils.log für Details."
 cd build
 echo "[binutils] Konfigurieren..."
-../binutils-2.18/configure --prefix="${PREFIX}" --with-sysroot=${PREFIX} --target=${TARGET} --disable-nls --disable-werror >>${LOGS}/binutils.log || die "Fehler beim Konfigurieren.\nSiehe tmp/binutils.log für Details."
+../binutils-${BINUTILS_VERSION}/configure --prefix="${PREFIX}" --with-sysroot=${PREFIX} --target=${TARGET} --disable-nls --disable-werror >>${LOGS}/binutils.log || die "Fehler beim Konfigurieren.\nSiehe tmp/binutils.log für Details."
 echo "[binutils] Kompilieren..."
 make ${MAKEOPTS} >>${LOGS}/binutils.log 2>>${LOGS}/binutils.log || die "Fehler beim Kompilieren.\nSiehe tmp/binutils.log für Details."
 echo "[binutils] Installieren..."
@@ -39,42 +143,86 @@ make install ${MAKEOPTS} >>${LOGS}/binutils.log 2>>${LOGS}/binutils.log || die "
 echo -e "[binutils] Abgeschlossen\n"
 fi
 
+#
+# GCC
+#
 if [ ! -f $PREFIX/bin/i386-pc-tyndur-gcc ]; then
-rm -rf ${TMP}/cross-gcc/gcc-4.2.2/
+
+# HACK: Ansonsten wird libgcc nicht kompiliert
+rm -f env/include/limits.h
+
+# GCC herunterladen & entpacken
+rm -rf ${TMP}/cross-gcc/build ${TMP}/cross-gcc/gcc-${GCC_VERSION}/
 cd ${TMP}/cross-gcc
+mkdir build
+echo "[gcc] Version " ${GCC_VERSION}
 echo "[gcc] Herunterladen..."
-[ -f gcc-core-4.2.2.tar.bz2 ] || wget -q http://ftp.gnu.org/gnu/gcc/gcc-4.2.2/gcc-core-4.2.2.tar.bz2 || die "Fehler beim Herunterladen von gcc-core.\nSiehe tmp/gcc.log für Details."
-[ -f gcc-g++-4.2.2.tar.bz2 ] || wget -q http://ftp.gnu.org/gnu/gcc/gcc-4.2.2/gcc-g++-4.2.2.tar.bz2 || die "Fehler beim Herunterladen von gcc-g++.\nSiehe tmp/gcc.log für Details."
+[ -f gcc-core-${GCC_VERSION}.tar.bz2 ] || wget -q http://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-core-${GCC_VERSION}.tar.bz2 || die "Fehler beim Herunterladen von gcc-core."
+[ -f gcc-g++-${GCC_VERSION}.tar.bz2 ] || wget -q http://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-g++-${GCC_VERSION}.tar.bz2 || die "Fehler beim Herunterladen von gcc-g++."
 echo "[gcc] Entpacken..."
-tar -xjf gcc-core-4.2.2.tar.bz2
-tar -xjf gcc-g++-4.2.2.tar.bz2
+tar -xjf gcc-core-${GCC_VERSION}.tar.bz2 || die "Fehler beim Entpacken von gcc-core."
+tar -xjf gcc-g++-${GCC_VERSION}.tar.bz2 || die "Fehler beim Entpacken von gcc-g++."
+
+if ! [ -z ${BUILD_GMP} ]; then
+  echo "[gmp] Version " ${GMP_VERSION}
+  echo "[gmp] Herunterladen..."
+  [ -f gmp-${GMP_VERSION}.tar.bz2 ] || wget -q ftp://ftp.gmplib.org/pub/gmp-${GMP_VERSION}/gmp-${GMP_VERSION}.tar.bz2 || die "Fehler beim Herunterladen."
+  echo "[gmp] Entpacken..."
+  (tar -xjf gmp-${GMP_VERSION}.tar.bz2 && mv gmp-${GMP_VERSION} ${TMP}/cross-gcc/gcc-${GCC_VERSION}/gmp ) || die "Fehler beim Entpacken."
+fi
+
+if ! [ -z ${BUILD_MPFR} ]; then
+  echo "[mpfr] Version " ${MPFR_VERSION}
+  echo "[mpfr] Herunterladen..."
+  [ -f mpfr-${MPFR_VERSION}.tar.bz2 ] || wget -q http://www.mpfr.org/mpfr-current/mpfr-${MPFR_VERSION}.tar.bz2 || die "Fehler beim Herunterladen."
+  echo "[mpfr] Entpacken..."
+  (tar -xjf mpfr-${MPFR_VERSION}.tar.bz2 && mv mpfr-${MPFR_VERSION} ${TMP}/cross-gcc/gcc-${GCC_VERSION}/mpfr ) || die "Fehler beim Entpacken."
+fi
+
+if ! [ -z ${BUILD_MPC} ]; then
+  echo "[mpc] Version " ${MPC_VERSION}
+  echo "[mpc] Herunterladen..."
+  [ -f mpc-${MPC_VERSION}.tar.gz ] || wget -q http://www.multiprecision.org/mpc/download/mpc-${MPC_VERSION}.tar.gz || die "Fehler beim Herunterladen."
+  echo "[mpc] Entpacken..."
+  (tar -xf mpc-${MPC_VERSION}.tar.gz && mv mpc-${MPC_VERSION} ${TMP}/cross-gcc/gcc-${GCC_VERSION}/mpc ) || die "Fehler beim Entpacken."
+fi
+
+# GCC patchen & bauen
 echo "[gcc] Patch anwenden..."
-patch -p0 -d gcc-4.2.2/ < ${PATCHES}/gcc/4.2.2/gcc-4.2.2.patch >${LOGS}/gcc.log || die "Fehler beim Anwenden des Patches.\nSiehe tmp/gcc.log für Details."
+patch -p0 -d gcc-${GCC_VERSION}/ < ${PATCHES}/gcc/${GCC_VERSION}/gcc-${GCC_VERSION}.patch >${LOGS}/gcc.log || die "Fehler beim Anwenden des Patches.\nSiehe tmp/gcc.log für Details."
 cd build
 echo "[gcc] Konfigurieren..."
-../gcc-4.2.2/configure --prefix="${PREFIX}" --target=${TARGET} --disable-nls --enable-languages=c,c++ --disable-shared --disable-libssp >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log|| die "Fehler beim Konfigurieren.\nSiehe tmp/gcc.log für Details."
+../gcc-${GCC_VERSION}/configure --prefix="${PREFIX}" --target=${TARGET} --disable-nls --enable-languages=c,c++ --disable-shared --disable-libssp ${GCC_CONFIGURE_PARAMS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log|| die "Fehler beim Konfigurieren.\nSiehe tmp/gcc.log für Details."
 echo "[gcc] Kompilieren..."
 make all-gcc ${MAKEOPTS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log || die "Fehler beim Kompilieren.\nSiehe tmp/gcc.log für Details."
 echo "[gcc] Installieren..."
-make install-gcc ${MAKEOPTS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log || die "Fehler beim Installieren.\nSiehe tmp/gcc.log für Details."
+make install-gcc ${MAKEOPTS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log || die "Fehler beim Installieren\nSiehe tmp/gcc.log für Details."
+echo "[gcc] Kompilieren (libgcc)..."
+make all-target-libgcc ${MAKEOPTS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log || die "Fehler beim Kompilieren der libgcc.\nSiehe tmp/gcc.log für Details."
+echo "[gcc] Installieren (libgcc)..."
+make install-target-libgcc ${MAKEOPTS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log || die "Fehler beim Installieren der libgcc.\nSiehe tmp/gcc.log für Details."
 echo -e "[gcc] Abgeschlossen\n"
 fi
 
+#
+# FPC
+#
 if [ ! -f $PREFIX/bin/fpc ]; then
 
-rm -rf ${TMP}/cross-fpc/fpc-2.4.0/
+rm -rf ${TMP}/cross-fpc/fpc-${FPC_VERSION}/
 cd ${TMP}/cross-fpc
+echo "[fpc] Version " ${FPC_VERSION}
 echo "[fpc] Herunterladen..."
 # [ -f fpc-2.2.2.source.tar.gz ] || wget -q http://gd.tuwien.ac.at/languages/pascal/fpc/dist/source-2.2.2/fpc-2.2.2.source.tar.gz || exit -1
 #[ -f fpc.zip ] || wget -q ftp://ftp.freepascal.org/pub/fpc/snapshot/trunk/source/fpc.zip || exit -1
-[ -f fpc-2.4.0.source.tar.gz ] || wget -q ftp://gd.tuwien.ac.at/languages/pascal/fpc/dist/2.4.0/source/fpc-2.4.0.source.tar.gz || die "Fehler beim Herunterladen.\nSiehe tmp/fpc.log für Details."
+[ -f fpc-${FPC_VERSION}.source.tar.gz ] || wget -q ftp://gd.tuwien.ac.at/languages/pascal/fpc/dist/${FPC_VERSION}/source/fpc-${FPC_VERSION}.source.tar.gz || die "Fehler beim Herunterladen."
 
 echo "[fpc] Entpacken..."
 #tar -xzf fpc-2.2.2.source.tar.gz || exit -1
 #unzip -qo fpc.zip || exit -1
-tar -xzf fpc-2.4.0.source.tar.gz || die "Fehler beim Entpacken.\nSiehe tmp/fpc.log für Details."
+tar -xzf fpc-${FPC_VERSION}.source.tar.gz || die "Fehler beim Entpacken."
 echo "[fpc] Patch anwenden..."
-patch -p0 < ${PATCHES}/fpc/2.4.0/fpc-2.4.0.patch >${LOGS}/fpc.log || die "Fehler beim Anwenden des Patches.\nSiehe tmp/fpc.log für Details."
+patch -p0 < ${PATCHES}/fpc/${FPC_VERSION}/fpc-${FPC_VERSION}.patch >${LOGS}/fpc.log || die "Fehler beim Anwenden des Patches.\nSiehe tmp/fpc.log für Details."
 #echo "[fpc] fpcmake bauen"
 #cd fpcbuild_2.0.4_exp/fpcsrc/utils/fpcm
 #make >>${LOGS}/fpc.log || exit -1
@@ -82,7 +230,7 @@ patch -p0 < ${PATCHES}/fpc/2.4.0/fpc-2.4.0.patch >${LOGS}/fpc.log || die "Fehler
 #cd ..
 
 echo "[fpc] Erzeuge Hilfsskripte..."
-cd fpc-2.4.0
+cd fpc-${FPC_VERSION}
 
 cat >> i386-linux-ld <<"EOF"
 #!/bin/sh
@@ -108,18 +256,22 @@ cp utils/fpcm/fpcmake ${PREFIX}/bin/fpcmake
 echo -e "[fpc] Abgeschlossen\n"
 fi
 
+#
+# FASM
+#
 if [ ! -f $PREFIX/bin/fasm ]; then
 rm -rf ${TMP}/cross-fasm/fasm/
 cd ${TMP}/cross-fasm
+echo "[fasm] Version " ${FASM_VERSION}
 echo "[fasm] Herunterladen..."
-[ -f fasm-1.69.09.tar.gz ] || wget -q http://flatassembler.net/fasm-1.69.09.tar.gz || die "Fehler beim Herunterladen."
+[ -f fasm-${FASM_VERSION}.tar.gz ] || wget -q http://flatassembler.net/fasm-${FASM_VERSION}.tar.gz || die "Fehler beim Herunterladen."
 echo "[fasm] Entpacken..."
-tar -xzf fasm-1.69.09.tar.gz || die "Fehler beim Entpacken."
+tar -xzf fasm-${FASM_VERSION}.tar.gz || die "Fehler beim Entpacken."
 echo "[fasm] Linux-FASM linken..."
 cd fasm
 gcc -m32 fasm.o -o fasm || die "Fehler beim Linken des Linux-FASM."
 echo "[fasm] Patch anwenden..."
-patch source/formats.inc ${PATCHES}/fasm/1.69.09/formats.patch || die "Fehler beim Anwenden des Patches."
+patch source/formats.inc ${PATCHES}/fasm/${FASM_VERSION}/formats.patch || die "Fehler beim Anwenden des Patches."
 echo "[fasm] Assemblieren..."
 ./fasm source/libc/fasm.asm fasm.o || die "Fehler beim Assemblieren."
 echo "[fasm] Týndur-FASM linken..."

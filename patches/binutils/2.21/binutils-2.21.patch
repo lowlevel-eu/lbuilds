@@ -1,9 +1,9 @@
-diff -uNr ../binutils-2.18/bfd/config.bfd ./bfd/config.bfd
---- ../binutils-2.18/bfd/config.bfd	2007-08-28 19:19:33.000000000 +0200
+diff -uNr ../binutils-2.21/bfd/config.bfd ./bfd/config.bfd
+--- ../binutils-2.21/bfd/config.bfd	2007-08-28 19:19:33.000000000 +0200
 +++ ./bfd/config.bfd	2008-01-21 15:22:03.000000000 +0100
-@@ -575,6 +575,11 @@
-     targ_selvecs="i386linux_vec bfd_efi_app_ia32_vec"
-     targ64_selvecs=bfd_elf64_x86_64_vec
+@@ -600,6 +600,11 @@
+     targ_selvecs="i386linux_vec i386pei_vec"
+     targ64_selvecs="bfd_elf64_x86_64_vec bfd_elf64_l1om_vec"
      ;;
 +  i[3-7]86-*-tyndur)
 +    targ_defvec=bfd_elf32_i386_vec
@@ -11,23 +11,23 @@ diff -uNr ../binutils-2.18/bfd/config.bfd ./bfd/config.bfd
 +    targ64_selvecs=bfd_elf64_x86_64_vec
 +    ;;
  #ifdef BFD64
-   x86_64-*-elf*)
-     targ_defvec=bfd_elf64_x86_64_vec
-diff -uNr ../binutils-2.18/config.sub ./config.sub
---- ../binutils-2.18/config.sub	2007-08-06 22:00:30.000000000 +0200
+   x86_64-*-darwin*)
+     targ_defvec=mach_o_x86_64_vec
+diff -uNr ../binutils-2.21/config.sub ./config.sub
+--- ../binutils-2.21/config.sub	2007-08-06 22:00:30.000000000 +0200
 +++ ./config.sub	2008-01-21 15:22:03.000000000 +0100
-@@ -121,8 +121,8 @@
- maybe_os=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\2/'`
- case $maybe_os in
-   nto-qnx* | linux-gnu* | linux-dietlibc | linux-newlib* | linux-uclibc* | \
--  uclinux-uclibc* | uclinux-gnu* | kfreebsd*-gnu* | knetbsd*-gnu* | netbsd*-gnu* | \
+@@ -127,8 +127,8 @@
+   nto-qnx* | linux-gnu* | linux-android* | linux-dietlibc | linux-newlib* | \
+   linux-uclibc* | uclinux-uclibc* | uclinux-gnu* | kfreebsd*-gnu* | \
+   knetbsd*-gnu* | netbsd*-gnu* | \
+-  kopensolaris*-gnu* | \
 -  storm-chaos* | os2-emx* | rtmk-nova*)
-+  tyndur | uclinux-uclibc* | uclinux-gnu* | kfreebsd*-gnu* | knetbsd*-gnu* | \
++  tyndur | kopensolaris*-gnu* | \
 +  netbsd*-gnu* |  storm-chaos* | os2-emx* | rtmk-nova*)
      os=-$maybe_os
      basic_machine=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\1/'`
      ;;
-@@ -1256,6 +1256,9 @@
+@@ -1347,6 +1347,9 @@
  	-linux*)
  		os=`echo $os | sed -e 's|linux|linux-gnu|'`
  		;;
@@ -37,21 +37,21 @@ diff -uNr ../binutils-2.18/config.sub ./config.sub
  	-sunos5*)
  		os=`echo $os | sed -e 's|sunos5|solaris2|'`
  		;;
-diff -uNr ../binutils-2.18/gas/configure.tgt ./gas/configure.tgt
---- ../binutils-2.18/gas/configure.tgt	2007-08-28 19:19:36.000000000 +0200
+diff -uNr ../binutils-2.21/gas/configure.tgt ./gas/configure.tgt
+--- ../binutils-2.21/gas/configure.tgt	2007-08-28 19:19:36.000000000 +0200
 +++ ./gas/configure.tgt	2008-01-21 15:22:03.000000000 +0100
-@@ -192,6 +192,7 @@
+@@ -199,6 +199,7 @@
    i386-*-linux*oldld)			fmt=aout em=linux ;;
    i386-*-linux*coff*)			fmt=coff em=linux ;;
    i386-*-linux-*)			fmt=elf em=linux ;;
 +  i386-*-tyndur)              fmt=elf ;;
    i386-*-lynxos*)			fmt=elf em=lynx ;;
    i386-*-sysv[45]*)			fmt=elf ;;
-   i386-*-solaris*)			fmt=elf ;;
-diff -uNr ../binutils-2.18/ld/configure.tgt ./ld/configure.tgt
---- ../binutils-2.18/ld/configure.tgt	2007-08-28 19:19:42.000000000 +0200
+   i386-*-solaris*)			fmt=elf em=solaris ;;
+diff -uNr ../binutils-2.21/ld/configure.tgt ./ld/configure.tgt
+--- ../binutils-2.21/ld/configure.tgt	2007-08-28 19:19:42.000000000 +0200
 +++ ./ld/configure.tgt	2008-02-08 17:55:11.000000000 +0100
-@@ -201,6 +201,10 @@
+@@ -207,6 +207,10 @@
  			targ_extra_libpath=elf_i386
  			tdir_i386linux=`echo ${targ_alias}aout | sed -e 's/x86_64/i386/'`
  			tdir_elf_i386=`echo ${targ_alias} | sed -e 's/x86_64/i386/'` ;;
@@ -60,9 +60,9 @@ diff -uNr ../binutils-2.18/ld/configure.tgt ./ld/configure.tgt
 +                        targ_extra_emuls="elf_i386"
 +                        ;;
  i[3-7]86-*-sysv[45]*)	targ_emul=elf_i386 ;;
- i[3-7]86-*-solaris2*)	targ_emul=elf_i386_ldso
-                         targ_extra_emuls="elf_i386 elf_x86_64"
-@@ -680,6 +684,9 @@
+ i[3-7]86-*-solaris2*)	targ_emul=elf_i386_sol2
+                         targ_extra_emuls="elf_i386_ldso elf_i386 elf_x86_64_sol2 elf_x86_64 elf_l1om"
+@@ -706,6 +706,9 @@
  *-*-linux*)
    ;;
  
@@ -72,8 +72,8 @@ diff -uNr ../binutils-2.18/ld/configure.tgt ./ld/configure.tgt
  *-*-freebsd* | *-*-dragonfly*)
    ;;
  
-diff -uNr ../binutils-2.18/ld/emulparams/elf_i386_tyndur.sh ./ld/emulparams/elf_i386_tyndur.sh
---- ../binutils-2.18/ld/emulparams/elf_i386_tyndur.sh	1970-01-01 01:00:00.000000000 +0100
+diff -uNr ../binutils-2.21/ld/emulparams/elf_i386_tyndur.sh ./ld/emulparams/elf_i386_tyndur.sh
+--- ../binutils-2.21/ld/emulparams/elf_i386_tyndur.sh	1970-01-01 01:00:00.000000000 +0100
 +++ ./ld/emulparams/elf_i386_tyndur.sh	2008-02-04 08:05:57.000000000 +0100
 @@ -0,0 +1,17 @@
 +SCRIPT_NAME=elf
@@ -93,31 +93,31 @@ diff -uNr ../binutils-2.18/ld/emulparams/elf_i386_tyndur.sh ./ld/emulparams/elf_
 +CTOR_END="__ctor_end__ = .;"
 +DTOR_START="__dtor_start__ = .;"
 +DTOR_END="__dtor_end__ = .;"
-diff -uNr ../binutils-2.18/ld/Makefile.am ./ld/Makefile.am
---- ../binutils-2.18/ld/Makefile.am	2007-08-06 22:00:17.000000000 +0200
+diff -uNr ../binutils-2.21/ld/Makefile.am ./ld/Makefile.am
+--- ../binutils-2.21/ld/Makefile.am	2007-08-06 22:00:17.000000000 +0200
 +++ ./ld/Makefile.am	2008-02-04 08:17:43.000000000 +0100
-@@ -1001,6 +1001,9 @@
+@@ -1196,6 +1196,9 @@
  eelf_i386_ldso.c: $(srcdir)/emulparams/elf_i386_ldso.sh \
    $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
  	${GENSCRIPTS} elf_i386_ldso "$(tdir_elf_i386_ldso)"
 +eelf_i386_tyndur.c: $(srcdir)/emulparams/elf_i386_tyndur.sh \
 +  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 +	${GENSCRIPTS} elf_i386_tyndur "$(tdir_elf_i386_tyndur)"
- eelf_i386_vxworks.c: $(srcdir)/emulparams/elf_i386_vxworks.sh \
-   $(srcdir)/emulparams/vxworks.sh $(srcdir)/emultempl/vxworks.em \
-   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-diff -uNr ../binutils-2.18/ld/Makefile.in ./ld/Makefile.in
---- ../binutils-2.18/ld/Makefile.in	2007-08-06 22:29:54.000000000 +0200
+ eelf_i386_sol2.c: $(srcdir)/emulparams/elf_i386_sol2.sh \
+   $(srcdir)/emulparams/solaris2.sh \
+   $(srcdir)/emultempl/solaris2.em \
+diff -uNr ../binutils-2.21/ld/Makefile.in ./ld/Makefile.in
+--- ../binutils-2.21/ld/Makefile.in	2007-08-06 22:29:54.000000000 +0200
 +++ ./ld/Makefile.in	2008-02-04 08:17:13.000000000 +0100
-@@ -452,6 +452,7 @@
- 	eelf_i386_chaos.o \
- 	eelf_i386_fbsd.o \
- 	eelf_i386_ldso.o \
+@@ -538,6 +538,7 @@
+ 	eelf_i386_chaos.c \
+ 	eelf_i386_fbsd.c \
+ 	eelf_i386_ldso.c \
 +	eelf_i386_tyndur.o \
- 	eelf_i386_vxworks.o \
- 	eelf_s390.o \
- 	egld960.o \
-@@ -1827,6 +1828,10 @@
+ 	eelf_i386_sol2.c \
+ 	eelf_i386_vxworks.c \
+ 	eelf_s390.c \
+@@ -2619,6 +2619,10 @@
  eelf_i386_ldso.c: $(srcdir)/emulparams/elf_i386_ldso.sh \
    $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
  	${GENSCRIPTS} elf_i386_ldso "$(tdir_elf_i386_ldso)"
@@ -125,35 +125,35 @@ diff -uNr ../binutils-2.18/ld/Makefile.in ./ld/Makefile.in
 +  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 +	${GENSCRIPTS} elf_i386_tyndur "$(tdir_elf_i386_tyndur)"
 +
- eelf_i386_vxworks.c: $(srcdir)/emulparams/elf_i386_vxworks.sh \
-   $(srcdir)/emulparams/vxworks.sh $(srcdir)/emultempl/vxworks.em \
-   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-diff -uNr ../binutils-2.18/libiberty/configure ./libiberty/configure
---- ../binutils-2.18/libiberty/configure	2007-08-06 21:59:45.000000000 +0200
+ eelf_i386_sol2.c: $(srcdir)/emulparams/elf_i386_sol2.sh \
+   $(srcdir)/emulparams/solaris2.sh \
+   $(srcdir)/emultempl/solaris2.em \
+diff -uNr ../binutils-2.21/libiberty/configure ./libiberty/configure
+--- ../binutils-2.21/libiberty/configure	2007-08-06 21:59:45.000000000 +0200
 +++ ./libiberty/configure	2008-01-21 15:22:03.000000000 +0100
-@@ -8520,6 +8520,7 @@
-      *-*-mingw* | *-*-winnt*)	pexecute=./pex-win32.o  ;;
-      *-*-msdosdjgpp*)		pexecute=./pex-djgpp.o  ;;
-      *-*-msdos*)		pexecute=./pex-msdos.o  ;;
+@@ -6579,6 +6579,7 @@
+      *-*-mingw* | *-*-winnt*)	pexecute=pex-win32  ;;
+      *-*-msdosdjgpp*)		pexecute=pex-djgpp  ;;
+      *-*-msdos*)		pexecute=pex-msdos  ;;
 +     *-*-tyndur*)     pexecute=./pex-tyndur.o   ;;
-      *)				pexecute=./pex-unix.o   ;;
+      *)				pexecute=pex-unix   ;;
  esac
  
-diff -uNr ../binutils-2.18/libiberty/configure.ac ./libiberty/configure.ac
---- ../binutils-2.18/libiberty/configure.ac	2007-08-06 21:59:45.000000000 +0200
+diff -uNr ../binutils-2.21/libiberty/configure.ac ./libiberty/configure.ac
+--- ../binutils-2.21/libiberty/configure.ac	2007-08-06 21:59:45.000000000 +0200
 +++ ./libiberty/configure.ac	2008-01-21 15:22:03.000000000 +0100
-@@ -682,6 +682,7 @@
-      *-*-mingw* | *-*-winnt*)	pexecute=./pex-win32.o  ;;
-      *-*-msdosdjgpp*)		pexecute=./pex-djgpp.o  ;;
-      *-*-msdos*)		pexecute=./pex-msdos.o  ;;
+@@ -689,6 +689,7 @@
+      *-*-mingw* | *-*-winnt*)	pexecute=pex-win32  ;;
+      *-*-msdosdjgpp*)		pexecute=pex-djgpp  ;;
+      *-*-msdos*)		pexecute=pex-msdos  ;;
 +     *-*-tyndur*)         pexecute=./pex-tyndur.o   ;;
-      *)				pexecute=./pex-unix.o   ;;
+      *)				pexecute=pex-unix   ;;
  esac
  AC_SUBST(pexecute)
-diff -uNr ../binutils-2.18/libiberty/Makefile.in ./libiberty/Makefile.in
---- ../binutils-2.18/libiberty/Makefile.in	2007-08-06 21:59:45.000000000 +0200
+diff -uNr ../binutils-2.21/libiberty/Makefile.in ./libiberty/Makefile.in
+--- ../binutils-2.21/libiberty/Makefile.in	2007-08-06 21:59:45.000000000 +0200
 +++ ./libiberty/Makefile.in	2008-01-21 15:22:03.000000000 +0100
-@@ -140,7 +140,7 @@
+@@ -141,7 +141,7 @@
  	objalloc.c obstack.c						\
  	partition.c pexecute.c						\
  	 pex-common.c pex-djgpp.c pex-msdos.c pex-one.c			\
@@ -161,8 +161,8 @@ diff -uNr ../binutils-2.18/libiberty/Makefile.in ./libiberty/Makefile.in
 +	 pex-unix.c pex-win32.c	pex-tyndur.c					\
           physmem.c putenv.c						\
  	random.c regex.c rename.c rindex.c				\
- 	safe-ctype.c setenv.c sigsetmask.c snprintf.c sort.c spaces.c	\
-@@ -857,6 +857,13 @@
+ 	safe-ctype.c setenv.c setproctitle.c sha1.c sigsetmask.c        \
+@@ -866,6 +866,13 @@
  	else true; fi
  	$(COMPILE.c) $(srcdir)/pex-djgpp.c $(OUTPUT_OPTION)
  
@@ -173,11 +173,11 @@ diff -uNr ../binutils-2.18/libiberty/Makefile.in ./libiberty/Makefile.in
 +	else true; fi
 +	$(COMPILE.c) $(srcdir)/pex-tyndur.c $(OUTPUT_OPTION)
 +
- ./pex-msdos.o: $(srcdir)/pex-msdos.c stamp-h $(INCDIR)/ansidecl.h \
+ ./pex-msdos.$(objext): $(srcdir)/pex-msdos.c config.h $(INCDIR)/ansidecl.h \
  	$(INCDIR)/libiberty.h $(srcdir)/pex-common.h \
  	$(INCDIR)/safe-ctype.h
-diff -uNr ../binutils-2.18/libiberty/pex-tyndur.c ./libiberty/pex-tyndur.c
---- ../binutils-2.18/libiberty/pex-tyndur.c	1970-01-01 01:00:00.000000000 +0100
+diff -uNr ../binutils-2.21/libiberty/pex-tyndur.c ./libiberty/pex-tyndur.c
+--- ../binutils-2.21/libiberty/pex-tyndur.c	1970-01-01 01:00:00.000000000 +0100
 +++ ./libiberty/pex-tyndur.c	2008-01-21 15:22:03.000000000 +0100
 @@ -0,0 +1,154 @@
 +/* Utilities to execute a program in a subprocess (possibly linked by pipes
@@ -334,24 +334,3 @@ diff -uNr ../binutils-2.18/libiberty/pex-tyndur.c ./libiberty/pex-tyndur.c
 +  return 0;
 +}
 +
---- ../binutils-2.18/configure	2007-08-06 22:29:40.000000000 +0200
-+++ ../binutils-2.18-new/configure	2008-06-05 19:40:52.000000000 +0200
-@@ -6127,12 +6127,12 @@
- 
-     # For an installed makeinfo, we require it to be from texinfo 4.4 or
-     # higher, else we use the "missing" dummy.
--    if ${MAKEINFO} --version \
--       | egrep 'texinfo[^0-9]*([1-3][0-9]|4\.[4-9]|[5-9])' >/dev/null 2>&1; then
--      :
--    else
--      MAKEINFO="$MISSING makeinfo"
--    fi
-+    #if ${MAKEINFO} --version \
-+    #   | egrep 'texinfo[^0-9]*([1-3][0-9]|4\.[4-9]|[5-9])' >/dev/null 2>&1; then
-+    #  :
-+    #else
-+    #  MAKEINFO="$MISSING makeinfo"
-+    #fi
-     ;;
- 
- esac
