@@ -7,7 +7,7 @@ SRC_URI=""
 
 LICENSE="none"
 
-BUILD_DEPEND="=freetype-2.4.1 =libpng-1.4.2 =zlib-1.2.3"
+BUILD_DEPEND="=freetype-2.4.1 =libpng-1.4.4 =zlib-1.2.3"
 RUN_DEPEND=""
 
 MY_S="${S}/${P}"
