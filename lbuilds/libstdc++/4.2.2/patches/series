@@ -1,2 +1,3 @@
 configure.patch
 libc.patch
+configure-with-new-autoconf.patch
