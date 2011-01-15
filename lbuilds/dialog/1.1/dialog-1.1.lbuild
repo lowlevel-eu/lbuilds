@@ -3,14 +3,14 @@ include toolchain
 
 DESCRIPTION=""
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/dialog"
-SRC_URI="ftp://invisible-island.net/dialog/dialog.tar.gz"
+SRC_URI="ftp://invisible-island.net/dialog/dialog-1.1-20100428.tgz"
 
 LICENSE="LGPL-2"
 
 RUN_DEPEND=""
 BUILD_DEPEND="=ncurses-5.6"
 
-MY_S="dialog-1.1-20080727"
+MY_S="${S}/dialog-1.1-20100428"
 
 src_unpack() {
 	lunpack ${PN}.tar.gz
