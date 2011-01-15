@@ -1,0 +1,44 @@
+Index: bsd-games-2.17/configure
+===================================================================
+--- bsd-games-2.17.orig/configure	2004-02-09 02:37:31.000000000 +0100
++++ bsd-games-2.17/configure	2011-01-15 19:24:42.065240003 +0100
+@@ -325,6 +325,7 @@
+ echo "It is presumed in some places by the Makefiles that the compiler"
+ echo "will be some form of gcc."
+ ask "C compiler" cc gcc
++ask "Host C compiler" hostcc gcc
+ if building_in dab; then
+     ask "C++ compiler" cxx g++
+ fi
+@@ -699,6 +700,8 @@
+ $dir/%.d:	$dir/%.c
+ 	./mkdep \$< \$@ \$(CC) \$(CFLAGS) \$(${udir}_CFLAGS) \$(${udir}_DEFS) \$(BASE_INCS) -I$dir \$(${udir}_INCS)
+ 
++hack/makedefs.o: hack/makedefs.c
++	\$(HOSTCC) -c \$^ -o \$@
+ EOF
+     fi
+ done
+@@ -747,6 +750,10 @@
+     else
+ 	ccvar=CC
+     fi
++    if [ "$exec" = "hack/makedefs" ]; then
++        ccvar=HOSTCC
++    fi
++
+     cat >>GNUmakefile <<EOF
+ ifneq (\$(nodep),true)
+ include $deps_to_inc
+Index: bsd-games-2.17/Makeconfig.in
+===================================================================
+--- bsd-games-2.17.orig/Makeconfig.in	2004-02-09 02:37:31.000000000 +0100
++++ bsd-games-2.17/Makeconfig.in	2011-01-15 19:22:32.225239981 +0100
+@@ -86,6 +86,7 @@
+ # Compilation details
+ CC := @cc@
+ CXX := @cxx@
++HOSTCC := @hostcc@
+ OPTIMIZE := @optimize_flags@
+ WARNING := @warning_flags@
+ CXX_WARNING := @cxx_warning_flags@

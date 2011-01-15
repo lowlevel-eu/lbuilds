@@ -32,6 +32,11 @@ src_configure() {
 	echo bsd_games_cfg_build_dirs=\"hack\" >> config.params
 	echo bsd_games_cfg_install_prefix=\"${D}\" >> config.params
 
+	bsd_games_cfg_cc="`tc-cc`" \
+	bsd_games_cfg_host_cc="cc" \
+	bsd_games_cfg_other_cflags="-I`tc-incdir` -I${MY_S}/include" \
+	bsd_games_cfg_ncurses_includes="-I`tc-incdir`/ncurses" \
+	bsd_games_cfg_base_libs="-L`tc-libdir`" \
 	./configure || die "configure failed"
 }
 
@@ -40,11 +45,7 @@ src_compile() {
 	cd ${MY_S}
 
 	lmake hack/makedefs || die "make failed"
-	lmake CC="`tc-cc`" \
-		CFLAGS+="-I`tc-incdir` -I${MY_S}/include" \
-		CFLAGS+="-I`tc-incdir`/ncurses" \
-		LDFLAGS="-L`tc-libdir`" \
-		|| die "make failed"
+	lmake || die "make failed"
 }
 
 src_install() {
