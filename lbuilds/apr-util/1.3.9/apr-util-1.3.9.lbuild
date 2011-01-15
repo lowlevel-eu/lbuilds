@@ -3,7 +3,7 @@ include toolchain
 
 DESCRIPTION="Apache Portable Runtime"
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/APR-Util"
-SRC_URI="http://mirrorspace.org/apache/apr/apr-util-1.3.9.tar.bz2"
+SRC_URI="http://archive.apache.org/dist/apr/apr-util-1.3.9.tar.bz2"
 
 LICENSE="Apache"
 
