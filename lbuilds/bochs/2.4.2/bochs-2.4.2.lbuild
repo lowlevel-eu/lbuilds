@@ -3,7 +3,7 @@ include toolchain
 
 DESCRIPTION=""
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/bochs"
-SRC_URI="http://sourceforge.net/projects/bochs/files/bochs/2.4.2/${P}.tar.gz/download/"
+SRC_URI="http://sourceforge.net/projects/bochs/files/bochs/2.4.2/${P}.tar.gz"
 
 LICENSE="GPL-2"
 
