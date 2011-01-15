@@ -3,7 +3,7 @@ include toolchain
 
 DESCRIPTION="Brainfuck interpreter"
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/BFF"
-SRC_URI="http://swapped.cc/bf/files/${P}.tar.gz"
+SRC_URI="http://swapped.cc/bff/files/${P}.tar.gz"
 
 LICENSE="BSD"
 
