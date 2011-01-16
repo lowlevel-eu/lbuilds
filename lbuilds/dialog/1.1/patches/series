@@ -1,0 +1,2 @@
+build.patch -p0
+strip-posix.patch -p0
