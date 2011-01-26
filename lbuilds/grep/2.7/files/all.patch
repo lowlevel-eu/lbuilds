@@ -1,0 +1,25 @@
+Index: grep-2.7/lib/inttypes.in.h
+===================================================================
+--- grep-2.7.orig/lib/inttypes.in.h
++++ grep-2.7/lib/inttypes.in.h
+@@ -46,5 +46,5 @@ #include <limits.h>
+
+-#if !(INT_MIN == INT32_MIN && INT_MAX == INT32_MAX)
+-# error "This file assumes that 'int' has exactly 32 bits. Please report your platform and compiler to <bug-gnulib@gnu.org>."
+-#endif
++//#if !(INT_MIN == INT32_MIN && INT_MAX == INT32_MAX)
++//# error "This file assumes that 'int' has exactly 32 bits. Please report your platform and compiler to <bug-gnulib@gnu.org>."
++//#endif
+
+Index: grep-2.7/lib/error.c
+===================================================================
+--- grep-2.7.orig/lib/error.c
++++ grep-2.7/lib/error.c
+@@ -126,5 +126,5 @@ # else
+
+-#  ifndef F_GETFL
+-#   error Please port fcntl to your platform
+-#  endif
++//#  ifndef F_GETFL
++//#   error Please port fcntl to your platform
++//#  endif
