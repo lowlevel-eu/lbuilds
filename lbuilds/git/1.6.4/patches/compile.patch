@@ -83,7 +83,7 @@ Index: src/git-1.6.4/compat/tyndur.h
 ===================================================================
 --- /dev/null
 +++ src/git-1.6.4/compat/tyndur.h
-@@ -0,0 +1,157 @@
+@@ -0,0 +1,147 @@
 +#ifndef COMPAT_TYNDUR_H
 +#define COMPAT_TYNDUR_H
 +
@@ -174,16 +174,6 @@ Index: src/git-1.6.4/compat/tyndur.h
 +static pid_t setsid(void)
 +{
 +    return getpid();
-+}
-+
-+static int setuid(uid_t uid)
-+{
-+    return 0;
-+}
-+
-+static int setgid(gid_t gid)
-+{
-+    return 0;
 +}
 +
 +static int initgroups(const char *user, gid_t group)
@@ -371,15 +361,6 @@ Index: src/git-1.6.4/run-command.c
  	fflush(NULL);
  	cmd->pid = fork();
  	if (!cmd->pid) {
-Index: src/git-1.6.4/write_or_die.c
-===================================================================
---- src.orig/git-1.6.4/write_or_die.c
-+++ src/git-1.6.4/write_or_die.c
-@@ -1,3 +1,4 @@
-+#include "compat/tyndur.h"
- #include "cache.h"
- 
- /*
 Index: src/git-1.6.4/daemon.c
 ===================================================================
 --- src.orig/git-1.6.4/daemon.c
