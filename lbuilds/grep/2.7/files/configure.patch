@@ -1,39 +1,12 @@
-Index: grep-2.7/configure
+Index: grep-2.7/build-aux/config.sub
 ===================================================================
---- grep-2.7.orig/configure
-+++ grep-2.7/configure
-@@ -3668,35 +3668,4 @@ case $build_os in *\ *) build_os=`echo "$build_os" | sed 's/ /-/g'`;; esac
+--- grep-2.7.orig/build-aux/config.sub
++++ grep-2.7/build-aux/config.sub
+@@ -1325,6 +1325,6 @@ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
 
-
--{ $as_echo "$as_me:${as_lineno-$LINENO}: checking host system type" >&5
--$as_echo_n "checking host system type... " >&6; }
--if ${ac_cv_host+:} false; then :
--  $as_echo_n "(cached) " >&6
--else
--  if test "x$host_alias" = x; then
--  ac_cv_host=$ac_cv_build
--else
--  ac_cv_host=`$SHELL "$ac_aux_dir/config.sub" $host_alias` ||
--    as_fn_error $? "$SHELL $ac_aux_dir/config.sub $host_alias failed" "$LINENO" 5
--fi
--
--fi
--{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_host" >&5
--$as_echo "$ac_cv_host" >&6; }
--case $ac_cv_host in
--*-*-*) ;;
--*) as_fn_error $? "invalid value of canonical host" "$LINENO" 5;;
--esac
--host=$ac_cv_host
--ac_save_IFS=$IFS; IFS='-'
--set x $ac_cv_host
--shift
--host_cpu=$1
--host_vendor=$2
--shift; shift
--# Remember, the first character of IFS is used to create $*,
--# except with old shells:
--host_os=$*
--IFS=$ac_save_IFS
--case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
-
+	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* | -tyndur*)
+	# Remember, each alternative MUST END IN *, to match a version number.
+		;;
