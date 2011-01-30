@@ -12,17 +12,6 @@ BUILD_DEPEND="=ncurses-5.6"
 
 MY_S="${S}/dialog-1.1-20100428"
 
-src_unpack() {
-	lunpack ${PN}.tar.gz
-	cd ${MY_S} || die "${MY_S} existiert nicht"
-    ln -s ${F} patches
-    for i in ${F}/*.patch; do
-        echo `basename $i` >> series
-        (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
-    done
-    (which quilt > /dev/null 2>&1) && quilt push -a
-}
-
 src_compile() {
 	cd ${MY_S}
 
