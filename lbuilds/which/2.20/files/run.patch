@@ -1,0 +1,23 @@
+Index: which-2.20/bash.c
+===================================================================
+--- which-2.20.orig/bash.c
++++ which-2.20/bash.c
+@@ -359,1 +359,1 @@      string is returned in that case. */
+-  if (i && string[i] == ':')
++  if (i && string[i] == ';')
+@@ -362,1 +362,1 @@
+-  for (start = i; string[i] && string[i] != ':'; i++)
++  for (start = i; string[i] && string[i] != ';'; i++)
+Index: which-2.20/which.c
+===================================================================
+--- which-2.20.orig/which.c
++++ which-2.20/which.c
+@@ -174,1 +174,1 @@   {
+-    const char *pwd = getenv("PWD");
++    const char *pwd = getenv("CWD");
+@@ -179,1 +179,1 @@
+-  if (*cwd != '/')
++  if (*cwd != '/' && strncmp(cwd, "file:/", 6))
+@@ -203,1 +203,1 @@
+-  if (*p1 != '/')
++  if (*p1 != '/' && strncmp(p1, "file:/", 6))
