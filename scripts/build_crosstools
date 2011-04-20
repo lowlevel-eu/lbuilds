@@ -174,7 +174,7 @@ fi
 if ! [ -z ${BUILD_MPFR} ]; then
   echo "[mpfr] Version " ${MPFR_VERSION}
   echo "[mpfr] Herunterladen..."
-  [ -f mpfr-${MPFR_VERSION}.tar.bz2 ] || wget -q http://www.mpfr.org/mpfr-current/mpfr-${MPFR_VERSION}.tar.bz2 || die "Fehler beim Herunterladen."
+  [ -f mpfr-${MPFR_VERSION}.tar.bz2 ] || wget -q http://www.mpfr.org/mpfr-${MPFR_VERSION}/mpfr-${MPFR_VERSION}.tar.bz2 || die "Fehler beim Herunterladen."
   echo "[mpfr] Entpacken..."
   (tar -xjf mpfr-${MPFR_VERSION}.tar.bz2 && mv mpfr-${MPFR_VERSION} ${TMP}/cross-gcc/gcc-${GCC_VERSION}/mpfr ) || die "Fehler beim Entpacken."
 fi
