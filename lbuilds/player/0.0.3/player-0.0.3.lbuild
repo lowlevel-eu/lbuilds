@@ -1,0 +1,32 @@
+include toolchain
+include lutils
+
+DESCRIPTION="Ein Musikabspielprogramm"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/player"
+SRC_URI="http://www.xanclic.bplaced.net/${P}.tar.bz2"
+
+LICENSE="MIT"
+
+BUILD_DEPEND="=libogg-1.1.4 =libvorbis-1.2.3 =libmpg123-1.13.3 =libcdi-42"
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+    lunpack ${P}.tar.bz2
+}
+
+src_compile() {
+    cd ${MY_S}
+
+    lmake CC="`tc-cc` -I `tc-incdir` -L `tc-libdir`" || die "make failed"
+    cd ..
+}
+
+src_install() {
+    cd ${MY_S}
+
+    mkdir -p ${D}/${R}
+    lmake install INSTALL_TO="${D}${R}" || die "make install failed"
+    rm -rf ${D}${R}/share
+}
