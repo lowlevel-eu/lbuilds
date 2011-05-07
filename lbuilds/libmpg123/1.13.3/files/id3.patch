@@ -1,0 +1,28 @@
+Index: src/mpg123-1.13.3/src/libmpg123/id3.c
+===================================================================
+--- src.orig/mpg123-1.13.3/src/libmpg123/id3.c	2011-04-03 09:50:14.000000000 +0200
++++ src/mpg123-1.13.3/src/libmpg123/id3.c	2011-05-07 00:56:57.000000000 +0200
+@@ -382,7 +382,7 @@
+ 			store_id3_text(&localcom.text, text-1, realsize+1-(text-realdata), NOQUIET, 0);
+ 			if(localcom.text.fill > 0)
+ 			{
+-				fr->rva.gain[rva_mode] = (float) atof(localcom.text.p);
++				fr->rva.gain[rva_mode] = (float) strtod(localcom.text.p, NULL);
+ 				if(VERBOSE3) fprintf(stderr, "Note: RVA value %fdB\n", fr->rva.gain[rva_mode]);
+ 				fr->rva.peak[rva_mode] = 0;
+ 				fr->rva.level[rva_mode] = rva_level;
+@@ -465,12 +465,12 @@
+ 			{
+ 				if(is_peak)
+ 				{
+-					fr->rva.peak[rva_mode] = (float) atof(localex.text.p);
++					fr->rva.peak[rva_mode] = (float) strtod(localex.text.p, NULL);
+ 					if(VERBOSE3) fprintf(stderr, "Note: RVA peak %f\n", fr->rva.peak[rva_mode]);
+ 				}
+ 				else
+ 				{
+-					fr->rva.gain[rva_mode] = (float) atof(localex.text.p);
++					fr->rva.gain[rva_mode] = (float) strtod(localex.text.p, NULL);
+ 					if(VERBOSE3) fprintf(stderr, "Note: RVA gain %fdB\n", fr->rva.gain[rva_mode]);
+ 				}
+ 				fr->rva.level[rva_mode] = rva_level;

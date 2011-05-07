@@ -1,0 +1,56 @@
+include toolchain
+include lutils
+
+DESCRIPTION="libmpg123"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/libmpg123"
+SRC_URI="http://sourceforge.net/projects/mpg123/files/mpg123/1.13.3/mpg123-1.13.3.tar.bz2/download"
+PS="lib"
+
+LICENSE="unknown"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+    cp ../../../distfiles/download ../../../distfiles/${P}.tar.bz2
+    lunpack ${P}.tar.bz2
+
+    ln -s ${F} patches
+    [ -f ${F}/series ] && ln -s ${F}/series series
+    for i in ${F}/*.patch; do
+        [ -L series ] || echo `basename $i` >> series
+        (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
+    done
+    (which quilt > /dev/null 2>&1) && quilt push -a || die "Fehler beim Anwenden der Patches"
+}
+
+src_configure() {
+	cd "${S}/mpg123-1.13.3"
+	./configure \
+                CC=`tc-cc` \
+                --build=`tc-build` \
+                --target=`tc-host` \
+                --host=`tc-host` \
+                --prefix="${R}" \
+                --without-pic \
+                --disable-shared \
+                --enable-static \
+                --with-audio=dummy \
+                --with-module-suffix=.a \
+                || die "configure failed"
+}
+
+src_compile() {
+	cd "${S}/mpg123-1.13.3"
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd "${S}/mpg123-1.13.3"
+        install -d "${D}${R}/1.13.3/lib" "${D}${R}/1.13.3/include"
+	cp src/libmpg123/libmpg123.a "${D}${R}/1.13.3/lib" || die "install failed"
+	cp src/libmpg123/mpg123.h "${D}${R}/1.13.3/include" || die "install failed"
+}

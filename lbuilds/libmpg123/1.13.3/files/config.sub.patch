@@ -1,0 +1,13 @@
+Index: src/mpg123-1.13.3/build/config.sub
+===================================================================
+--- src.orig/mpg123-1.13.3/build/config.sub	2011-04-03 09:52:42.000000000 +0200
++++ src/mpg123-1.13.3/build/config.sub	2011-05-06 23:49:19.000000000 +0200
+@@ -1264,7 +1264,7 @@
+ 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
+ 	      | -kopensolaris* \
+ 	      | -amigaos* | -amigados* | -msdos* | -newsos* | -unicos* | -aof* \
+-	      | -aos* | -aros* \
++	      | -aos* | -aros* | -tyndur* \
+ 	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* \
+ 	      | -clix* | -riscos* | -uniplus* | -iris* | -rtu* | -xenix* \
+ 	      | -hiux* | -386bsd* | -knetbsd* | -mirbsd* | -netbsd* \

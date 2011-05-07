@@ -1,0 +1,258 @@
+Index: src/mpg123-1.13.3/src/libmpg123/Makefile.am
+===================================================================
+--- src.orig/mpg123-1.13.3/src/libmpg123/Makefile.am	2011-04-03 09:50:15.000000000 +0200
++++ src/mpg123-1.13.3/src/libmpg123/Makefile.am	2011-05-07 02:59:11.000000000 +0200
+@@ -21,12 +21,14 @@
+ 
+ # The library can have different names, depending on largefile setup.
+ # Libtool macros think they're smart. Because of that mpg123.la does not work, it must be libmpg123.la .
+-lib_LTLIBRARIES = libmpg123.la
++lib_LTLIBRARIES = libmpg123.a
+ nodist_include_HEADERS = mpg123.h
+ 
+ libmpg123_la_LDFLAGS = -no-undefined -version-info @LIBMPG123_VERSION@ -export-symbols-regex '^mpg123_'
+ libmpg123_la_LIBADD = @DECODER_LOBJ@ @LFS_LOBJ@
++libmpg123_a_LIBADD = @DECODER_OBJ@ @LFS_OBJ@
+ libmpg123_la_DEPENDENCIES = @DECODER_LOBJ@ @LFS_LOBJ@
++libmpg123_a_DEPENDENCIES = @DECODER_OBJ@ @LFS_OBJ@
+ 
+ libmpg123_la_SOURCES = \
+ 	intsym.h \
+@@ -66,6 +68,8 @@
+ 	index.h \
+ 	index.c
+ 
++libmpg123_a_SOURCES = $(libmpg123_la_SOURCES)
++
+ EXTRA_libmpg123_la_SOURCES = \
+ 	lfs_alias.c \
+ 	lfs_wrap.c \
+@@ -137,3 +141,5 @@
+ 	l12_integer_tables.h \
+ 	l3_integer_tables.h
+ 
++EXTRA_libmpg123_a_SOURCES = $(EXTRA_libmpg123_la_SOURCES)
++
+Index: src/mpg123-1.13.3/src/libmpg123/Makefile.in
+===================================================================
+--- src.orig/mpg123-1.13.3/src/libmpg123/Makefile.in	2011-04-17 11:23:11.000000000 +0200
++++ src/mpg123-1.13.3/src/libmpg123/Makefile.in	2011-05-07 02:59:02.000000000 +0200
+@@ -76,7 +76,11 @@
+ am_libmpg123_la_OBJECTS = compat.lo parse.lo frame.lo format.lo \
+ 	dct64.lo equalizer.lo id3.lo optimize.lo readers.lo tabinit.lo \
+ 	libmpg123.lo index.lo
++am_libmpg123_a_OBJECTS = compat.o parse.o frame.o format.o \
++	dct64.o equalizer.o id3.o optimize.o readers.o tabinit.o \
++	libmpg123.o index.o
+ libmpg123_la_OBJECTS = $(am_libmpg123_la_OBJECTS)
++libmpg123_a_OBJECTS = $(am_libmpg123_a_OBJECTS)
+ libmpg123_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+ 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+ 	$(libmpg123_la_LDFLAGS) $(LDFLAGS) -o $@
+@@ -318,11 +322,13 @@
+ 
+ # The library can have different names, depending on largefile setup.
+ # Libtool macros think they're smart. Because of that mpg123.la does not work, it must be libmpg123.la .
+-lib_LTLIBRARIES = libmpg123.la
++lib_LTLIBRARIES = libmpg123.a
+ nodist_include_HEADERS = mpg123.h
+ libmpg123_la_LDFLAGS = -no-undefined -version-info @LIBMPG123_VERSION@ -export-symbols-regex '^mpg123_'
+ libmpg123_la_LIBADD = @DECODER_LOBJ@ @LFS_LOBJ@
++libmpg123_a_LIBADD = @DECODER_OBJ@ @LFS_OBJ@
+ libmpg123_la_DEPENDENCIES = @DECODER_LOBJ@ @LFS_LOBJ@
++libmpg123_a_DEPENDENCIES = @DECODER_OBJ@ @LFS_OBJ@
+ libmpg123_la_SOURCES = \
+ 	intsym.h \
+ 	compat.c \
+@@ -360,6 +366,7 @@
+ 	getcpuflags.h \
+ 	index.h \
+ 	index.c
++libmpg123_a_SOURCES = $(libmpg123_la_SOURCES)
+ 
+ EXTRA_libmpg123_la_SOURCES = \
+ 	lfs_alias.c \
+@@ -431,6 +438,7 @@
+ 	getcpuflags.S \
+ 	l12_integer_tables.h \
+ 	l3_integer_tables.h
++EXTRA_libgmp123_a_SOURCES = $(EXTRA_libmpg123_la_SOURCES)
+ 
+ all: all-am
+ 
+@@ -501,6 +509,8 @@
+ 	done
+ libmpg123.la: $(libmpg123_la_OBJECTS) $(libmpg123_la_DEPENDENCIES) 
+ 	$(libmpg123_la_LINK) -rpath $(libdir) $(libmpg123_la_OBJECTS) $(libmpg123_la_LIBADD) $(LIBS)
++libmpg123.a: $(libmpg123_a_OBJECTS) $(libmpg123_a_DEPENDENCIES)
++	ar rcs $@ $(libmpg123_a_OBJECTS) $(libmpg123_a_LIBADD)
+ testcpu$(EXEEXT): $(testcpu_OBJECTS) $(testcpu_DEPENDENCIES) 
+ 	@rm -f testcpu$(EXEEXT)
+ 	$(LINK) $(testcpu_OBJECTS) $(testcpu_LDADD) $(LIBS)
+Index: src/mpg123-1.13.3/src/Makefile.am
+===================================================================
+--- src.orig/mpg123-1.13.3/src/Makefile.am	2011-04-03 09:50:15.000000000 +0200
++++ src/mpg123-1.13.3/src/Makefile.am	2011-05-07 02:57:08.000000000 +0200
+@@ -5,12 +5,12 @@
+ ## initially written by Nicholas J. Humfrey
+ 
+ AM_CPPFLAGS = -DPKGLIBDIR="\"$(pkglibdir)\""
+-mpg123_LDADD = $(LIBLTDL) libmpg123/libmpg123.la @MODULE_OBJ@ @OUTPUT_OBJ@ @OUTPUT_LIBS@
++mpg123_LDADD = $(LIBLTDL) libmpg123/libmpg123.a @MODULE_OBJ@ @OUTPUT_OBJ@ @OUTPUT_LIBS@
+ mpg123_LDFLAGS = @EXEC_LT_LDFLAGS@ @OUTPUT_LDFLAGS@
+ # Just mpg123_INCLUDES has no effect on build! Trying that before reverting to AM_CPPFLAGS.
+ INCLUDES = $(LTDLINCL) -I$(top_builddir)/src/libmpg123 -I$(top_srcdir)/src/libmpg123
+ # libltdl is not mentioned here... it's not that trivial
+-mpg123_DEPENDENCIES = @OUTPUT_OBJ@ @MODULE_OBJ@ libmpg123/libmpg123.la
++mpg123_DEPENDENCIES = @OUTPUT_OBJ@ @MODULE_OBJ@ libmpg123/libmpg123.a
+ 
+ SUBDIRS = output libmpg123
+ EXTRA_DIST = legacy_module.c module.c sfifo.c sfifo.h
+@@ -142,7 +142,7 @@
+ 
+ # Would have to mention _all_ source files... Dammit, that's what the libmpg123/Makefile.am does!
+ # But again, the a make $something here needs that stupid rule... WHY???
+-libmpg123/libmpg123.la: config.h libmpg123/mpg123.h
++libmpg123/libmpg123.a: config.h libmpg123/mpg123.h
+ 	cd libmpg123 && $(MAKE)
+ 
+ tests_seek_accuracy_SOURCES = \
+@@ -150,16 +150,16 @@
+ libmpg123/compat.h \
+ libmpg123/compat.c
+ 
+-tests_seek_accuracy_DEPENDENCIES = libmpg123/libmpg123.la
+-tests_seek_accuracy_LDADD = libmpg123/libmpg123.la
++tests_seek_accuracy_DEPENDENCIES = libmpg123/libmpg123.a
++tests_seek_accuracy_LDADD = libmpg123/libmpg123.a
+ 
+ tests_seek_whence_SOURCES = \
+ tests/seek_whence.c \
+ libmpg123/compat.h \
+ libmpg123/compat.c
+ 
+-tests_seek_whence_DEPENDENCIES = libmpg123/libmpg123.la
+-tests_seek_whence_LDADD = libmpg123/libmpg123.la
++tests_seek_whence_DEPENDENCIES = libmpg123/libmpg123.a
++tests_seek_whence_LDADD = libmpg123/libmpg123.a
+ 
+ tests_noise_SOURCES = \
+ tests/noise.c \
+@@ -174,13 +174,13 @@
+ libmpg123/compat.h \
+ libmpg123/compat.c
+ 
+-tests_text_DEPENDENCIES = libmpg123/libmpg123.la
+-tests_text_LDADD = libmpg123/libmpg123.la
++tests_text_DEPENDENCIES = libmpg123/libmpg123.a
++tests_text_LDADD = libmpg123/libmpg123.a
+ 
+ tests_plain_id3_SOURCES = \
+ tests/plain_id3.c \
+ libmpg123/compat.h \
+ libmpg123/compat.c
+ 
+-tests_plain_id3_DEPENDENCIES = libmpg123/libmpg123.la
+-tests_plain_id3_LDADD = libmpg123/libmpg123.la
++tests_plain_id3_DEPENDENCIES = libmpg123/libmpg123.a
++tests_plain_id3_LDADD = libmpg123/libmpg123.a
+Index: src/mpg123-1.13.3/src/Makefile.in
+===================================================================
+--- src.orig/mpg123-1.13.3/src/Makefile.in	2011-04-17 11:23:11.000000000 +0200
++++ src/mpg123-1.13.3/src/Makefile.in	2011-05-07 02:57:08.000000000 +0200
+@@ -351,12 +351,12 @@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ AM_CPPFLAGS = -DPKGLIBDIR="\"$(pkglibdir)\""
+-mpg123_LDADD = $(LIBLTDL) libmpg123/libmpg123.la @MODULE_OBJ@ @OUTPUT_OBJ@ @OUTPUT_LIBS@
++mpg123_LDADD = $(LIBLTDL) libmpg123/libmpg123.a @MODULE_OBJ@ @OUTPUT_OBJ@ @OUTPUT_LIBS@
+ mpg123_LDFLAGS = @EXEC_LT_LDFLAGS@ @OUTPUT_LDFLAGS@
+ # Just mpg123_INCLUDES has no effect on build! Trying that before reverting to AM_CPPFLAGS.
+ INCLUDES = $(LTDLINCL) -I$(top_builddir)/src/libmpg123 -I$(top_srcdir)/src/libmpg123
+ # libltdl is not mentioned here... it's not that trivial
+-mpg123_DEPENDENCIES = @OUTPUT_OBJ@ @MODULE_OBJ@ libmpg123/libmpg123.la
++mpg123_DEPENDENCIES = @OUTPUT_OBJ@ @MODULE_OBJ@ libmpg123/libmpg123.a
+ SUBDIRS = output libmpg123
+ EXTRA_DIST = legacy_module.c module.c sfifo.c sfifo.h
+ CLEANFILES = *.a
+@@ -372,15 +372,15 @@
+ libmpg123/compat.h \
+ libmpg123/compat.c
+ 
+-tests_seek_accuracy_DEPENDENCIES = libmpg123/libmpg123.la
+-tests_seek_accuracy_LDADD = libmpg123/libmpg123.la
++tests_seek_accuracy_DEPENDENCIES = libmpg123/libmpg123.a
++tests_seek_accuracy_LDADD = libmpg123/libmpg123.a
+ tests_seek_whence_SOURCES = \
+ tests/seek_whence.c \
+ libmpg123/compat.h \
+ libmpg123/compat.c
+ 
+-tests_seek_whence_DEPENDENCIES = libmpg123/libmpg123.la
+-tests_seek_whence_LDADD = libmpg123/libmpg123.la
++tests_seek_whence_DEPENDENCIES = libmpg123/libmpg123.a
++tests_seek_whence_LDADD = libmpg123/libmpg123.a
+ tests_noise_SOURCES = \
+ tests/noise.c \
+ libmpg123/compat.h \
+@@ -394,15 +394,15 @@
+ libmpg123/compat.h \
+ libmpg123/compat.c
+ 
+-tests_text_DEPENDENCIES = libmpg123/libmpg123.la
+-tests_text_LDADD = libmpg123/libmpg123.la
++tests_text_DEPENDENCIES = libmpg123/libmpg123.a
++tests_text_LDADD = libmpg123/libmpg123.a
+ tests_plain_id3_SOURCES = \
+ tests/plain_id3.c \
+ libmpg123/compat.h \
+ libmpg123/compat.c
+ 
+-tests_plain_id3_DEPENDENCIES = libmpg123/libmpg123.la
+-tests_plain_id3_LDADD = libmpg123/libmpg123.la
++tests_plain_id3_DEPENDENCIES = libmpg123/libmpg123.a
++tests_plain_id3_LDADD = libmpg123/libmpg123.a
+ all: config.h
+ 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+ 
+@@ -1072,7 +1072,7 @@
+ 
+ # Would have to mention _all_ source files... Dammit, that's what the libmpg123/Makefile.am does!
+ # But again, the a make $something here needs that stupid rule... WHY???
+-libmpg123/libmpg123.la: config.h libmpg123/mpg123.h
++libmpg123/libmpg123.a: config.h libmpg123/mpg123.h
+ 	cd libmpg123 && $(MAKE)
+ 
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
+Index: src/mpg123-1.13.3/configure
+===================================================================
+--- src.orig/mpg123-1.13.3/configure	2011-04-17 11:23:10.000000000 +0200
++++ src/mpg123-1.13.3/configure	2011-05-07 02:57:08.000000000 +0200
+@@ -737,6 +737,7 @@
+ INCLUDE_STDLIB_H
+ INCLUDE_STDIO_H
+ LFS_LOBJ
++LFS_OBJ
+ EXEC_LT_LDFLAGS
+ LT_LDFLAGS
+ MODULE_OBJ
+@@ -14433,9 +14434,11 @@
+ 
+ if test "x$ac_cv_sys_file_offset_bits" = x || echo "$ac_cv_sys_file_offset_bits" | $GREP  '[^0-9]' > /dev/null; then
+ 		LFS_LOBJ=
++		LFS_OBJ=
+ else
+ 	# Add dual-mode wrapper code.
+ 	LFS_LOBJ=lfs_wrap.lo
++	LFS_OBJ=lfs_wrap.o
+ fi
+ 
+ # Using the lower level macros instead of AC_TYPE_* for compatibility with not freshest autoconf.
+@@ -14734,6 +14737,7 @@
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+ $as_echo "yes" >&6; }
+   LFS_LOBJ="$LFS_LOBJ lfs_alias.lo"
++  LFS_OBJ="$LFS_OBJ lfs_alias.o"
+ else
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+ $as_echo "no" >&6; }

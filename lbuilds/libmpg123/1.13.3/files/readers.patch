@@ -1,0 +1,38 @@
+Index: src/mpg123-1.13.3/src/libmpg123/readers.c
+===================================================================
+--- src.orig/mpg123-1.13.3/src/libmpg123/readers.c	2011-04-03 09:50:15.000000000 +0200
++++ src/mpg123-1.13.3/src/libmpg123/readers.c	2011-05-07 00:54:57.000000000 +0200
+@@ -70,22 +70,7 @@
+    This is needed for Shoutcast servers that have forgotten about us while connection was temporarily down. */
+ static ssize_t timeout_read(mpg123_handle *fr, void *buf, size_t count)
+ {
+-	struct timeval tv;
+-	ssize_t ret = 0;
+-	fd_set fds;
+-	tv.tv_sec = fr->rdat.timeout_sec;
+-	tv.tv_usec = 0;
+-	FD_ZERO(&fds);
+-	FD_SET(fr->rdat.filept, &fds);
+-	ret = select(fr->rdat.filept+1, &fds, NULL, NULL, &tv);
+-	/* This works only with "my" read function. Not user-replaced. */
+-	if(ret > 0) ret = read(fr->rdat.filept, buf, count);
+-	else
+-	{
+-		ret=-1; /* no activity is the error */
+-		if(NOQUIET) error("stream timed out");
+-	}
+-	return ret;
++    read(fr->rdat.filept, buf, count);
+ }
+ #endif
+ 
+@@ -926,9 +911,6 @@
+ 			error("Timeout reading does not work with user-provided read function. Implement it yourself!");
+ 			return -1;
+ 		}
+-		flags = fcntl(fr->rdat.filept, F_GETFL);
+-		flags |= O_NONBLOCK;
+-		fcntl(fr->rdat.filept, F_SETFL, flags);
+ 		fr->rdat.fdread = timeout_read;
+ 		fr->rdat.timeout_sec = fr->p.timeout;
+ 		fr->rdat.flags |= READER_NONBLOCK;
