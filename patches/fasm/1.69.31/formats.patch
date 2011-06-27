@@ -1,0 +1,13 @@
+Index: cross-fasm/fasm/source/formats.inc
+===================================================================
+--- cross-fasm.orig/fasm/source/formats.inc	2011-02-07 11:39:42.000000000 +0100
++++ cross-fasm/fasm/source/formats.inc	2011-05-07 00:17:39.000000000 +0200
+@@ -3625,7 +3625,7 @@
+ 	pop	edx
+ 	mov	[edx+7],al
+       elf_exe_brand_ok:
+-	mov	[image_base],8048000h
++	mov	[image_base],40000000h
+ 	cmp	byte [esi],80h
+ 	jne	elf_exe_base_ok
+ 	lods	word [esi]

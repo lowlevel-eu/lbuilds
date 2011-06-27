@@ -16,7 +16,7 @@ GMP_VERSION=5.0.1
 MPFR_VERSION=3.0.1
 MPC_VERSION=0.8.2
 FPC_VERSION=2.4.0
-FASM_VERSION=1.69.09
+FASM_VERSION=1.69.31
 
 PREFIX=`pwd`/env
 TARGET=i386-pc-tyndur
@@ -273,7 +273,7 @@ gcc -m32 fasm.o -o fasm || die "Fehler beim Linken des Linux-FASM."
 echo "[fasm] Patch anwenden..."
 patch source/formats.inc ${PATCHES}/fasm/${FASM_VERSION}/formats.patch || die "Fehler beim Anwenden des Patches."
 echo "[fasm] Assemblieren..."
-./fasm source/libc/fasm.asm fasm.o || die "Fehler beim Assemblieren."
+./fasm source/libc/fasm.asm fasm.o
 echo "[fasm] Týndur-FASM linken..."
 gcc -m32 fasm.o -o fasm || die "Fehler beim Linken des týndur-FASM."
 echo "[fasm] Installieren..."
