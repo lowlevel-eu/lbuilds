@@ -1,0 +1,4 @@
+diffutils-config.patch
+diffutils-strftime.patch
+diffutils-src.patch
+diffutils-inttypes.patch

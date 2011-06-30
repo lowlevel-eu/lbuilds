@@ -1,0 +1,11 @@
+--- src.orig/diffutils-3.0/lib/strftime.c	2010-04-15 15:40:37.000000000 +0200
++++ src/diffutils-3.0/lib/strftime.c	2011-06-29 19:44:58.807375690 +0200
+@@ -1122,7 +1122,7 @@
+             time_t t;
+ 
+             ltm = *tp;
+-            t = mktime (&ltm);
++            t = 0; // mktime (&ltm);
+ 
+             /* Generate string value for T using time_t arithmetic;
+                this works even if sizeof (long) < sizeof (time_t).  */

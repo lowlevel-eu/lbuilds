@@ -1,0 +1,55 @@
+--- src.orig/diffutils-3.0/src/diff.c	2010-04-15 21:53:08.000000000 +0200
++++ src/diffutils-3.0/src/diff.c	2011-06-29 20:00:15.507375267 +0200
+@@ -633,7 +633,7 @@
+ 	specify_style (OUTPUT_NORMAL);
+     }
+ 
+-  if (output_style != OUTPUT_CONTEXT || hard_locale (LC_TIME))
++  /*if (output_style != OUTPUT_CONTEXT || hard_locale (LC_TIME))
+     {
+ #if (defined STAT_TIMESPEC || defined STAT_TIMESPEC_NS \
+      || defined HAVE_STRUCT_STAT_ST_SPARE1)
+@@ -642,7 +642,7 @@
+       time_format = "%Y-%m-%d %H:%M:%S %z";
+ #endif
+     }
+-  else
++  else*/
+     {
+       /* See POSIX 1003.1-2001 for this format.  */
+       time_format = "%a %b %e %T %Y";
+--- src.orig/diffutils-3.0/src/sdiff.c	2010-04-15 14:58:08.000000000 +0200
++++ src/diffutils-3.0/src/sdiff.c	2011-06-29 20:02:01.767375217 +0200
+@@ -1225,12 +1225,12 @@
+   sprintf (buf, "%s/sdiffXXXXXX", dir);
+   sigemptyset (&blocked);
+   sigaddset (&blocked, SIGINT);
+-  sigprocmask (SIG_BLOCK, &blocked, &procmask);
++  // sigprocmask (SIG_BLOCK, &blocked, &procmask);
+   fd = mkstemp (buf);
+   e = errno;
+   if (0 <= fd)
+     tmpname = buf;
+-  sigprocmask (SIG_SETMASK, &procmask, 0);
++  // sigprocmask (SIG_SETMASK, &procmask, 0);
+   errno = e;
+   return fd;
+ }
+--- src.orig/diffutils-3.0/src/util.c	2010-04-15 21:53:08.000000000 +0200
++++ src/diffutils-3.0/src/util.c	2011-06-29 20:02:53.287375194 +0200
+@@ -192,6 +192,7 @@
+ 
+       /* Make OUTFILE a pipe to a subsidiary `pr'.  */
+       {
++#if 0
+ #if HAVE_WORKING_FORK || HAVE_WORKING_VFORK
+ 	int pipes[2];
+ 
+@@ -236,6 +237,7 @@
+ 	  pfatal_with_name (command);
+ 	free (command);
+ #endif
++#endif
+       }
+     }
+   else

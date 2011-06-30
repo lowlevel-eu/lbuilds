@@ -1,0 +1,13 @@
+--- src.orig/diffutils-3.0/lib/inttypes.in.h	2010-04-15 15:40:37.000000000 +0200
++++ src/diffutils-3.0/lib/inttypes.in.h	2011-06-29 20:06:00.357375107 +0200
+@@ -45,10 +45,6 @@
+ /* Get CHAR_BIT.  */
+ #include <limits.h>
+ 
+-#if !(INT_MIN == INT32_MIN && INT_MAX == INT32_MAX)
+-# error "This file assumes that 'int' has exactly 32 bits. Please report your platform and compiler to <bug-gnulib@gnu.org>."
+-#endif
+-
+ /* The definition of _GL_ARG_NONNULL is copied here.  */
+ 
+ /* The definition of _GL_WARN_ON_USE is copied here.  */

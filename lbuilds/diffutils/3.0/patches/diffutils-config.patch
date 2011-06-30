@@ -1,0 +1,11 @@
+--- src.orig/diffutils-3.0/build-aux/config.sub	2010-04-15 15:40:36.000000000 +0200
++++ src/diffutils-3.0/build-aux/config.sub	2011-06-29 19:38:10.147375879 +0200
+@@ -1315,7 +1315,7 @@
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* | -tyndur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
