@@ -1,0 +1,30 @@
+--- src.orig/grep-2.9/lib/inttypes.in.h	2011-04-28 10:20:53.000000000 +0200
++++ src/grep-2.9/lib/inttypes.in.h	2011-07-02 09:39:11.025794074 +0200
+@@ -46,9 +46,9 @@
+ /* Get CHAR_BIT.  */
+ #include <limits.h>
+ 
+-#if !(INT_MIN == INT32_MIN && INT_MAX == INT32_MAX)
+-# error "This file assumes that 'int' has exactly 32 bits. Please report your platform and compiler to <bug-gnulib@gnu.org>."
+-#endif
++//#if !(INT_MIN == INT32_MIN && INT_MAX == INT32_MAX)
++//# error "This file assumes that 'int' has exactly 32 bits. Please report your platform and compiler to <bug-gnulib@gnu.org>."
++//#endif
+ 
+ /* The definition of _GL_ARG_NONNULL is copied here.  */
+ 
+--- src.orig/grep-2.9/lib/error.c	2011-06-17 11:31:43.000000000 +0200
++++ src/grep-2.9/lib/error.c	2011-07-02 09:39:54.925794053 +0200
+@@ -128,9 +128,9 @@
+      fcntl, and the gnulib replacement fcntl does not support F_GETFL.  */
+   return (HANDLE) _get_osfhandle (fd) != INVALID_HANDLE_VALUE;
+ # else
+-#  ifndef F_GETFL
+-#   error Please port fcntl to your platform
+-#  endif
++//#  ifndef F_GETFL
++//#   error Please port fcntl to your platform
++//#  endif
+   return 0 <= fcntl (fd, F_GETFL);
+ # endif
+ }

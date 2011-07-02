@@ -1,0 +1,12 @@
+--- src.orig/grep-2.9/build-aux/config.sub	2011-06-18 08:43:14.000000000 +0200
++++ src/grep-2.9/build-aux/config.sub	2011-07-02 09:35:30.855794175 +0200
+@@ -1342,7 +1342,8 @@
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* \
++              | -tyndur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
