@@ -1,0 +1,36 @@
+include lutils
+include toolchain
+
+DESCRIPTION="Tools necessary to build programs"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/mpfr"
+SRC_URI="http://www.mpfr.org/mpfr-current/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+
+BUILD_DEPEND="=gmp-5.0.2"
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_compile() {
+	cd ${MY_S}
+	./configure \
+		--build=`tc-build` \
+		--host=`tc-host` \
+		--prefix=${R} \
+		--with-gmp=${S}/../env/ \
+		|| die "configure failed"
+
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake DESTDIR="${D}" install || die "make install failed"
+
+	cd "${D}/${R}"
+
+	# Sonst funktioniert mpc nicht.
+	rm lib/*.la
+}

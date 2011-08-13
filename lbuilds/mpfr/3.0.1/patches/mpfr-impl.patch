@@ -1,0 +1,12 @@
+diff -urN src.orig/mpfr-3.0.1//mpfr-impl.h src/mpfr-3.0.1//mpfr-impl.h
+--- src.orig/mpfr-3.0.1//mpfr-impl.h	2011-04-04 12:19:18.000000000 +0200
++++ src/mpfr-3.0.1//mpfr-impl.h	2011-08-13 23:16:56.000000000 +0200
+@@ -633,7 +633,7 @@
+ # define mp_exp_unsigned_t mpfr_uexp_t
+ #endif
+ 
+-#if MPFR_EXP_MIN >= LONG_MIN && MPFR_EXP_MAX <= LONG_MAX
++#if 1 >= 0 && 0 <= 1
+ typedef long int mpfr_eexp_t;
+ # define mpfr_get_exp_t(x,r) mpfr_get_si((x),(r))
+ # define mpfr_set_exp_t(x,e,r) mpfr_set_si((x),(e),(r))

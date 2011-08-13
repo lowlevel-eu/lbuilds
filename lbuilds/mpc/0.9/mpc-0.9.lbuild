@@ -1,0 +1,37 @@
+include lutils
+include toolchain
+
+DESCRIPTION="Tools necessary to build programs"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/mpc"
+SRC_URI="http://www.multiprecision.org/mpc/download/${P}.tar.gz"
+
+LICENSE="GPL-2"
+
+BUILD_DEPEND="=gmp-5.0.2 =mpfr-3.0.1"
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_compile() {
+	cd ${MY_S}
+	./configure \
+		--build=`tc-build` \
+		--host=`tc-host` \
+		--prefix=${R} \
+		--with-gmp=${S}/../env \
+		--with-mpfr=${S}/../env \
+		|| die "configure failed"
+
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake DESTDIR="${D}" install || die "make install failed"
+
+	cd "${D}/${R}"
+
+	# Weißt auf das falsche Verzeichnis
+	rm lib/*.la
+}
