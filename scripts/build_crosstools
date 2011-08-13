@@ -44,6 +44,7 @@ mkdir -p ${TMP}/cross-binutils/build
 mkdir -p ${TMP}/cross-gcc/build
 mkdir -p ${TMP}/cross-fpc
 mkdir -p ${TMP}/cross-fasm
+mkdir -p ${TMP}/make/build
 
 #
 # User nerven
@@ -205,6 +206,28 @@ echo -e "[gcc] Abgeschlossen\n"
 fi
 
 #
+# Make 3.81 für FPC
+#
+if [ ! -f $TMP/make/build/bin/make ]; then
+
+rm -rf ${TMP}/make/make-3.81
+cd ${TMP}/make
+echo "[make] Verion 3.81"
+echo "[make] Herunterladen..."
+
+[ -f make-3.81.tar.bz2 ] || wget -q http://ftp.gnu.org/gnu/make/make-3.81.tar.bz2 || die "Fehler beim Herrunterladen."
+echo "[make] Entpacken..."
+tar -xvf make-3.81.tar.bz2
+echo "[make] Kompilieren"
+cd make-3.81
+./configure --prefix=${TMP}/make/build
+make
+echo "[make] Installieren."
+make install
+echo "[make] Fertig."
+fi
+
+#
 # FPC
 #
 if [ ! -f $PREFIX/bin/fpc ]; then
@@ -247,7 +270,7 @@ export PATH="$PATH:`pwd`"
 echo "[fpc] Kompilieren"
 #utils/fpcm/fpcmake -Tall -r >>${LOGS}/fpc.log || exit -1
 # Hindweis: Die folgende Anweisung wird nicht erfolgreich beendet werden, aber der Crosscompiler steht danach zur Verfuegung
-make all CPU_TARGET=i386 OS_TARGET=linux >>${LOGS}/fpc.log 2>>${LOGS}/fpc.log
+${TMP}/make/build/bin/make all CPU_TARGET=i386 OS_TARGET=linux >>${LOGS}/fpc.log 2>>${LOGS}/fpc.log
 test -f compiler/ppc386 || die "Fehler beim Kompilieren. \nSiehe tmp/fpc.log für Details."
 echo "[fpc] Installieren"
 #make compiler-install PREFIX=${PREFIX} CPU_TARGET=i386 OS_TARGET=lost >>${LOGS}/fpc.log || exit -1
