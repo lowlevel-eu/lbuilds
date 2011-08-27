@@ -249,6 +249,12 @@ internal_src_install() {
         echo "lpt cfg-addbin file:/packages/${PN}/${PV}/bin/$bin $bin" >> "$PIS"
         lstatus "    addbin $bin"
     done
+    for b in ${D}/${R}/sbin/*; do
+        test -f "$b" || continue
+        bin="`basename $b`"
+        echo "lpt cfg-addbin file:/packages/${PN}/${PV}/sbin/$bin $bin" >> "$PIS"
+        lstatus "    addbin $bin"
+    done
     for l in ${D}/${R}/lib/*; do
         test -f "$l" || continue
         lib="`basename $l`"
