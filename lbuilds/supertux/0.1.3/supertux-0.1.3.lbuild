@@ -8,7 +8,7 @@ SRC_URI="http://download.berlios.de/supertux/${P}.tar.bz2"
 LICENSE="LGPL-2"
 
 RUN_DEPEND=""
-BUILD_DEPEND="=sdl-1.2.14 =sdl-image-1.2.10 =sdl-mixer-1.2.11 =zlib-1.2.3 =libstdc++-4.2.2 =libpng-1.4.2 =libjpeg-8b"
+BUILD_DEPEND="=sdl-1.2.14 =sdl-image-1.2.10 =sdl-mixer-1.2.11 =zlib-1.2.3 =libstdc++-4.2.2 =libpng-1.4.4 =libjpeg-8b"
 
 MY_S="${S}/${P}"
 
