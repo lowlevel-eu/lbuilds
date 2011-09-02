@@ -1,0 +1,337 @@
+diff -uNr ../binutils-2.21/bfd/config.bfd ./bfd/config.bfd
+--- ../binutils-2.21/bfd/config.bfd	2007-08-28 19:19:33.000000000 +0200
++++ ./bfd/config.bfd	2008-01-21 15:22:03.000000000 +0100
+@@ -600,6 +600,11 @@
+     targ_selvecs="i386linux_vec i386pei_vec"
+     targ64_selvecs="bfd_elf64_x86_64_vec bfd_elf64_l1om_vec"
+     ;;
++  i[3-7]86-*-tyndur)
++    targ_defvec=bfd_elf32_i386_vec
++    targ_selvecs=bfd_elf32_i386_vec
++    targ64_selvecs=bfd_elf64_x86_64_vec
++    ;;
+ #ifdef BFD64
+   x86_64-*-darwin*)
+     targ_defvec=mach_o_x86_64_vec
+diff -uNr ../binutils-2.21/config.sub ./config.sub
+--- ../binutils-2.21/config.sub	2007-08-06 22:00:30.000000000 +0200
++++ ./config.sub	2008-01-21 15:22:03.000000000 +0100
+@@ -127,8 +127,8 @@
+   nto-qnx* | linux-gnu* | linux-android* | linux-dietlibc | linux-newlib* | \
+   linux-uclibc* | uclinux-uclibc* | uclinux-gnu* | kfreebsd*-gnu* | \
+   knetbsd*-gnu* | netbsd*-gnu* | \
+-  kopensolaris*-gnu* | \
+-  storm-chaos* | os2-emx* | rtmk-nova*)
++  tyndur | kopensolaris*-gnu* | \
++  netbsd*-gnu* |  storm-chaos* | os2-emx* | rtmk-nova*)
+     os=-$maybe_os
+     basic_machine=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\1/'`
+     ;;
+@@ -1347,6 +1347,9 @@
+ 	-linux*)
+ 		os=`echo $os | sed -e 's|linux|linux-gnu|'`
+ 		;;
++    -tyndur*)
++        os=-tyndur
++        ;;
+ 	-sunos5*)
+ 		os=`echo $os | sed -e 's|sunos5|solaris2|'`
+ 		;;
+diff -uNr ../binutils-2.21/gas/configure.tgt ./gas/configure.tgt
+--- ../binutils-2.21/gas/configure.tgt	2007-08-28 19:19:36.000000000 +0200
++++ ./gas/configure.tgt	2008-01-21 15:22:03.000000000 +0100
+@@ -199,6 +199,7 @@
+   i386-*-linux*oldld)			fmt=aout em=linux ;;
+   i386-*-linux*coff*)			fmt=coff em=linux ;;
+   i386-*-linux-*)			fmt=elf em=linux ;;
++  i386-*-tyndur)              fmt=elf ;;
+   i386-*-lynxos*)			fmt=elf em=lynx ;;
+   i386-*-sysv[45]*)			fmt=elf ;;
+   i386-*-solaris*)			fmt=elf em=solaris ;;
+diff -uNr ../binutils-2.21/ld/configure.tgt ./ld/configure.tgt
+--- ../binutils-2.21/ld/configure.tgt	2007-08-28 19:19:42.000000000 +0200
++++ ./ld/configure.tgt	2008-02-08 17:55:11.000000000 +0100
+@@ -207,6 +207,10 @@
+ 			targ_extra_libpath=elf_i386
+ 			tdir_i386linux=`echo ${targ_alias}aout | sed -e 's/x86_64/i386/'`
+ 			tdir_elf_i386=`echo ${targ_alias} | sed -e 's/x86_64/i386/'` ;;
++i[3-7]86-*-tyndur*)
++                        targ_emul=elf_i386_tyndur
++                        targ_extra_emuls="elf_i386"
++                        ;;
+ i[3-7]86-*-sysv[45]*)	targ_emul=elf_i386 ;;
+ i[3-7]86-*-solaris2*)	targ_emul=elf_i386_sol2
+                         targ_extra_emuls="elf_i386_ldso elf_i386 elf_x86_64_sol2 elf_x86_64 elf_l1om"
+@@ -718,6 +718,10 @@
+ *-*-linux*)
+   ;;
+ 
++*-*-tyndur*)
++  NATIVE_LIB_DIRS='/system/links/lib'
++  ;;
++   
+ *-*-netbsd*)
+   ;;
+ 
+diff -uNr ../binutils-2.21/ld/emulparams/elf_i386_tyndur.sh ./ld/emulparams/elf_i386_tyndur.sh
+--- ../binutils-2.21/ld/emulparams/elf_i386_tyndur.sh	1970-01-01 01:00:00.000000000 +0100
++++ ./ld/emulparams/elf_i386_tyndur.sh	2008-02-04 08:05:57.000000000 +0100
+@@ -0,0 +1,17 @@
++SCRIPT_NAME=elf
++OUTPUT_FORMAT="elf32-i386"
++TEXT_START_ADDR=0x40000000
++MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
++COMMONPAGESIZE="CONSTANT (COMMONPAGESIZE)"
++ARCH=i386
++MACHINE=
++NOP=0x90909090
++TEMPLATE_NAME=elf32
++GENERATE_SHLIB_SCRIPT=yes
++GENERATE_PIE_SCRIPT=yes
++NO_SMALL_DATA=yes
++SEPARATE_GOTPLT=12
++CTOR_START="__ctor_start__ = .;"
++CTOR_END="__ctor_end__ = .;"
++DTOR_START="__dtor_start__ = .;"
++DTOR_END="__dtor_end__ = .;"
+diff -uNr ../binutils-2.21/ld/Makefile.am ./ld/Makefile.am
+--- ../binutils-2.21/ld/Makefile.am	2007-08-06 22:00:17.000000000 +0200
++++ ./ld/Makefile.am	2008-02-04 08:17:43.000000000 +0100
+@@ -1196,6 +1196,9 @@
+ eelf_i386_ldso.c: $(srcdir)/emulparams/elf_i386_ldso.sh \
+   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+ 	${GENSCRIPTS} elf_i386_ldso "$(tdir_elf_i386_ldso)"
++eelf_i386_tyndur.c: $(srcdir)/emulparams/elf_i386_tyndur.sh \
++  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++	${GENSCRIPTS} elf_i386_tyndur "$(tdir_elf_i386_tyndur)"
+ eelf_i386_sol2.c: $(srcdir)/emulparams/elf_i386_sol2.sh \
+   $(srcdir)/emulparams/solaris2.sh \
+   $(srcdir)/emultempl/solaris2.em \
+diff -uNr ../binutils-2.21/ld/Makefile.in ./ld/Makefile.in
+--- ../binutils-2.21/ld/Makefile.in	2007-08-06 22:29:54.000000000 +0200
++++ ./ld/Makefile.in	2008-02-04 08:17:13.000000000 +0100
+@@ -538,6 +538,7 @@
+ 	eelf_i386_chaos.c \
+ 	eelf_i386_fbsd.c \
+ 	eelf_i386_ldso.c \
++	eelf_i386_tyndur.o \
+ 	eelf_i386_sol2.c \
+ 	eelf_i386_vxworks.c \
+ 	eelf_s390.c \
+@@ -2619,6 +2619,10 @@
+ eelf_i386_ldso.c: $(srcdir)/emulparams/elf_i386_ldso.sh \
+   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+ 	${GENSCRIPTS} elf_i386_ldso "$(tdir_elf_i386_ldso)"
++eelf_i386_tyndur.c: $(srcdir)/emulparams/elf_i386_tyndur.sh \
++  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++	${GENSCRIPTS} elf_i386_tyndur "$(tdir_elf_i386_tyndur)"
++
+ eelf_i386_sol2.c: $(srcdir)/emulparams/elf_i386_sol2.sh \
+   $(srcdir)/emulparams/solaris2.sh \
+   $(srcdir)/emultempl/solaris2.em \
+diff -uNr ../binutils-2.21/libiberty/configure ./libiberty/configure
+--- ../binutils-2.21/libiberty/configure	2007-08-06 21:59:45.000000000 +0200
++++ ./libiberty/configure	2008-01-21 15:22:03.000000000 +0100
+@@ -6579,6 +6579,7 @@
+      *-*-mingw* | *-*-winnt*)	pexecute=pex-win32  ;;
+      *-*-msdosdjgpp*)		pexecute=pex-djgpp  ;;
+      *-*-msdos*)		pexecute=pex-msdos  ;;
++     *-*-tyndur*)     pexecute=./pex-tyndur.o   ;;
+      *)				pexecute=pex-unix   ;;
+ esac
+ 
+diff -uNr ../binutils-2.21/libiberty/configure.ac ./libiberty/configure.ac
+--- ../binutils-2.21/libiberty/configure.ac	2007-08-06 21:59:45.000000000 +0200
++++ ./libiberty/configure.ac	2008-01-21 15:22:03.000000000 +0100
+@@ -689,6 +689,7 @@
+      *-*-mingw* | *-*-winnt*)	pexecute=pex-win32  ;;
+      *-*-msdosdjgpp*)		pexecute=pex-djgpp  ;;
+      *-*-msdos*)		pexecute=pex-msdos  ;;
++     *-*-tyndur*)         pexecute=./pex-tyndur.o   ;;
+      *)				pexecute=pex-unix   ;;
+ esac
+ AC_SUBST(pexecute)
+diff -uNr ../binutils-2.21/libiberty/Makefile.in ./libiberty/Makefile.in
+--- ../binutils-2.21/libiberty/Makefile.in	2007-08-06 21:59:45.000000000 +0200
++++ ./libiberty/Makefile.in	2008-01-21 15:22:03.000000000 +0100
+@@ -141,7 +141,7 @@
+ 	objalloc.c obstack.c						\
+ 	partition.c pexecute.c						\
+ 	 pex-common.c pex-djgpp.c pex-msdos.c pex-one.c			\
+-	 pex-unix.c pex-win32.c						\
++	 pex-unix.c pex-win32.c	pex-tyndur.c					\
+          physmem.c putenv.c						\
+ 	random.c regex.c rename.c rindex.c				\
+ 	safe-ctype.c setenv.c setproctitle.c sha1.c sigsetmask.c        \
+@@ -866,6 +866,13 @@
+ 	else true; fi
+ 	$(COMPILE.c) $(srcdir)/pex-djgpp.c $(OUTPUT_OPTION)
+ 
++./pex-tyndur.o: $(srcdir)/pex-tyndur.c stamp-h $(INCDIR)/ansidecl.h \
++	$(INCDIR)/libiberty.h $(srcdir)/pex-common.h
++	if [ x"$(PICFLAG)" != x ]; then \
++	  $(COMPILE.c) $(PICFLAG) $(srcdir)/pex-tyndur.c -o pic/$@; \
++	else true; fi
++	$(COMPILE.c) $(srcdir)/pex-tyndur.c $(OUTPUT_OPTION)
++
+ ./pex-msdos.$(objext): $(srcdir)/pex-msdos.c config.h $(INCDIR)/ansidecl.h \
+ 	$(INCDIR)/libiberty.h $(srcdir)/pex-common.h \
+ 	$(INCDIR)/safe-ctype.h
+diff -uNr ../binutils-2.21/libiberty/pex-tyndur.c ./libiberty/pex-tyndur.c
+--- ../binutils-2.21/libiberty/pex-tyndur.c	1970-01-01 01:00:00.000000000 +0100
++++ ./libiberty/pex-tyndur.c	2008-01-21 15:22:03.000000000 +0100
+@@ -0,0 +1,154 @@
++/* Utilities to execute a program in a subprocess (possibly linked by pipes
++   with other subprocesses), and wait for it.  Generic Unix version
++   (also used for UWIN and VMS).
++   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005
++   Free Software Foundation, Inc.
++
++This file is part of the libiberty library.
++Libiberty is free software; you can redistribute it and/or
++modify it under the terms of the GNU Library General Public
++License as published by the Free Software Foundation; either
++version 2 of the License, or (at your option) any later version.
++
++Libiberty is distributed in the hope that it will be useful,
++but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++Library General Public License for more details.
++
++You should have received a copy of the GNU Library General Public
++License along with libiberty; see the file COPYING.LIB.  If not,
++write to the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
++Boston, MA 02110-1301, USA.  */
++
++#include "config.h"
++#include "libiberty.h"
++#include "pex-common.h"
++
++#include <stdio.h>
++#include <signal.h>
++#include <errno.h>
++#include <init.h>
++#ifdef NEED_DECLARATION_ERRNO
++extern int errno;
++#endif
++#ifdef HAVE_STDLIB_H
++#include <stdlib.h>
++#endif
++#ifdef HAVE_STRING_H
++#include <string.h>
++#endif
++#ifdef HAVE_UNISTD_H
++#include <unistd.h>
++#endif
++
++#include <sys/types.h>
++
++#ifdef HAVE_FCNTL_H
++#include <fcntl.h>
++#endif
++#ifdef HAVE_SYS_WAIT_H
++#include <sys/wait.h>
++#endif
++#ifdef HAVE_GETRUSAGE
++#include <sys/time.h>
++#include <sys/resource.h>
++#endif
++#ifdef HAVE_SYS_STAT_H
++#include <sys/stat.h>
++#endif
++
++
++static int pex_tyndur_open_read (struct pex_obj *, const char *, int);
++static int pex_tyndur_open_write (struct pex_obj *, const char *, int);
++static long pex_tyndur_exec_child (struct pex_obj *, int, const char *,
++				 char * const *, char * const *,
++				 int, int, int, int,
++				 const char **, int *);
++static int pex_tyndur_close (struct pex_obj *, int);
++static int pex_tyndur_wait (struct pex_obj *, long, int *, struct pex_time *,
++			  int, const char **, int *);
++static int pex_tyndur_pipe (struct pex_obj *, int *, int);
++static FILE *pex_tyndur_fdopenr (struct pex_obj *, int, int);
++static FILE *pex_tyndur_fdopenw (struct pex_obj *, int, int);
++static void pex_tyndur_cleanup (struct pex_obj *);
++
++/* The list of functions we pass to the common routines.  */
++
++const struct pex_funcs funcs =
++{
++  pex_tyndur_open_read,
++  pex_tyndur_open_write,
++  pex_tyndur_exec_child,
++  pex_tyndur_close,
++  pex_tyndur_wait,
++  NULL,
++  NULL,
++  NULL,
++  NULL
++};
++
++/* Return a newly initialized pex_obj structure.  */
++
++struct pex_obj *
++pex_init (int flags, const char *pname, const char *tempbase)
++{
++  return pex_init_common (flags, pname, tempbase, &funcs);
++}
++
++/* Open a file for reading.  */
++
++static int
++pex_tyndur_open_read (struct pex_obj *obj ATTRIBUTE_UNUSED, const char *name,
++		    int binary ATTRIBUTE_UNUSED)
++{
++  return open (name, O_RDONLY);
++}
++
++/* Open a file for writing.  */
++
++static int
++pex_tyndur_open_write (struct pex_obj *obj ATTRIBUTE_UNUSED, const char *name,
++		     int binary ATTRIBUTE_UNUSED)
++{
++  /* Note that we can't use O_EXCL here because gcc may have already
++     created the temporary file via make_temp_file.  */
++  return open (name, O_WRONLY | O_CREAT | O_TRUNC);
++}
++
++/* Close a file.  */
++
++static int
++pex_tyndur_close (struct pex_obj *obj ATTRIBUTE_UNUSED, int fd)
++{
++  return close (fd);
++}
++
++/* Execute a child.  */
++static long
++pex_tyndur_exec_child (struct pex_obj *obj, int flags, const char *executable,
++		     char * const * argv, char * const * env,
++                     int in, int out, int errdes,
++		     int toclose, const char **errmsg, int *err)
++{
++  // FIXME
++  return -1;
++}
++
++/* Wait for a child process to complete.  */
++
++static int
++pex_tyndur_wait (struct pex_obj *obj, long pid, int *status,
++	       struct pex_time *time, int done, const char **errmsg,
++	       int *err)
++{
++  /* If we are cleaning up when the caller didn't retrieve process
++     status for some reason, encourage the process to go away.  */
++  if (done)
++    kill (pid, SIGTERM);
++  
++  // FIXME
++  while (get_parent_pid(pid) != 0);
++  *status = 0;
++  return 0;
++}
++
