@@ -1,0 +1,56 @@
+include toolchain
+include lutils
+
+DESCRIPTION="OpenGL-Software-Rasterizer"
+HOMEPAGE="http://gitorious.org/asx-games/soft-and-slow"
+SRC_URI="http://gitorious.org/asx-games/soft-and-slow/archive-tarball/master"
+
+LICENSE="GPLv2"
+
+BUILD_DEPEND="lsdl-1.2.14"
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack()
+{
+    if [ "$(head -c 11 ${DISTDIR}/master)" == "The archive" ]; then
+        rm ${DISTDIR}/master
+        die "Try loading the archive again."
+    fi
+    pwd
+    cp ${DISTDIR}/master ${DISTDIR}/master.tar.gz || die "package not found"
+    lunpack master.tar.gz || die "could not unpack"
+    mv asx-games-soft-and-slow ${MY_S}
+}
+
+src_compile()
+{
+    cd ${MY_S}/lib
+
+    export CC="`tc-cc` -I`tc-incdir`"
+    export LINK="`tc-cc` -L`tc-libdir`"
+    export AR="`tc-host`-ar rcs"
+
+    lmake || die "make failed"
+
+    cd ../test/gears
+
+    lmake || die "make failed"
+
+    cd ../../..
+}
+
+src_install()
+{
+    cd ${MY_S}
+
+    install -d install -d ${D}/${R}/lib
+    install -d install -d ${D}/${R}/include
+    install -d install -d ${D}/${R}/bin
+    cp lib/libSASGL.a ${D}/${R}/lib || die "installing S&S lib failed"
+    cp -r include/soft-and-slow ${D}/${R}/include || die "installing S&S includes failed"
+    cp test/gears/gears ${D}/${R}/bin || die "installing gears failed"
+
+    cd ${S}
+}

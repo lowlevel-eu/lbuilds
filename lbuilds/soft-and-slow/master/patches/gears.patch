@@ -1,0 +1,123 @@
+Index: src/soft-and-slow-master/test/gears/Makefile
+===================================================================
+--- src.orig/soft-and-slow-master/test/gears/Makefile	2011-09-13 22:35:20.000000000 +0200
++++ src/soft-and-slow-master/test/gears/Makefile	2011-09-13 22:41:11.000000000 +0200
+@@ -1,8 +1,6 @@
+-CC = gcc
+-LINK = gcc
+ RM = rm -f
+-CFLAGS = -rdynamic -O3 -Wall -Wextra -std=c1x -I../../include
+-LDFLAGS = -rdynamic -L../../lib -lSDL -lSASGL -lm -lrt
++CFLAGS = -O3 -Wall -Wextra -std=gnu99 -I../../include -m32
++LDFLAGS = -L../../lib -lSDL -lSASGL -lm -m32
+ 
+ .PHONY: all clean
+ 
+Index: src/soft-and-slow-master/test/gears/gears.c
+===================================================================
+--- src.orig/soft-and-slow-master/test/gears/gears.c	2011-09-13 20:41:00.000000000 +0200
++++ src/soft-and-slow-master/test/gears/gears.c	2011-09-13 23:56:08.000000000 +0200
+@@ -3,7 +3,6 @@
+  *
+  * Command line options:
+  *    -info      print GL implementation information
+- *    -exit      automatically exit after 30 seconds
+  *
+  *
+  * Brian Paul
+@@ -17,6 +16,8 @@
+ #include <soft-and-slow/gl.h>
+ #include <soft-and-slow/glu.h>
+ 
++#include <video/video.h>
++
+ #include <math.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+@@ -32,17 +33,16 @@
+ 
+ static GLint T0 = 0;
+ static GLint Frames = 0;
+-static GLint autoexit = 0;
+ static GLfloat viewDist = 40.0;
+ 
+ 
+ static long elapsed_time(void)
+ {
+-    static struct timeval tv;
++    static long time = 0;
+ 
+-    gettimeofday(&tv, NULL);
++    time += 29;
+ 
+-    return tv.tv_sec * 1000 + tv.tv_usec / 1000;
++    return time;
+ }
+ 
+ 
+@@ -221,23 +221,6 @@
+     glPopMatrix();
+ 
+   glPopMatrix();
+-
+-  Frames++;
+-
+-  {
+-    GLint t = elapsed_time();
+-    if (t - T0 >= 5000) {
+-      GLfloat seconds = (t - T0) / 1000.0;
+-      GLfloat fps = Frames / seconds;
+-      printf("%d frames in %6.3f seconds = %6.3f FPS\n", Frames, seconds, fps);
+-      fflush(stdout);
+-      T0 = t;
+-      Frames = 0;
+-      if ((t >= 999.0 * autoexit) && (autoexit)) {
+-        exit(0);
+-      }
+-    }
+-  }
+ }
+ 
+ 
+@@ -282,7 +265,7 @@
+   glMatrixMode(GL_PROJECTION);
+ 
+   glLoadIdentity();
+-  gluPerspective(23.f, 1.f, 1.f, 1000.f);
++  gluPerspective(23.f, 640.f / 480.f, 1.f, 1000.f);
+ 
+   glMatrixMode(GL_MODELVIEW);
+ 
+@@ -304,10 +287,10 @@
+ {
+   SDL_Init(SDL_INIT_VIDEO);
+ 
+-  SDL_Surface *sfc = SDL_SetVideoMode(300, 300, 32, SDL_SWSURFACE);
++  SDL_Surface *sfc = SDL_SetVideoMode(640, 480, 32, SDL_SWSURFACE);
+   SDL_WM_SetCaption("Gears", "Gears");
+ 
+-  sas_context_t ctx = create_bound_sas_context(300, 300, sfc->pixels);
++  sas_context_t ctx = create_bound_sas_context(640, 480, sfc->pixels);
+   set_current_sas_context(ctx);
+ 
+   init(argc, argv);
+@@ -337,7 +320,7 @@
+     SDL_Event evt;
+ 
+     while (SDL_PollEvent(&evt))
+-      if (evt.type == SDL_QUIT)
++      if ((evt.type == SDL_QUIT) || (evt.type == SDL_KEYDOWN))
+         quit = 1;
+   }
+ 
+@@ -346,5 +329,10 @@
+ 
+   destroy_sas_context(ctx);
+ 
++  SDL_Quit();
++
++  libvideo_destroy_bitmap(libvideo_get_frontbuffer_bitmap(0));
++  libvideo_restore_text_mode();
++
+   return 0;
+ }

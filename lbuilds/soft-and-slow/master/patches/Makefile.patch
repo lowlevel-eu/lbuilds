@@ -1,0 +1,29 @@
+Index: src/soft-and-slow-master/lib/Makefile
+===================================================================
+--- src.orig/soft-and-slow-master/lib/Makefile	2011-09-13 20:41:00.000000000 +0200
++++ src/soft-and-slow-master/lib/Makefile	2011-09-13 22:35:42.000000000 +0200
+@@ -1,12 +1,10 @@
+ THREADING = 0
+-ASSEMBLY = 1
+-SHADERS = 1
++ASSEMBLY = 0
++SHADERS = 0
+ 
+-AR = ar rcs
+-CC = gcc
+ OCP = objcopy
+ 
+-CFLAGS = -O3 -march=native -g2 -std=c1x -Wall -Wextra -pedantic -I../include -D_GNU_SOURCE
++CFLAGS = -O3 -march=native -g2 -std=gnu99 -Wall -Wextra -pedantic -I../include -D_GNU_SOURCE -m32
+ ifeq ($(THREADING), 1)
+ CFLAGS += -DTHREADING -pthread
+ endif
+@@ -17,7 +15,7 @@
+ CFLAGS += -DUSE_SHADERS
+ endif
+ 
+-OCP_FROM_TEXT = -I binary -O elf64-x86-64 -B i386
++OCP_FROM_TEXT = -I binary -O elf32-i386 -B i386
+ RM = rm -f
+ ASM = fasm
+ 
