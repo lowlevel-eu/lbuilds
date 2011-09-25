@@ -36,5 +36,5 @@ src_install() {
 	cd ${MY_S}
 
 	mkdir -p "${D}${R}/bin"
-	cp gui "${D}${R}/bin/gui"
+	cp src/gui "${D}${R}/bin/gui"
 }
