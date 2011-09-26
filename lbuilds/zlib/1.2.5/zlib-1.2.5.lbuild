@@ -1,0 +1,35 @@
+include toolchain
+include lutils
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/zlib"
+SRC_URI="http://zlib.net/${P}.tar.bz2"
+PS="lib"
+
+LICENSE="zlib"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+lunpack ${P}.tar.bz2
+}
+
+src_compile() {
+	cd ${MY_S}
+
+	CC=`tc-cc` prefix="${D}${R}" ./configure \
+		|| die "configure failed"
+
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+
+	lmake install prefix="${D}${R}" || die "make install failed"
+	rm -rf ${D}${R}/share
+}
