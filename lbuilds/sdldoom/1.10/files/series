@@ -1,0 +1,6 @@
+network.patch
+strupr.patch
+sprintf.patch
+bool.patch
+wadpath.patch
+error.patch

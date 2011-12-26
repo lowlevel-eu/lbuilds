@@ -1,0 +1,18 @@
+Index: sdldoom-1.10/i_system.c
+===================================================================
+--- sdldoom-1.10.orig/i_system.c
++++ sdldoom-1.10/i_system.c
+@@ -169,6 +169,13 @@ void I_Error (char *error, ...)
+ 
+     fflush( stderr );
+ 
++#ifdef TYNDUR
++    stdout = NULL;
++    printf("Error: ");
++    vprintf(error, argptr);
++    printf("\n");
++#endif
++
+     // Shutdown. Here might be other errors.
+     if (demorecording)
+ 	G_CheckDemoStatus();

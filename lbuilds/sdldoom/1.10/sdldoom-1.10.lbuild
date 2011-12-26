@@ -1,0 +1,48 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://www.idsoftware.com/"
+SRC_URI="http://www.libsdl.org/projects/doom/src/${P}.tar.gz http://www.libsdl.org/projects/doom/data/doom1.wad.gz"
+
+LICENSE="DOOM LICENSE"
+
+RUN_DEPEND=""
+BUILD_DEPEND="=sdl-1.2.14"
+
+MY_S="${S}/${P}"
+
+src_unpack() {
+    lunpack ${P}.tar.gz
+
+    cd ${MY_S}
+
+    ln -s ${F} patches
+    [ -f ${F}/series ] && ln -s ${F}/series series
+    for i in ${F}/*.patch; do
+        [ -L series ] || echo `basename $i` >> series
+        (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
+    done
+    (which quilt > /dev/null 2>&1) && quilt push -a || die "Fehler beim Anwenden der Patches"
+}
+
+src_configure() {
+    cd ${MY_S}
+
+    CC=`tc-cc` CFLAGS="-nostdinc -I `tc-incdir` -I `tc-incdir`/SDL -L`tc-libdir`" ./configure --host=`tc-host` --prefix="${R}" || die "Fehler beim Configure"
+}
+
+src_compile() {
+    cd ${MY_S}
+
+    lmake || die "Fehler beim Bauen"
+}
+
+src_install() {
+    cd ${MY_S}
+
+    lmake DESTDIR="${D}" install || die "Fehler beim Installieren"
+
+    mkdir -p "${D}/${R}/share/doom"
+    gzip -dc "${DISTDIR}/doom1.wad.gz" > "${D}/${R}/share/doom/doom1.wad"
+}

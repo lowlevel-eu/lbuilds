@@ -1,0 +1,19 @@
+Index: sdldoom-1.10/doomtype.h
+===================================================================
+--- sdldoom-1.10.orig/doomtype.h	1999-12-21 06:16:09.000000000 +0100
++++ sdldoom-1.10/doomtype.h	2011-12-26 01:20:58.000000000 +0100
+@@ -31,13 +31,12 @@
+ #ifdef __cplusplus
+ typedef bool boolean;
+ #else
+-#ifdef __BEOS__	/* boolean is a builtin type for MWCC */
++#include <stdbool.h>
+ #define boolean D_BOOL
+ #undef false
+ #define false D_false
+ #undef true
+ #define true D_true
+-#endif
+ typedef enum {false, true} boolean;
+ #endif
+ typedef unsigned char byte;

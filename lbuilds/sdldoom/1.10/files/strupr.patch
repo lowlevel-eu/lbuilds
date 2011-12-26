@@ -1,0 +1,17 @@
+Index: sdldoom-1.10/w_wad.c
+===================================================================
+--- sdldoom-1.10.orig/w_wad.c	1999-12-21 06:16:22.000000000 +0100
++++ sdldoom-1.10/w_wad.c	2011-12-25 23:18:12.000000000 +0100
+@@ -57,12 +57,10 @@
+ void**			lumpcache;
+ 
+ 
+-#if defined(linux) || defined(__BEOS__) || defined(__SVR4)
+ void strupr (char* s)
+ {
+     while (*s) { *s = toupper(*s); s++; }
+ }
+-#endif
+ 
+ int filelength (FILE *handle) 
+ { 

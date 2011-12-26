@@ -1,0 +1,18 @@
+Index: sdldoom-1.10/d_main.c
+===================================================================
+--- sdldoom-1.10.orig/d_main.c
++++ sdldoom-1.10/d_main.c
+@@ -575,9 +575,13 @@ void IdentifyVersion (void)
+ 
+     char *home;
+     char *doomwaddir;
++#if 0
+     doomwaddir = getenv("DOOMWADDIR");
+     if (!doomwaddir)
+ 	doomwaddir = ".";
++#else
++    doomwaddir = "file:/packages/sdldoom/1.10/share/doom";
++#endif
+ 
+     // Commercial.
+     doom2wad = malloc(strlen(doomwaddir)+1+9+1);

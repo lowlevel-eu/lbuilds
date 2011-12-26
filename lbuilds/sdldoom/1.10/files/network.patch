@@ -1,0 +1,42 @@
+Index: sdldoom-1.10/i_net.c
+===================================================================
+--- sdldoom-1.10.orig/i_net.c	1999-12-21 06:16:16.000000000 +0100
++++ sdldoom-1.10/i_net.c	2011-12-26 00:36:33.000000000 +0100
+@@ -51,7 +51,11 @@
+ #define Win32_Winsock
+ #include <windows.h>
+ #else
+-#error You should hack this file for your BSD sockets layer
++#include <sys/socket.h>
++#include <netinet/in.h>
++#include <arpa/inet.h>
++#include <unistd.h>
++#include <netdb.h>
+ #endif
+ #endif
+ #endif
+@@ -107,6 +111,10 @@
+ // NETWORKING
+ //
+ 
++#ifndef IPPORT_USERRESERVED
++#define IPPORT_USERRESERVED 1024
++#endif
++
+ int	DOOMPORT =	(IPPORT_USERRESERVED +0x1d );
+ 
+ int			sendsocket;
+@@ -261,10 +269,13 @@
+     struct hostent*	hostentry;	// host information entry
+     int			v;
+ 
++    /*
+     // get local address
+     v = gethostname (hostname, sizeof(hostname));
+     if (v == -1)
+ 	I_Error ("GetLocalAddress : gethostname: errno %d",errno);
++        */
++    strcpy(hostname, "localhost");
+ 	
+     hostentry = gethostbyname (hostname);
+     if (!hostentry)
