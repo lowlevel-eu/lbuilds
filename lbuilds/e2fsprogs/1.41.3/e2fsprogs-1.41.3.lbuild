@@ -24,7 +24,7 @@ src_unpack() {
     (which quilt > /dev/null 2>&1) && quilt push -a
 }
 
-src_compile() {
+src_configure() {
 	cd ${MY_S}
 
 	./configure \
@@ -42,6 +42,10 @@ src_compile() {
         --disable-nls \
         --disable-rpath \
 		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
 
 	lmake || die "make failed"
 	cd ..
