@@ -1,0 +1,44 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/OpenTTD"
+SRC_URI="http://binaries.openttd.org/releases/1.1.4/${P}-source.tar.gz"
+
+LICENSE="LGPL-2"
+
+RUN_DEPEND=""
+BUILD_DEPEND="=sdl-1.2.14 =sdl-image-1.2.10 =sdl-mixer-1.2.11 =zlib-1.2.5 =libstdc++-4.2.2 =libpng-1.4.4 =freetype-2.4.1"
+
+MY_S="${S}/${P}"
+
+src_configure() {
+	cd ${MY_S}
+
+	./configure \
+		CC=`tc-cc` \
+		CXXFLAGS="-nostdinc -I `tc-incdir` -I `tc-incdir`/c++/4.2.2 -I `tc-incdir`/c++/4.2.2/i386-pc-tyndur -I `tc-incdir`/SDL -L`tc-libdir` -I `tc-incdir`/freetype2" \
+        LIBS="-lpng -lz" \
+		--host=`tc-host` \
+		--prefix-dir="${R}" \
+        --without-lzma \
+        --without-liblzo2 \
+        --without-fontconfig \
+        --disable-network \
+        --without-threads \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+
+	lmake -j1 INSTALL_DIR="${D}" install || die "make install failed"
+    mv "${D}/${R}/games/openttd" "${D}/${R}/bin/openttd"
+}

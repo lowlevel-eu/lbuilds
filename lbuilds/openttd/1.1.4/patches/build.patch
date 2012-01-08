@@ -1,0 +1,136 @@
+Index: src/openttd-1.1.4/src/stdafx.h
+===================================================================
+--- src.orig/openttd-1.1.4/src/stdafx.h
++++ src/openttd-1.1.4/src/stdafx.h
+@@ -292,7 +292,7 @@
+ typedef unsigned char byte;
+ 
+ /* This is already defined in unix, but not in QNX Neutrino (6.x)*/
+-#if (!defined(UNIX) && !defined(__CYGWIN__) && !defined(__BEOS__) && !defined(__HAIKU__) && !defined(__MORPHOS__)) || defined(__QNXNTO__)
++#if defined(TYNDUR) || (!defined(UNIX) && !defined(__CYGWIN__) && !defined(__BEOS__) && !defined(__HAIKU__) && !defined(__MORPHOS__)) || defined(__QNXNTO__)
+ 	typedef unsigned int uint;
+ #endif
+ 
+Index: src/openttd-1.1.4/src/3rdparty/squirrel/squirrel/sqcompiler.cpp
+===================================================================
+--- src.orig/openttd-1.1.4/src/3rdparty/squirrel/squirrel/sqcompiler.cpp
++++ src/openttd-1.1.4/src/3rdparty/squirrel/squirrel/sqcompiler.cpp
+@@ -1360,6 +1360,6 @@ private:
+ 
+ bool Compile(SQVM *vm,SQLEXREADFUNC rg, SQUserPointer up, const SQChar *sourcename, SQObjectPtr &out, bool raiseerror, bool lineinfo)
+ {
+-	SQCompiler p(vm, rg, up, sourcename, raiseerror, lineinfo);
+-	return p.Compile(out);
++	SQCompiler pc(vm, rg, up, sourcename, raiseerror, lineinfo);
++	return pc.Compile(out);
+ }
+Index: src/openttd-1.1.4/src/music/extmidi.cpp
+===================================================================
+--- src.orig/openttd-1.1.4/src/music/extmidi.cpp
++++ src/openttd-1.1.4/src/music/extmidi.cpp
+@@ -82,6 +82,7 @@ void MusicDriver_ExtMidi::SetVolume(byte
+ 
+ void MusicDriver_ExtMidi::DoPlay()
+ {
++#ifndef TYNDUR
+ 	this->pid = fork();
+ 	switch (this->pid) {
+ 		case 0: {
+@@ -105,6 +106,7 @@ void MusicDriver_ExtMidi::DoPlay()
+ 			this->song[0] = '\0';
+ 			break;
+ 	}
++#endif
+ }
+ 
+ void MusicDriver_ExtMidi::DoStop()
+Index: src/openttd-1.1.4/src/os/unix/crashlog_unix.cpp
+===================================================================
+--- src.orig/openttd-1.1.4/src/os/unix/crashlog_unix.cpp
++++ src/openttd-1.1.4/src/os/unix/crashlog_unix.cpp
+@@ -64,7 +64,7 @@ class CrashLogUnix : public CrashLog {
+ 				"Crash reason:\n"
+ 				" Signal:  %s (%d)\n"
+ 				" Message: %s\n\n",
+-				strsignal(this->signum),
++				/*strsignal(this->signum)*/ "???",
+ 				this->signum,
+ 				message == NULL ? "<none>" : message
+ 		);
+Index: src/openttd-1.1.4/src/os/unix/unix.cpp
+===================================================================
+--- src.orig/openttd-1.1.4/src/os/unix/unix.cpp
++++ src/openttd-1.1.4/src/os/unix/unix.cpp
+@@ -28,6 +28,10 @@
+ 	#define HAS_STATVFS
+ #endif
+ 
++#ifdef TYNDUR
++#include <sleep.h>
++#endif
++
+ #ifdef HAS_STATVFS
+ #include <sys/statvfs.h>
+ #endif
+@@ -249,6 +253,8 @@ int CDECL main(int argc, char *argv[])
+ {
+ 	int ret;
+ 
++stdout = NULL;
++
+ #ifdef WITH_COCOA
+ 	cocoaSetupAutoreleasePool();
+ 	/* This is passed if we are launched by double-clicking */
+@@ -314,6 +320,8 @@ void CSleep(int milliseconds)
+ 		}
+ 		WaitIO((struct IORequest *)TimerRequest);
+ 	}
++    #elif defined(TYNDUR)
++		msleep(milliseconds);
+ 	#else
+ 		usleep(milliseconds * 1000);
+ 	#endif
+Index: src/openttd-1.1.4/src/train_cmd.cpp
+===================================================================
+--- src.orig/openttd-1.1.4/src/train_cmd.cpp
++++ src/openttd-1.1.4/src/train_cmd.cpp
+@@ -2287,6 +2287,7 @@ static bool TryReserveSafeTrack(const Tr
+ class VehicleOrderSaver
+ {
+ private:
++#undef v
+ 	Train          *v;
+ 	Order          old_order;
+ 	TileIndex      old_dest_tile;
+Index: src/openttd-1.1.4/config.lib
+===================================================================
+--- src.orig/openttd-1.1.4/config.lib
++++ src/openttd-1.1.4/config.lib
+@@ -1432,7 +1432,7 @@ make_cflags_and_ldflags() {
+ 	fi
+ 
+ 	if [ "$os" != "CYGWIN" ] && [ "$os" != "HAIKU" ] && [ "$os" != "FREEBSD" ] && [ "$os" != "OPENBSD" ] && [ "$os" != "MINGW" ] && [ "$os" != "MORPHOS" ] && [ "$os" != "OSX" ] && [ "$os" != "DOS" ] && [ "$os" != "WINCE" ] && [ "$os" != "PSP" ] && [ "$os" != "OS2" ]; then
+-		LIBS="$LIBS -lpthread"
++		true #LIBS="$LIBS -lpthread"
+ 	fi
+ 
+ 	if [ "$os" != "CYGWIN" ] && [ "$os" != "HAIKU" ] && [ "$os" != "MINGW" ] && [ "$os" != "DOS" ] && [ "$os" != "WINCE" ]; then
+Index: src/openttd-1.1.4/Makefile.src.in
+===================================================================
+--- src.orig/openttd-1.1.4/Makefile.src.in
++++ src/openttd-1.1.4/Makefile.src.in
+@@ -255,14 +255,7 @@ endif
+ 
+ $(TTD): $(OBJS) $(CONFIG_CACHE_LINKER)
+ 	$(E) '$(STAGE) Linking $@'
+-ifeq ($(OS), PSP)
+-	# Because of a bug in the PSP GCC tools, linking via CXX results
+-	#  in total chaos and more problems then you can handle. So we need
+-	#  CC to link OpenTTD for PSP
+ 	$(Q)+$(CC_HOST) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
+-else
+-	$(Q)+$(CXX_HOST) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
+-endif
+ ifdef STRIP
+ 	$(Q)$(STRIP) $@
+ endif

@@ -1,0 +1,195 @@
+Index: src/openttd-1.1.4/src/openttd.cpp
+===================================================================
+--- src.orig/openttd-1.1.4/src/openttd.cpp
++++ src/openttd-1.1.4/src/openttd.cpp
+@@ -353,8 +353,11 @@ static void LoadIntroGame()
+ 	SetupColoursAndInitialWindow();
+ 
+ 	/* Load the default opening screen savegame */
++    printf("SaveOrLoad\n");
+ 	if (SaveOrLoad("opntitle.dat", SL_LOAD, DATA_DIR) != SL_OK) {
++        printf("GenerateWorld\n");
+ 		GenerateWorld(GWM_EMPTY, 64, 64); // if failed loading, make empty world.
++        printf("WaitTillGeneratedWorld\n");
+ 		WaitTillGeneratedWorld();
+ 		SetLocalCompany(COMPANY_SPECTATOR);
+ 	} else {
+@@ -364,11 +367,13 @@ static void LoadIntroGame()
+ 	_pause_mode = PM_UNPAUSED;
+ 	_cursor.fix_at = false;
+ 
++    printf("Check\n");
+ 	CheckForMissingSprites();
+ 	CheckForMissingGlyphsInLoadedLanguagePack();
+ 
+ 	/* Play main theme */
+ 	if (_music_driver->IsSongPlaying()) ResetMusic();
++    printf("Intro loaded\n");
+ }
+ 
+ void MakeNewgameSettingsLive()
+@@ -554,8 +559,11 @@ int ttd_main(int argc, char *argv[])
+ #endif
+ 
+ 	DeterminePaths(argv[0]);
++    printf("BaseGraphics::FindSets\n");
+ 	BaseGraphics::FindSets();
++    printf("BaseSounds::FindSets\n");
+ 	BaseSounds::FindSets();
++    printf("BaseMusic::FindSets\n");
+ 	BaseMusic::FindSets();
+ 
+ #if defined(ENABLE_NETWORK) && defined(UNIX) && !defined(__MORPHOS__)
+@@ -563,6 +571,7 @@ int ttd_main(int argc, char *argv[])
+ 	if (_dedicated_forks) DedicatedFork();
+ #endif
+ 
++    printf("AI, Config\n");
+ 	TarScanner::DoScan();
+ 	AI::Initialize();
+ 	LoadFromConfig();
+@@ -595,15 +604,18 @@ int ttd_main(int argc, char *argv[])
+ #endif /* ENABLE_NETWORK */
+ 
+ 	/* enumerate language files */
++    printf("Language\n");
+ 	InitializeLanguagePacks();
+ 
+ 	/* initialize screenshot formats */
+ 	InitializeScreenshotFormats();
+ 
+ 	/* Initialize FreeType */
++    printf("FreeType\n");
+ 	InitFreeType();
+ 
+ 	/* This must be done early, since functions use the SetWindowDirty* calls */
++    printf("Window System\n");
+ 	InitWindowSystem();
+ 
+ 	/* Look for the sounds before the graphics. Otherwise none would be set and
+@@ -634,6 +646,7 @@ int ttd_main(int argc, char *argv[])
+ 	free(music_set);
+ 
+ 	/* Initialize game palette */
++    printf("GfxInit\n");
+ 	GfxInitPalettes();
+ 
+ 	DEBUG(misc, 1, "Loading blitter...");
+@@ -645,6 +658,7 @@ int ttd_main(int argc, char *argv[])
+ 	}
+ 	free(blitter);
+ 
++    printf("Drivers\n");
+ 	DEBUG(driver, 1, "Loading drivers...");
+ 
+ 	if (sounddriver == NULL && _ini_sounddriver != NULL) sounddriver = strdup(_ini_sounddriver);
+@@ -697,6 +711,7 @@ int ttd_main(int argc, char *argv[])
+ 	}
+ #endif /* ENABLE_NETWORK */
+ 
++    printf("GRFFiles\n");
+ 	ScanNewGRFFiles();
+ 
+ 	ResetGRFConfig(false);
+@@ -705,12 +720,14 @@ int ttd_main(int argc, char *argv[])
+ 	if (_switch_mode != SM_NONE) MakeNewgameSettingsLive();
+ 
+ 	/* initialize the ingame console */
++    printf("Console\n");
+ 	IConsoleInit();
+ 	_cursor.in_window = true;
+ 	InitializeGUI();
+ 	IConsoleCmdExec("exec scripts/autoexec.scr 0");
+ 
+ 	/* Take our initial lock on whatever we might want to do! */
++    printf("GenerateWorld\n");
+ 	_genworld_paint_mutex->BeginCritical();
+ 	_genworld_mapgen_mutex->BeginCritical();
+ 
+@@ -746,7 +763,9 @@ int ttd_main(int argc, char *argv[])
+ 	}
+ #endif /* ENABLE_NETWORK */
+ 
++    printf("Mainloop\n");
+ 	_video_driver->MainLoop();
++    printf("Mainloop done\n");
+ 
+ 	WaitTillSaved();
+ 
+@@ -758,6 +777,7 @@ int ttd_main(int argc, char *argv[])
+ 	}
+ 
+ 	/* Reset windowing system, stop drivers, free used memory, ... */
++    printf("Shutdown\n");
+ 	ShutdownGame();
+ 
+ 	free(const_cast<char *>(BaseGraphics::ini_set));
+@@ -931,6 +951,7 @@ void SwitchToMode(SwitchMode new_mode)
+ 	/* Make sure all AI controllers are gone at quiting game */
+ 	if (new_mode != SM_SAVE) AI::KillAll();
+ 
++    printf("switch: new_mode = %d\n", new_mode);
+ 	switch (new_mode) {
+ 		case SM_EDITOR: // Switch to scenario editor
+ 			MakeNewEditorWorld();
+@@ -1003,7 +1024,9 @@ void SwitchToMode(SwitchMode new_mode)
+ 		}
+ 
+ 		case SM_MENU: // Switch to game intro menu
++            printf("LoadIntroGame\n");
+ 			LoadIntroGame();
++            printf("Sounds\n");
+ 			if (BaseSounds::ini_set == NULL && BaseSounds::GetUsedSet()->fallback) {
+ 				ShowErrorMessage(STR_WARNING_FALLBACK_SOUNDSET, INVALID_STRING_ID, WL_CRITICAL);
+ 				BaseSounds::ini_set = strdup(BaseSounds::GetUsedSet()->name);
+@@ -1162,6 +1185,7 @@ void StateGameLoop()
+ {
+ 	/* dont execute the state loop during pause */
+ 	if (_pause_mode != PM_UNPAUSED) {
++    printf("StateGameLoop: paused\n");
+ 		UpdateLandscapingLimits();
+ 		CallWindowTickEvent();
+ 		return;
+@@ -1188,6 +1212,7 @@ void StateGameLoop()
+ 		}
+ 
+ 		CheckCaches();
++    printf("StateGameLoop: update\n");
+ 
+ 		/* All these actions has to be done from OWNER_NONE
+ 		 *  for multiplayer compatibility */
+@@ -1244,6 +1269,7 @@ static void DoAutosave()
+ 
+ void GameLoop()
+ {
++    printf("AsyncSaveFinish\n");
+ 	ProcessAsyncSaveFinish();
+ 
+ 	/* autosave game? */
+@@ -1255,15 +1281,18 @@ void GameLoop()
+ 
+ 	/* switch game mode? */
+ 	if (_switch_mode != SM_NONE) {
++        printf("SwitchMode\n");
+ 		SwitchToMode(_switch_mode);
+ 		_switch_mode = SM_NONE;
+ 	}
+ 
++    printf("InteractiveRandom\n");
+ 	IncreaseSpriteLRU();
+ 	InteractiveRandom();
+ 
+ 	extern int _caret_timer;
+ 	_caret_timer += 3;
++    printf("CursorTick\n");
+ 	CursorTick();
+ 
+ #ifdef ENABLE_NETWORK
+@@ -1290,6 +1319,7 @@ void GameLoop()
+ 		NetworkChatMessageLoop();
+ 	}
+ #else
++    printf("StateGameLoop\n");
+ 	StateGameLoop();
+ #endif /* ENABLE_NETWORK */
+ 
