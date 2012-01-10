@@ -415,7 +415,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 ===================================================================
 --- /dev/null
 +++ src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
-@@ -0,0 +1,277 @@
+@@ -0,0 +1,339 @@
 +/*
 +    SDL - Simple DirectMedia Layer
 +    Copyright (C) 1997-2009 Sam Lantinga
@@ -556,11 +556,17 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +};
 +
 +
++static SDL_Rect** modelists[4] = {};
++
 +int TYNDUR_VideoInit(_THIS, SDL_PixelFormat *vformat)
 +{
-+	/*
-+	fprintf(stderr, "WARNING: You are using the SDL dummy video driver!\n");
-+	*/
++    int modelist_len = 0;
++    uint32_t* modes;
++    int bpp;
++    int num;
++    int i, j;
++
++    stdout = NULL;
 +
 +	/* Determine the screen depth (use default 8-bit depth) */
 +	/* we change this during the SDL_SetVideoMode implementation... */
@@ -570,27 +576,67 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +    this->hidden->buffer = NULL;
 +    this->hidden->mousedata = fopen("kbc:/mouse/data", "r");
 +
++    /* libvideo-Kontext initialisieren */
++    this->hidden->context = libvideo_create_driver_context("vesa");
++    libvideo_use_driver_context(this->hidden->context);
++    libvideo_get_command_buffer(1024);
++    libvideo_change_device(0);
++
++    /* Verfügbare Videomodi auslesen */
++    modes = libvideo_get_modes(0, 0);
++    modelist_len = modes[0];
++
++    for (bpp = 8; bpp < 32; bpp += 8) {
++
++        /* Modi mit gewünschter Farbtiefe zählen */
++        num = 0;
++        for (i = 0; i < modelist_len; i++) {
++            if (modes[4 * i + 3] == bpp) {
++                num++;
++            }
++        }
++
++        /* Und jetzt das Array anlegen, jeweils NULL-terminiert */
++        SDL_Rect* p = calloc(num, sizeof(SDL_Rect));
++        SDL_Rect** modelist = calloc(num + 1, sizeof(SDL_Rect));
++
++        for (i = 0, j = 0; i < modelist_len; i++) {
++            if (modes[4 * i + 3] != bpp) {
++                continue;
++            }
++
++            p[j] = (SDL_Rect) {
++                .w = modes[4 * i + 1],
++                .h = modes[4 * i + 2],
++            };
++            modelist[j] = &p[j];
++            printf("%d bpp: Modus %d*%d eingetragen\n", bpp, p[j].w, p[j].h);
++            j++;
++        }
++
++        modelists[(bpp / 8) - 1] = modelist;
++    }
++
 +	/* We're done! */
 +	return(0);
 +}
-+
-+static SDL_Rect* modelist[] = {
-+    & (SDL_Rect) { .w =  640, .h = 480 },
-+    & (SDL_Rect) { .w =  800, .h = 600 },
-+    & (SDL_Rect) { .w = 1024, .h = 768 },
-+    NULL,
-+};
 +
 +static SDL_Rect* modelist_empty[] = { NULL };
 +
 +SDL_Rect **TYNDUR_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 +{
-+    /* TODO Check real mode list */
-+    if (format->BitsPerPixel != 24 && format->BitsPerPixel != 32) {
++    int i;
++
++    if (format->BitsPerPixel % 8) {
 +        return modelist_empty;
 +    }
 +
-+    return modelist;
++    i = format->BitsPerPixel / 8;
++    if (i < 1 || i > 4) {
++        return modelist_empty;
++    }
++
++    return modelists[i - 1];
 +}
 +
 +SDL_Surface *TYNDUR_SetVideoMode(_THIS, SDL_Surface *current,
@@ -598,18 +644,19 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +{
 +	if ( this->hidden->buffer ) {
 +		SDL_free( this->hidden->buffer );
++        this->hidden->buffer = NULL;
++        this->screen->pixels = NULL;
 +	}
 +
 +    /* Modus wechseln */
-+    this->hidden->context = libvideo_create_driver_context("vesa");
-+    libvideo_use_driver_context(this->hidden->context);
-+    libvideo_get_command_buffer(1024);
-+
 +    libvideo_change_device(0);
 +    libvideo_change_color(0, 255, 0, 0);
 +    libvideo_do_command_buffer();
++    printf("libvideo_change_display_resolution: %d*%d, %d bpp\n",
++        width, height, bpp);
 +    if (libvideo_change_display_resolution(0, width, height, bpp) != 0) {
-+        SDL_SetError("Modus setzen fehlgeschlagen");
++        SDL_SetError("Modus setzen fehlgeschlagen (%d*%d, %d bpp)",
++            width, height, bpp);
 +        return NULL;
 +    }
 +
@@ -620,17 +667,24 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +
 +	/* Allocate the new pixel format for the screen */
 +	if ( ! SDL_ReallocFormat(current, bpp, 0xff0000, 0xff00, 0xff, 0) ) {
-+		SDL_free(this->hidden->buffer);
-+		this->hidden->buffer = NULL;
 +		SDL_SetError("Couldn't allocate new pixel format for requested mode");
-+		return(NULL);
++		goto fail;
 +	}
 +
 +    /* Framebuffer aufsetzen */
 +    size_t buffer_size;
++    size_t expected_buffer_size = width * height * (bpp / 8);
++
 +    this->hidden->buffer = libvideo_open_upload_buffer(front, &buffer_size);
-+    if (buffer_size != width * height * (bpp / 8)) {
-+        SDL_SetError("Unerwartete Puffergroesse: %x\n", buffer_size);
++    if (buffer_size != expected_buffer_size) {
++        SDL_SetError("Unerwartete Puffergroesse: %x "
++            "(Erwartet %x fuer %d*%d bei %dbpp)\n",
++            buffer_size, expected_buffer_size,
++            width, height, bpp);
++
++        if (buffer_size < expected_buffer_size) {
++            goto fail;
++        }
 +    }
 +
 +	SDL_memset(this->hidden->buffer, 0, width * height * (bpp / 8));
@@ -639,13 +693,18 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +	current->flags = flags & SDL_FULLSCREEN;
 +	this->hidden->w = current->w = width;
 +	this->hidden->h = current->h = height;
-+	current->pitch = current->w * (bpp / 8);
++	current->pitch = buffer_size / height;
 +	current->pixels = this->hidden->buffer;
 +    current->format->BitsPerPixel = bpp;
 +    current->format->BytesPerPixel = bpp / 8;
 +
 +	/* We're done */
 +	return(current);
++
++fail:
++    libvideo_destroy_bitmap(front);
++    libvideo_restore_text_mode();
++    return NULL;
 +}
 +
 +/* We don't actually allow hardware surfaces other than the main one */
@@ -690,8 +749,11 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +	if (this->screen->pixels != NULL)
 +	{
 +		SDL_free(this->screen->pixels);
++        this->hidden->buffer = NULL;
 +		this->screen->pixels = NULL;
 +	}
++
++    libvideo_restore_text_mode();
 +}
 Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.h
 ===================================================================
