@@ -13,16 +13,17 @@ RUN_DEPEND=""
 
 MY_S="${S}/${P}"
 
-src_unpack() {
-lunpack ${P}.tar.bz2
+src_configure() {
+	cd ${MY_S}
+
+    # Das libz-configure hat zwar ein --static, aber das ist kaputt.
+    # Stattdessen löschen wir alles dynamische hinterher wieder manuell.
+	CC=`tc-cc` prefix="${D}${R}" ./configure \
+		|| die "configure failed"
 }
 
 src_compile() {
 	cd ${MY_S}
-
-	CC=`tc-cc` prefix="${D}${R}" ./configure \
-		|| die "configure failed"
-
 	lmake || die "make failed"
 	cd ..
 }
@@ -32,4 +33,5 @@ src_install() {
 
 	lmake install prefix="${D}${R}" || die "make install failed"
 	rm -rf ${D}${R}/share
+	rm -rf ${D}${R}/lib/*.so*
 }
