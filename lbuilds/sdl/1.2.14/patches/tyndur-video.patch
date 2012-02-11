@@ -68,7 +68,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 ===================================================================
 --- /dev/null
 +++ src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
-@@ -0,0 +1,235 @@
+@@ -0,0 +1,242 @@
 +/*
 +    SDL - Simple DirectMedia Layer
 +    Copyright (C) 1997-2009 Sam Lantinga
@@ -193,6 +193,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 +    struct kbd_data* kbd_data = data;
 +    SDL_keysym* keysym;
 +    int keycode;
++    char buf[16];
 +
 +    /* Pruefen, ob die Nachricht in Ordnung ist */
 +    if ((pid != kbc_pid) || (data_size != 2)) {
@@ -216,6 +217,12 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 +    }
 +
 +    v();
++
++    /*
++     * Und stdin auslesen, sonst landen alle Tastendrücke nach dem Beenden in
++     * der Shell. Benutzt werden sie nicht.
++     */
++    fread(buf, 1, sizeof(buf), stdin);
 +}
 +
 +int TYNDUR_init_events(void)
