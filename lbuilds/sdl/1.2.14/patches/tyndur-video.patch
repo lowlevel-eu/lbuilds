@@ -415,7 +415,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 ===================================================================
 --- /dev/null
 +++ src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
-@@ -0,0 +1,339 @@
+@@ -0,0 +1,347 @@
 +/*
 +    SDL - Simple DirectMedia Layer
 +    Copyright (C) 1997-2009 Sam Lantinga
@@ -643,7 +643,9 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +				int width, int height, int bpp, Uint32 flags)
 +{
 +	if ( this->hidden->buffer ) {
-+		SDL_free( this->hidden->buffer );
++        if (this->hidden->buffer) {
++            libvideo_close_upload_buffer(this->hidden->front);
++        }
 +        this->hidden->buffer = NULL;
 +        this->screen->pixels = NULL;
 +	}
@@ -702,6 +704,9 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +	return(current);
 +
 +fail:
++    if (this->hidden->buffer) {
++        libvideo_close_upload_buffer(front);
++    }
 +    libvideo_destroy_bitmap(front);
 +    libvideo_restore_text_mode();
 +    return NULL;
@@ -748,9 +753,12 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +{
 +	if (this->screen->pixels != NULL)
 +	{
-+		SDL_free(this->screen->pixels);
++        if (this->hidden->buffer) {
++            libvideo_close_upload_buffer(this->hidden->front);
++        }
 +        this->hidden->buffer = NULL;
 +		this->screen->pixels = NULL;
++        libvideo_destroy_bitmap(this->hidden->front);
 +	}
 +
 +    libvideo_restore_text_mode();
