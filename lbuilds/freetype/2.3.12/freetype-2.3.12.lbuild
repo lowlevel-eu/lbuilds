@@ -23,7 +23,7 @@ src_unpack() {
         [ -L series ] || echo `basename $i` >> series
         (which quilt > /dev/null 2>&1) || (patch -p1 < $i) || die "Fehler beim Anwenden von $i"
     done
-    (which quilt > /dev/null 2>&1) && quilt push -a || die "Fehler beim Anwenden der Patches"
+    (which quilt > /dev/null 2>&1) && (quilt push -a || die "Fehler beim Anwenden der Patches")
 }
 
 src_compile() {
