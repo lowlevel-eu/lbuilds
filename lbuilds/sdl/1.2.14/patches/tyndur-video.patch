@@ -422,7 +422,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 ===================================================================
 --- /dev/null
 +++ src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
-@@ -0,0 +1,347 @@
+@@ -0,0 +1,353 @@
 +/*
 +    SDL - Simple DirectMedia Layer
 +    Copyright (C) 1997-2009 Sam Lantinga
@@ -590,15 +590,14 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +    libvideo_change_device(0);
 +
 +    /* Verfügbare Videomodi auslesen */
-+    modes = libvideo_get_modes(0, 0);
-+    modelist_len = modes[0];
++    modelist_len = libvideo_get_modes(0, 0, &modes);
 +
 +    for (bpp = 8; bpp < 32; bpp += 8) {
 +
 +        /* Modi mit gewünschter Farbtiefe zählen */
 +        num = 0;
 +        for (i = 0; i < modelist_len; i++) {
-+            if (modes[4 * i + 3] == bpp) {
++            if (modes[4 * i + 2] == bpp) {
 +                num++;
 +            }
 +        }
@@ -608,13 +607,13 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +        SDL_Rect** modelist = calloc(num + 1, sizeof(SDL_Rect));
 +
 +        for (i = 0, j = 0; i < modelist_len; i++) {
-+            if (modes[4 * i + 3] != bpp) {
++            if (modes[4 * i + 2] != bpp) {
 +                continue;
 +            }
 +
 +            p[j] = (SDL_Rect) {
-+                .w = modes[4 * i + 1],
-+                .h = modes[4 * i + 2],
++                .w = modes[4 * i],
++                .h = modes[4 * i + 1],
 +            };
 +            modelist[j] = &p[j];
 +            printf("%d bpp: Modus %d*%d eingetragen\n", bpp, p[j].w, p[j].h);
@@ -623,6 +622,8 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +
 +        modelists[(bpp / 8) - 1] = modelist;
 +    }
++
++    free(modes);
 +
 +	/* We're done! */
 +	return(0);
@@ -653,8 +654,13 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +        if (this->hidden->buffer) {
 +            libvideo_close_upload_buffer(this->hidden->front);
 +        }
++        if (this->hidden->front) {
++            libvideo_destroy_bitmap(this->hidden->front);
++        }
 +        this->hidden->buffer = NULL;
-+        this->screen->pixels = NULL;
++        if (this->screen) {
++            this->screen->pixels = NULL;
++        }
 +	}
 +
 +    /* Modus wechseln */
