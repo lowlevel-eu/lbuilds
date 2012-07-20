@@ -1,0 +1,55 @@
+include lutils
+include toolchain
+
+DESCRIPTION="C++-Standardbibliothek"
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/GCC"
+SRC_URI="http://ftp.gnu.org/gnu/gcc/gcc-${PV}/gcc-core-${PV}.tar.bz2 http://ftp.gnu.org/gnu/gcc/gcc-${PV}/gcc-g++-${PV}.tar.bz2"
+
+LICENSE="GPL-2"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/gcc-${PV}/libstdc++-v3/"
+MY_BUILD="${S}/gcc-${PV}/build/"
+
+src_configure() {
+    mkdir -p ${MY_BUILD}
+	cd ${MY_BUILD}
+
+    (cd ${MY_S}/ && autoreconf && autoconf) || die "autoconf failed"
+
+false &&	( ../configure \
+		--build=`tc-build` \
+		--host=`tc-host` \
+		--target=`tc-host` \
+		--prefix=${R} \
+		--disable-nls \
+		--enable-languages=c \
+		--disable-shared \
+		--without-headers \
+		--disable-libssp \
+		|| die "configure failed")
+
+	../libstdc++-v3/configure \
+		CC=`tc-cc` \
+		CFLAGS="-I `tc-incdir` -L `tc-libdir`" \
+		CXX=`tc-cxx` \
+		CXXFLAGS="-I `tc-incdir` -L `tc-libdir`" \
+		--build=`tc-build` \
+		--host=`tc-host` \
+		--target=`tc-host` \
+		--prefix=${R} \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_BUILD}
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_BUILD}
+	lmake DESTDIR="${D}" install || die "make install failed"
+}

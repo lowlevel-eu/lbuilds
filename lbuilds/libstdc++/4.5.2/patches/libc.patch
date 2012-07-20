@@ -1,0 +1,409 @@
+Index: src/gcc-4.5.2/config/override.m4
+===================================================================
+--- src.orig/gcc-4.5.2/config/override.m4
++++ src/gcc-4.5.2/config/override.m4
+@@ -55,7 +55,7 @@ AC_DEFUN([_GCC_AUTOCONF_VERSION_CHECK],
+   [m4_fatal([Please use exactly Autoconf ]_GCC_AUTOCONF_VERSION[ instead of ]m4_defn([m4_PACKAGE_VERSION])[.])])
+ ])
+ m4_define([AC_INIT], m4_defn([AC_INIT])[
+-_GCC_AUTOCONF_VERSION_CHECK
++dnl _GCC_AUTOCONF_VERSION_CHECK
+ ])
+ 
+ 
+Index: src/gcc-4.5.2/libstdc++-v3/configure.ac
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/configure.ac
++++ src/gcc-4.5.2/libstdc++-v3/configure.ac
+@@ -1,6 +1,6 @@
+ # Process this file with autoreconf to produce a configure script.
+ 
+-AC_PREREQ(2.64)
++#AC_PREREQ(2.64)
+ AC_INIT(package-unused, version-unused,, libstdc++)
+ AC_CONFIG_SRCDIR(src/ios.cc)
+ AC_CONFIG_HEADER(config.h)
+Index: src/gcc-4.5.2/libstdc++-v3/include/c_std/cmath
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/include/c_std/cmath
++++ src/gcc-4.5.2/libstdc++-v3/include/c_std/cmath
+@@ -270,6 +270,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   fmod(long double __x, long double __y)
+   { return __builtin_fmodl(__x, __y); }
+ 
++#if 0
+   using ::frexp;
+ 
+   inline float
+@@ -303,6 +304,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+     { return __builtin_ldexp(__x, __exp); }
+ 
+   using ::log;
++#endif
+ 
+   inline float
+   log(float __x)
+Index: src/gcc-4.5.2/libstdc++-v3/include/c_std/cstdio
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/include/c_std/cstdio
++++ src/gcc-4.5.2/libstdc++-v3/include/c_std/cstdio
+@@ -93,7 +93,7 @@
+ _GLIBCXX_BEGIN_NAMESPACE(std)
+ 
+   using ::FILE;
+-  using ::fpos_t;
++//  using ::fpos_t;
+ 
+   using ::clearerr;
+   using ::fclose;
+@@ -101,7 +101,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::ferror;
+   using ::fflush;
+   using ::fgetc;
+-  using ::fgetpos;
++//  using ::fgetpos;
+   using ::fgets;
+   using ::fopen;
+   using ::fprintf;
+@@ -111,7 +111,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::freopen;
+   using ::fscanf;
+   using ::fseek;
+-  using ::fsetpos;
++//  using ::fsetpos;
+   using ::ftell;
+   using ::fwrite;
+   using ::getc;
+@@ -131,7 +131,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::sprintf;
+   using ::sscanf;
+   using ::tmpfile;
+-  using ::tmpnam;
++//  using ::tmpnam;
+   using ::ungetc;
+   using ::vfprintf;
+   using ::vprintf;
+Index: src/gcc-4.5.2/libstdc++-v3/include/c_std/cstdlib
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/include/c_std/cstdlib
++++ src/gcc-4.5.2/libstdc++-v3/include/c_std/cstdlib
+@@ -98,8 +98,8 @@ _GLIBCXX_END_NAMESPACE
+ 
+ _GLIBCXX_BEGIN_NAMESPACE(std)
+ 
+-  using ::div_t;
+-  using ::ldiv_t;
++//  using ::div_t;
++//  using ::ldiv_t;
+ 
+   using ::abort;
+   using ::abs;
+@@ -109,12 +109,12 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::atol;
+   using ::bsearch;
+   using ::calloc;
+-  using ::div;
++//  using ::div;
+   using ::exit;
+   using ::free;
+   using ::getenv;
+   using ::labs;
+-  using ::ldiv;
++//  using ::ldiv;
+   using ::malloc;
+ #ifdef _GLIBCXX_HAVE_MBSTATE_T
+   using ::mblen;
+@@ -137,8 +137,8 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   inline long
+   abs(long __i) { return labs(__i); }
+ 
+-  inline ldiv_t
+-  div(long __i, long __j) { return ldiv(__i, __j); }
++//  inline ldiv_t
++//  div(long __i, long __j) { return ldiv(__i, __j); }
+ 
+ _GLIBCXX_END_NAMESPACE
+ 
+Index: src/gcc-4.5.2/libstdc++-v3/include/c_std/cstring
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/include/c_std/cstring
++++ src/gcc-4.5.2/libstdc++-v3/include/c_std/cstring
+@@ -83,7 +83,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::strcmp;
+   using ::strcoll;
+   using ::strncmp;
+-  using ::strxfrm;
++//  using ::strxfrm;
+   using ::strcspn;
+   using ::strspn;
+   using ::strtok;
+Index: src/gcc-4.5.2/libstdc++-v3/include/c_std/ctime
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/include/c_std/ctime
++++ src/gcc-4.5.2/libstdc++-v3/include/c_std/ctime
+@@ -62,8 +62,8 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::time_t;
+   using ::tm;
+ 
+-  using ::clock;
+-  using ::difftime;
++//  using ::clock;
++//  using ::difftime;
+   using ::mktime;
+   using ::time;
+   using ::asctime;
+Index: src/gcc-4.5.2/libstdc++-v3/include/c_global/cmath
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/include/c_global/cmath
++++ src/gcc-4.5.2/libstdc++-v3/include/c_global/cmath
+@@ -62,11 +62,11 @@
+ #undef fabs
+ #undef floor
+ #undef fmod
+-#undef frexp
++//#undef frexp
+ #undef ldexp
+ #undef log
+ #undef log10
+-#undef modf
++//#undef modf
+ #undef pow
+ #undef sin
+ #undef sinh
+@@ -284,6 +284,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   fmod(long double __x, long double __y)
+   { return __builtin_fmodl(__x, __y); }
+ 
++#if 0
+   using ::frexp;
+ 
+   inline float
+@@ -299,6 +300,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+ 					   double>::__type
+     frexp(_Tp __x, int* __exp)
+     { return __builtin_frexp(__x, __exp); }
++#endif
+ 
+   using ::ldexp;
+ 
+@@ -348,6 +350,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+     log10(_Tp __x)
+     { return __builtin_log10(__x); }
+ 
++#if 0
+   using ::modf;
+ 
+   inline float
+@@ -357,6 +360,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   inline long double
+   modf(long double __x, long double* __iptr)
+   { return __builtin_modfl(__x, __iptr); }
++#endif
+ 
+   using ::pow;
+ 
+Index: src/gcc-4.5.2/libstdc++-v3/include/c_global/cstdio
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/include/c_global/cstdio
++++ src/gcc-4.5.2/libstdc++-v3/include/c_global/cstdio
+@@ -93,7 +93,7 @@
+ _GLIBCXX_BEGIN_NAMESPACE(std)
+ 
+   using ::FILE;
+-  using ::fpos_t;
++//  using ::fpos_t;
+ 
+   using ::clearerr;
+   using ::fclose;
+@@ -101,7 +101,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::ferror;
+   using ::fflush;
+   using ::fgetc;
+-  using ::fgetpos;
++//  using ::fgetpos;
+   using ::fgets;
+   using ::fopen;
+   using ::fprintf;
+@@ -111,7 +111,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::freopen;
+   using ::fscanf;
+   using ::fseek;
+-  using ::fsetpos;
++//  using ::fsetpos;
+   using ::ftell;
+   using ::fwrite;
+   using ::getc;
+@@ -131,7 +131,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::sprintf;
+   using ::sscanf;
+   using ::tmpfile;
+-  using ::tmpnam;
++//  using ::tmpnam;
+   using ::ungetc;
+   using ::vfprintf;
+   using ::vprintf;
+Index: src/gcc-4.5.2/libstdc++-v3/include/c_global/cstdlib
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/include/c_global/cstdlib
++++ src/gcc-4.5.2/libstdc++-v3/include/c_global/cstdlib
+@@ -76,12 +76,12 @@ _GLIBCXX_END_NAMESPACE
+ #undef atol
+ #undef bsearch
+ #undef calloc
+-#undef div
++//#undef div
+ #undef exit
+ #undef free
+ #undef getenv
+ #undef labs
+-#undef ldiv
++//#undef ldiv
+ #undef malloc
+ #undef mblen
+ #undef mbstowcs
+@@ -99,8 +99,8 @@ _GLIBCXX_END_NAMESPACE
+ 
+ _GLIBCXX_BEGIN_NAMESPACE(std)
+ 
+-  using ::div_t;
+-  using ::ldiv_t;
++//  using ::div_t;
++//  using ::ldiv_t;
+ 
+   using ::abort;
+   using ::abs;
+@@ -110,12 +110,12 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::atol;
+   using ::bsearch;
+   using ::calloc;
+-  using ::div;
++//  using ::div;
+   using ::exit;
+   using ::free;
+   using ::getenv;
+   using ::labs;
+-  using ::ldiv;
++//  using ::ldiv;
+   using ::malloc;
+ #ifdef _GLIBCXX_HAVE_MBSTATE_T
+   using ::mblen;
+@@ -138,8 +138,8 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   inline long
+   abs(long __i) { return labs(__i); }
+ 
+-  inline ldiv_t
+-  div(long __i, long __j) { return ldiv(__i, __j); }
++//  inline ldiv_t
++//  div(long __i, long __j) { return ldiv(__i, __j); }
+ 
+ _GLIBCXX_END_NAMESPACE
+ 
+Index: src/gcc-4.5.2/libstdc++-v3/include/c_global/cstring
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/include/c_global/cstring
++++ src/gcc-4.5.2/libstdc++-v3/include/c_global/cstring
+@@ -90,7 +90,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::strncpy;
+   using ::strspn;
+   using ::strtok;
+-  using ::strxfrm;
++//  using ::strxfrm;
+   using ::strchr;
+   using ::strpbrk;
+   using ::strrchr;
+Index: src/gcc-4.5.2/libstdc++-v3/include/c_global/ctime
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/include/c_global/ctime
++++ src/gcc-4.5.2/libstdc++-v3/include/c_global/ctime
+@@ -63,8 +63,8 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+   using ::time_t;
+   using ::tm;
+ 
+-  using ::clock;
+-  using ::difftime;
++//  using ::clock;
++//  using ::difftime;
+   using ::mktime;
+   using ::time;
+   using ::asctime;
+Index: src/gcc-4.5.2/libstdc++-v3/include/bits/random.h
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/include/bits/random.h
++++ src/gcc-4.5.2/libstdc++-v3/include/bits/random.h
+@@ -3254,6 +3254,7 @@ namespace std
+ 	_GLIBCXX_DEBUG_ASSERT((_M_p >= 0.0) && (_M_p <= 1.0));
+       }
+ 
++#undef p
+       double
+       p() const
+       { return _M_p; }
+Index: src/gcc-4.5.2/libstdc++-v3/include/tr1/random.h
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/include/tr1/random.h
++++ src/gcc-4.5.2/libstdc++-v3/include/tr1/random.h
+@@ -1712,6 +1712,7 @@ namespace tr1
+     /**
+      * Gets the @p p parameter of the distribution.
+      */
++#undef p
+     double
+     p() const
+     { return _M_p; }
+Index: src/gcc-4.5.2/libstdc++-v3/src/math_stubs_float.cc
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/src/math_stubs_float.cc
++++ src/gcc-4.5.2/libstdc++-v3/src/math_stubs_float.cc
+@@ -118,7 +118,7 @@ extern "C" 
+   }
+ #endif
+ 
+-#ifndef _GLIBCXX_HAVE_FREXPF
++#if 0
+   float
+   frexpf(float x, int *exp)
+   {
+@@ -170,7 +170,7 @@ extern "C" 
+   }
+ #endif
+ 
+-#ifndef _GLIBCXX_HAVE_MODFF
++#if 0
+   float
+   modff(float x, float *iptr)
+   {
+Index: src/gcc-4.5.2/libstdc++-v3/src/math_stubs_long_double.cc
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/src/math_stubs_long_double.cc
++++ src/gcc-4.5.2/libstdc++-v3/src/math_stubs_long_double.cc
+@@ -118,7 +118,7 @@ extern "C" 
+   }
+ #endif
+ 
+-#ifndef _GLIBCXX_HAVE_FREXPL
++#if 0
+   long double
+   frexpl(long double x, int *exp)
+   {
+@@ -170,7 +170,7 @@ extern "C" 
+   }
+ #endif
+ 
+-#ifndef _GLIBCXX_HAVE_MODFL
++#if 0
+   long double
+   modfl(long double x, long double *iptr)
+   {
+Index: src/gcc-4.5.2/libstdc++-v3/config/locale/generic/collate_members.cc
+===================================================================
+--- src.orig/gcc-4.5.2/libstdc++-v3/config/locale/generic/collate_members.cc
++++ src/gcc-4.5.2/libstdc++-v3/config/locale/generic/collate_members.cc
+@@ -49,7 +49,7 @@ _GLIBCXX_BEGIN_NAMESPACE(std)
+     size_t
+     collate<char>::_M_transform(char* __to, const char* __from, 
+ 				size_t __n) const throw()
+-    { return strxfrm(__to, __from, __n); }
++    { strncpy(__to, __from, __n); return strlen(__from); }
+ 
+ #ifdef _GLIBCXX_USE_WCHAR_T
+   template<>
