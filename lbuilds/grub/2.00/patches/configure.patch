@@ -1,0 +1,26 @@
+Index: src/grub-2.00/build-aux/config.sub
+===================================================================
+--- src.orig/grub-2.00/build-aux/config.sub
++++ src/grub-2.00/build-aux/config.sub
+@@ -1368,7 +1368,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* | -tyndur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: src/grub-2.00/configure
+===================================================================
+--- src.orig/grub-2.00/configure
++++ src/grub-2.00/configure
+@@ -10141,7 +10141,7 @@ if ${ac_cv_c_restrict+:} false; then :
+ else
+   ac_cv_c_restrict=no
+    # The order here caters to the fact that C++ does not require restrict.
+-   for ac_kw in __restrict __restrict__ _Restrict restrict; do
++   for ac_kw in restrict; do
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+ typedef int * int_ptr;

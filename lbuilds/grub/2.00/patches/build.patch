@@ -1,0 +1,322 @@
+Index: src/grub-2.00/grub-core/gnulib/vasnprintf.c
+===================================================================
+--- src.orig/grub-2.00/grub-core/gnulib/vasnprintf.c
++++ src/grub-2.00/grub-core/gnulib/vasnprintf.c
+@@ -73,7 +73,14 @@
+ #include <string.h>     /* memcpy(), strlen() */
+ #include <errno.h>      /* errno */
+ #include <limits.h>     /* CHAR_BIT */
+-#include <float.h>      /* DBL_MAX_EXP, LDBL_MAX_EXP */
++//#include <float.h>      /* DBL_MAX_EXP, LDBL_MAX_EXP */
++
++/* Man könnte auch eine float.h von PDCLib ins Repo nehmen */
++#define DBL_MAX_EXP __DBL_MAX_EXP__
++#define LDBL_MAX_EXP __LDBL_MAX_EXP__
++#define DBL_DIG __DBL_DIG__
++#define LDBL_DIG __LDBL_DIG__
++
+ #if HAVE_NL_LANGINFO
+ # include <langinfo.h>
+ #endif
+Index: src/grub-2.00/util/misc.c
+===================================================================
+--- src.orig/grub-2.00/util/misc.c
++++ src/grub-2.00/util/misc.c
+@@ -150,7 +150,7 @@ grub_util_write_image_at (const void *im
+ {
+   grub_util_info ("writing 0x%" PRIxGRUB_SIZE " bytes at offset 0x%llx",
+ 		  size, (unsigned long long) offset);
+-  if (fseeko (out, offset, SEEK_SET) == -1)
++  if (fseek (out, offset, SEEK_SET) == -1)
+     grub_util_error (_("cannot seek `%s': %s"),
+ 		     name, strerror (errno));
+   if (fwrite (img, 1, size, out) != size)
+@@ -267,6 +267,17 @@ grub_millisleep (grub_uint32_t ms)
+   Sleep (ms);
+ }
+ 
++
++#elif defined(TYNDUR)
++
++#include <sleep.h>
++
++void
++grub_millisleep (grub_uint32_t ms)
++{
++    msleep(ms);
++}
++
+ #else
+ 
+ void
+Index: src/grub-2.00/util/getroot.c
+===================================================================
+--- src.orig/grub-2.00/util/getroot.c
++++ src/grub-2.00/util/getroot.c
+@@ -1094,6 +1094,11 @@ grub_guess_root_devices (const char *dir
+   /* GNU/Hurd specific function.  */
+   os_dev[0] = find_hurd_root_device (dir);
+ 
++#elif defined(TYNDUR)
++  /* FIXME Das ist aus offensichtlichen Gründen kaputt */
++  os_dev[0] = strdup("ata:/ata00_p0");
++
++
+ #else
+ 
+   /* This might be truly slow, but is there any better way?  */
+@@ -2095,7 +2100,7 @@ devmapper_out:
+     }
+   return ret;
+ #else
+-# warning "The function `convert_system_partition_to_system_disk' might not work on your OS correctly."
++//# warning "The function `convert_system_partition_to_system_disk' might not work on your OS correctly."
+   return xstrdup (os_dev);
+ #endif
+ }
+@@ -2376,7 +2381,7 @@ grub_util_biosdisk_get_grub_dev (const c
+     return make_device_name (drive, strtol (p, NULL, 10) - 1, -1);
+   }
+ #else
+-# warning "The function `grub_util_biosdisk_get_grub_dev' might not work on your OS correctly."
++//# warning "The function `grub_util_biosdisk_get_grub_dev' might not work on your OS correctly."
+   return make_device_name (drive, -1, -1);
+ #endif
+ }
+Index: src/grub-2.00/grub-core/kern/emu/hostdisk.c
+===================================================================
+--- src.orig/grub-2.00/grub-core/kern/emu/hostdisk.c
++++ src/grub-2.00/grub-core/kern/emu/hostdisk.c
+@@ -41,6 +41,11 @@
+ #include <errno.h>
+ #include <limits.h>
+ 
++static int fsync(int fd)
++{
++    return 0;
++}
++
+ #ifdef __linux__
+ # include <sys/ioctl.h>         /* ioctl */
+ # include <sys/mount.h>
+@@ -247,8 +252,6 @@ grub_util_get_fd_size (int fd, const cha
+   struct disklabel label;
+ # elif defined (__sun__)
+   struct dk_minfo minfo;
+-# else
+-  unsigned long long nr;
+ # endif
+ #endif
+   unsigned sector_size, log_sector_size;
+@@ -323,7 +326,7 @@ grub_util_get_fd_size (int fd, const cha
+ 
+   /* In GNU/Hurd, stat() will return the right size.  */
+ #elif !defined (__GNU__)
+-# warning "No special routine to get the size of a block device is implemented for your OS. This is not possibly fatal."
++//# warning "No special routine to get the size of a block device is implemented for your OS. This is not possibly fatal."
+ #endif
+ 
+   sector_size = 512;
+Index: src/grub-2.00/grub-core/kern/emu/misc.c
+===================================================================
+--- src.orig/grub-2.00/grub-core/kern/emu/misc.c
++++ src/grub-2.00/grub-core/kern/emu/misc.c
+@@ -228,11 +228,12 @@ canonicalize_file_name (const char *path
+   ret = xmalloc (PATH_MAX);
+   if (!_fullpath (ret, path, PATH_MAX))
+     return NULL;
++#elif defined(TYNDUR)
++  ret = strdup(path);
+ #elif defined (PATH_MAX)
+   ret = xmalloc (PATH_MAX);
+   if (!realpath (path, ret))
+     return NULL;
+-#else
+   ret = realpath (path, NULL);
+ #endif
+   return ret;
+Index: src/grub-2.00/grub-core/kern/emu/mm.c
+===================================================================
+--- src.orig/grub-2.00/grub-core/kern/emu/mm.c
++++ src/grub-2.00/grub-core/kern/emu/mm.c
+@@ -24,6 +24,7 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <grub/i18n.h>
++#include <grub/emu/misc.h>
+ 
+ void *
+ grub_malloc (grub_size_t size)
+@@ -64,9 +65,10 @@ grub_realloc (void *ptr, grub_size_t siz
+ }
+ 
+ void *
++__attribute__((noreturn))
+ grub_memalign (grub_size_t align, grub_size_t size)
+ {
+-  void *p;
++//  void *p;
+ 
+ #if defined(HAVE_POSIX_MEMALIGN)
+   if (align < sizeof (void *))
+@@ -78,11 +80,13 @@ grub_memalign (grub_size_t align, grub_s
+ #else
+   (void) align;
+   (void) size;
+-  grub_util_error (_("grub_memalign is not supported on your system"));
++  grub_util_error ("%s", _("grub_memalign is not supported on your system"));
+ #endif
+ 
++/*
+   if (!p)
+     grub_error (GRUB_ERR_OUT_OF_MEMORY, N_("out of memory"));
+ 
+   return p;
++*/
+ }
+Index: src/grub-2.00/util/grub-mkimage.c
+===================================================================
+--- src.orig/grub-2.00/util/grub-mkimage.c
++++ src/grub-2.00/util/grub-mkimage.c
+@@ -41,6 +41,11 @@
+ #include <assert.h>
+ #include <grub/efi/pe32.h>
+ 
++static inline int fsync(int fd)
++{
++    return 0;
++}
++
+ #define _GNU_SOURCE	1
+ #include <argp.h>
+ 
+Index: src/grub-2.00/grub-core/kern/emu/hostfs.c
+===================================================================
+--- src.orig/grub-2.00/grub-core/kern/emu/hostfs.c
++++ src/grub-2.00/grub-core/kern/emu/hostfs.c
+@@ -145,7 +145,7 @@ grub_hostfs_read (grub_file_t file, char
+   struct grub_hostfs_data *data;
+ 
+   data = file->data;
+-  if (fseeko (data->f, file->offset, SEEK_SET) != 0)
++  if (fseek (data->f, file->offset, SEEK_SET) != 0)
+     {
+       grub_error (GRUB_ERR_OUT_OF_RANGE, N_("cannot seek `%s': %s"),
+ 		  data->filename, strerror (errno));
+Index: src/grub-2.00/grub-core/lib/posix_wrap/sys/types.h
+===================================================================
+--- src.orig/grub-2.00/grub-core/lib/posix_wrap/sys/types.h
++++ src/grub-2.00/grub-core/lib/posix_wrap/sys/types.h
+@@ -21,7 +21,7 @@
+ 
+ #include <grub/misc.h>
+ 
+-#ifndef __APPLE__
++#if !defined(__APPLE__) && !defined(TYNDUR)
+ typedef grub_size_t size_t;
+ #else
+ #include <stddef.h>
+Index: src/grub-2.00/grub-core/lib/posix_wrap/wchar.h
+===================================================================
+--- src.orig/grub-2.00/grub-core/lib/posix_wrap/wchar.h
++++ src/grub-2.00/grub-core/lib/posix_wrap/wchar.h
+@@ -29,7 +29,11 @@ enum
+   };
+ 
+ /* UCS-4.  */
++#ifndef TYNDUR
+ typedef grub_int32_t wchar_t;
++#else
++#include <stddef.h>
++#endif
+ 
+ typedef struct mbstate {
+   grub_uint32_t code;
+Index: src/grub-2.00/util/grub-editenv.c
+===================================================================
+--- src.orig/grub-2.00/util/grub-editenv.c
++++ src/grub-2.00/util/grub-editenv.c
+@@ -32,6 +32,11 @@
+ 
+ #include "progname.h"
+ 
++static inline int fsync(int fd)
++{
++    return 0;
++}
++
+ #define DEFAULT_ENVBLK_SIZE	1024
+ #define DEFAULT_ENVBLK_PATH DEFAULT_DIRECTORY "/" GRUB_ENVBLK_DEFCFG
+ 
+Index: src/grub-2.00/util/grub-fstest.c
+===================================================================
+--- src.orig/grub-2.00/util/grub-fstest.c
++++ src/grub-2.00/util/grub-fstest.c
+@@ -302,7 +302,7 @@ cmd_cmp (char *src, char *dest)
+       return;
+     }
+ 
+-  if ((skip) && (fseeko (ff, skip, SEEK_SET)))
++  if ((skip) && (fseek (ff, skip, SEEK_SET)))
+     grub_util_error (_("cannot seek `%s': %s"), dest,
+ 		     strerror (errno));
+ 
+Index: src/grub-2.00/util/grub-probe.c
+===================================================================
+--- src.orig/grub-2.00/util/grub-probe.c
++++ src/grub-2.00/util/grub-probe.c
+@@ -71,6 +71,8 @@ enum {
+   PRINT_DISK
+ };
+ 
++char* stpcpy(char* dst, const char* src);
++
+ static int print = PRINT_FS;
+ static unsigned int argument_is_device = 0;
+ 
+Index: src/grub-2.00/util/grub-setup.c
+===================================================================
+--- src.orig/grub-2.00/util/grub-setup.c
++++ src/grub-2.00/util/grub-setup.c
+@@ -63,6 +63,11 @@
+ #define _GNU_SOURCE	1
+ #include <argp.h>
+ 
++static inline int fsync(int fd)
++{
++    return 0;
++}
++
+ /* On SPARC this program fills in various fields inside of the 'boot' and 'core'
+  * image files.
+  *
+@@ -244,7 +249,7 @@ setup (const char *dir,
+   first_block = (struct grub_boot_blocklist *) (core_img
+ 						+ GRUB_DISK_SECTOR_SIZE
+ 						- sizeof (*block));
+-  grub_util_info ("root is `%s', dest is `%s'", root, dest);
++  grub_util_info ("root is `%s', dest is `%s'", root ?: "(nil)", dest);
+ 
+   grub_util_info ("Opening dest");
+   dest_dev = grub_device_open (dest);
+Index: src/grub-2.00/util/ieee1275/ofpath.c
+===================================================================
+--- src.orig/grub-2.00/util/ieee1275/ofpath.c
++++ src/grub-2.00/util/ieee1275/ofpath.c
+@@ -156,6 +156,7 @@ find_obppath (const char *sysfs_path_ori
+ static char *
+ xrealpath (const char *in)
+ {
++#if 0
+   char *out;
+ #ifdef PATH_MAX
+   out = xmalloc (PATH_MAX);
+@@ -166,6 +167,8 @@ xrealpath (const char *in)
+   if (!out)
+     grub_util_error (_("failed to get canonical path of %s"), in);
+   return out;
++#endif
++  return NULL;
+ }
+ 
+ static char *
