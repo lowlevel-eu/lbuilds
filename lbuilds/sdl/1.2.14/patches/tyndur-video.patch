@@ -68,7 +68,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 ===================================================================
 --- /dev/null
 +++ src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
-@@ -0,0 +1,231 @@
+@@ -0,0 +1,249 @@
 +/*
 +    SDL - Simple DirectMedia Layer
 +    Copyright (C) 1997-2009 Sam Lantinga
@@ -176,6 +176,24 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 +        case KEYCODE_F10:           return SDLK_F10;
 +        case KEYCODE_F11:           return SDLK_F11;
 +        case KEYCODE_F12:           return SDLK_F12;
++
++        case KEYCODE_KP_0:          return SDLK_KP0;
++        case KEYCODE_KP_1:          return SDLK_KP1;
++        case KEYCODE_KP_2:          return SDLK_KP2;
++        case KEYCODE_KP_3:          return SDLK_KP3;
++        case KEYCODE_KP_4:          return SDLK_KP4;
++        case KEYCODE_KP_5:          return SDLK_KP5;
++        case KEYCODE_KP_6:          return SDLK_KP6;
++        case KEYCODE_KP_7:          return SDLK_KP7;
++        case KEYCODE_KP_8:          return SDLK_KP8;
++        case KEYCODE_KP_9:          return SDLK_KP9;
++
++        case KEYCODE_KP_PLUS:       return SDLK_KP_PLUS;
++        case KEYCODE_KP_MINUS:      return SDLK_KP_MINUS;
++        case KEYCODE_KP_MUL:        return SDLK_KP_MULTIPLY;
++        case KEYCODE_KP_DIV:        return SDLK_KP_DIVIDE;
++        case KEYCODE_KP_DECIMAL:    return SDLK_KP_PERIOD;
++        case KEYCODE_KP_ENTER:      return SDLK_KP_ENTER;
 +
 +        default:
 +            c = keymap[keycode].normal;
