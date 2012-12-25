@@ -2,7 +2,18 @@ Index: src/coreutils-7.4/lib/freadahead.c
 ===================================================================
 --- src.orig/coreutils-7.4/lib/freadahead.c
 +++ src/coreutils-7.4/lib/freadahead.c
-@@ -79,6 +79,8 @@ freadahead (FILE *fp)
+@@ -22,6 +22,10 @@
+ #include <stdlib.h>
+ #include "stdio-impl.h"
+ 
++#if defined __TYNDUR__
++#include <lostio.h>
++#endif
++
+ size_t
+ freadahead (FILE *fp)
+ {
+@@ -79,6 +83,8 @@ freadahead (FILE *fp)
  #elif defined SLOW_BUT_NO_HACKS     /* users can define this */
    abort ();
    return 0;
