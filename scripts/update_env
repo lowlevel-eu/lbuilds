@@ -4,7 +4,7 @@ ARCH=i386
 ENV=`pwd`/env
 
 show_usage() {
-	echo "Aufruf: scripts/update_env <Pfad zum LOST Source>"
+	echo "Aufruf: scripts/update_env <Pfad zum tyndur-Quellcode>"
 	exit -1
 }
 
@@ -48,4 +48,9 @@ ln -s -f ${ENV}/lib/libc.a ${ENV}/lib/libg.a
 if [ -f ${LOST_SRC}/src/modules/pas/lib/prt0.o ]; then
     cp ${LOST_SRC}/src/modules/pas/lib/prt0.o ${ENV}/pascal/units
     cp ${LOST_SRC}/src/modules/pas/lib/units/* ${ENV}/pascal/units/
+fi
+
+# Pruefen, ob libc-Stubs vorhanden sind
+if (grep '#define CONFIG_LIBC_NO_STUBS' ${ENV}/include/lost/config.h > /dev/null); then
+    echo -e "\033[01;31m*\n* CONFIG_LIBC_NO_STUBS ist gesetzt! Einige lbuilds funktionieren so nicht.\n* make menuconfig; make clean; make im tyndur-Verzeichnis, dann nochmal versuchen.\n*\033[01;37m"
 fi
