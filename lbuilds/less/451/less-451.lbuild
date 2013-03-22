@@ -1,0 +1,39 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/less"
+SRC_URI="http://www.greenwoodsoftware.com/less/less-451.tar.gz"
+
+LICENSE="GPL"
+
+RUN_DEPEND=""
+BUILD_DEPEND="=ncurses-5.6"
+
+MY_S="${S}/${P}"
+
+src_configure() {
+    cd ${MY_S}
+
+    chmod +w *
+
+    autoconf || die "autoconf ist fehlgeschlagen"
+    ./configure \
+        CC=`tc-cc` \
+        --build=`tc-build` \
+        --target=`tc-host` \
+        --host=`tc-host` \
+        --prefix="${R}" \
+        --with-secure \
+        || die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+	lmake
+}
+
+src_install() {
+    cd ${MY_S}
+    lmake DESTDIR="${D}" install || die "make install failed"
+}
