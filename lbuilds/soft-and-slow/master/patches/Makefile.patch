@@ -14,7 +14,7 @@ Index: src/soft-and-slow-master/lib/Makefile
  OCP = objcopy
  
 -CFLAGS = -O3 -march=native -g2 -std=c1x -Wall -Wextra -pedantic -I../include -D_GNU_SOURCE
-+CFLAGS = -O3 -march=native -g2 -std=gnu99 -Wall -Wextra -pedantic -I../include -D_GNU_SOURCE -m32
++CFLAGS = -O3 -march=native -g2 -std=gnu99 -Wall -Wextra -pedantic -I../include -D_GNU_SOURCE -m32 -mno-mmx -mno-sse
  ifeq ($(THREADING), 1)
  CFLAGS += -DTHREADING -pthread
  endif
