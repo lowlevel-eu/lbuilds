@@ -1,7 +1,7 @@
 Index: src/soft-and-slow-master/test/gears/Makefile
 ===================================================================
---- src.orig/soft-and-slow-master/test/gears/Makefile	2011-09-13 22:35:20.000000000 +0200
-+++ src/soft-and-slow-master/test/gears/Makefile	2011-09-13 22:41:11.000000000 +0200
+--- src.orig/soft-and-slow-master/test/gears/Makefile
++++ src/soft-and-slow-master/test/gears/Makefile
 @@ -1,8 +1,6 @@
 -CC = gcc
 -LINK = gcc
@@ -15,17 +15,9 @@ Index: src/soft-and-slow-master/test/gears/Makefile
  
 Index: src/soft-and-slow-master/test/gears/gears.c
 ===================================================================
---- src.orig/soft-and-slow-master/test/gears/gears.c	2011-09-13 20:41:00.000000000 +0200
-+++ src/soft-and-slow-master/test/gears/gears.c	2011-09-13 23:56:08.000000000 +0200
-@@ -3,7 +3,6 @@
-  *
-  * Command line options:
-  *    -info      print GL implementation information
-- *    -exit      automatically exit after 30 seconds
-  *
-  *
-  * Brian Paul
-@@ -17,6 +16,8 @@
+--- src.orig/soft-and-slow-master/test/gears/gears.c
++++ src/soft-and-slow-master/test/gears/gears.c
+@@ -17,12 +17,14 @@
  #include <soft-and-slow/gl.h>
  #include <soft-and-slow/glu.h>
  
@@ -34,52 +26,27 @@ Index: src/soft-and-slow-master/test/gears/gears.c
  #include <math.h>
  #include <stdlib.h>
  #include <stdio.h>
-@@ -32,17 +33,16 @@
+ #include <string.h>
  
- static GLint T0 = 0;
- static GLint Frames = 0;
--static GLint autoexit = 0;
- static GLfloat viewDist = 40.0;
+-#include <sys/time.h>
++#include <syscall.h>
  
+ #include <SDL/SDL.h>
+ 
+@@ -38,11 +40,7 @@ static GLfloat viewDist = 40.0;
  
  static long elapsed_time(void)
  {
 -    static struct timeval tv;
-+    static long time = 0;
- 
+-
 -    gettimeofday(&tv, NULL);
-+    time += 29;
- 
+-
 -    return tv.tv_sec * 1000 + tv.tv_usec / 1000;
-+    return time;
++    return get_tick_count() / 1000;
  }
  
  
-@@ -221,23 +221,6 @@
-     glPopMatrix();
- 
-   glPopMatrix();
--
--  Frames++;
--
--  {
--    GLint t = elapsed_time();
--    if (t - T0 >= 5000) {
--      GLfloat seconds = (t - T0) / 1000.0;
--      GLfloat fps = Frames / seconds;
--      printf("%d frames in %6.3f seconds = %6.3f FPS\n", Frames, seconds, fps);
--      fflush(stdout);
--      T0 = t;
--      Frames = 0;
--      if ((t >= 999.0 * autoexit) && (autoexit)) {
--        exit(0);
--      }
--    }
--  }
- }
- 
- 
-@@ -282,7 +265,7 @@
+@@ -282,7 +280,7 @@ init (int argc, char *argv[])
    glMatrixMode(GL_PROJECTION);
  
    glLoadIdentity();
@@ -88,7 +55,7 @@ Index: src/soft-and-slow-master/test/gears/gears.c
  
    glMatrixMode(GL_MODELVIEW);
  
-@@ -304,10 +287,10 @@
+@@ -304,10 +302,10 @@ int main(int argc, char *argv[])
  {
    SDL_Init(SDL_INIT_VIDEO);
  
@@ -101,7 +68,7 @@ Index: src/soft-and-slow-master/test/gears/gears.c
    set_current_sas_context(ctx);
  
    init(argc, argv);
-@@ -337,7 +320,7 @@
+@@ -337,7 +335,7 @@ int main(int argc, char *argv[])
      SDL_Event evt;
  
      while (SDL_PollEvent(&evt))
@@ -110,14 +77,11 @@ Index: src/soft-and-slow-master/test/gears/gears.c
          quit = 1;
    }
  
-@@ -346,5 +329,10 @@
+@@ -346,5 +344,7 @@ int main(int argc, char *argv[])
  
    destroy_sas_context(ctx);
  
 +  SDL_Quit();
-+
-+  libvideo_destroy_bitmap(libvideo_get_frontbuffer_bitmap(0));
-+  libvideo_restore_text_mode();
 +
    return 0;
  }
