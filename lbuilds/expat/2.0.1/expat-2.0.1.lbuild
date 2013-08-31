@@ -1,0 +1,41 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/expat"
+SRC_URI="http://sourceforge.net/projects/expat/files/${PN}/${PV}/${P}.tar.gz"
+
+LICENSE="MIT"
+
+RUN_DEPEND=""
+BUILD_DEPEND=""
+
+MY_S="${S}/${P}"
+
+src_configure() {
+	cd ${MY_S}
+
+	./configure \
+		CC=`tc-cc` \
+		CFLAGS="-nostdinc -I `tc-incdir` -L`tc-libdir`" \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+
+	lmake || die "make failed"
+	cd ..
+}
+
+src_install() {
+	cd ${MY_S}
+
+	# Sonst gibts Fehler
+	mkdir -p "${D}${R}/bin"
+	lmake -j1 DESTDIR="${D}" install || die "make install failed"
+}
