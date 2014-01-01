@@ -193,6 +193,7 @@ echo "[gcc] Patch anwenden..."
 patch -p0 -d gcc-${GCC_VERSION}/ < ${PATCHES}/gcc/${GCC_VERSION}/gcc-${GCC_VERSION}.patch >${LOGS}/gcc.log || die "Fehler beim Anwenden des Patches.\nSiehe tmp/gcc.log für Details."
 cd build
 echo "[gcc] Konfigurieren..."
+export MAKEINFO=missing
 ../gcc-${GCC_VERSION}/configure --prefix="${PREFIX}" --target=${TARGET} --disable-nls --enable-languages=c,c++ --disable-shared --disable-libssp ${GCC_CONFIGURE_PARAMS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log|| die "Fehler beim Konfigurieren.\nSiehe tmp/gcc.log für Details."
 echo "[gcc] Kompilieren..."
 make all-gcc ${MAKEOPTS} >>${LOGS}/gcc.log 2>>${LOGS}/gcc.log || die "Fehler beim Kompilieren.\nSiehe tmp/gcc.log für Details."
