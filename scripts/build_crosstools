@@ -218,14 +218,15 @@ echo "[make] Herunterladen..."
 
 [ -f make-3.81.tar.bz2 ] || wget -q http://ftp.gnu.org/gnu/make/make-3.81.tar.bz2 || die "Fehler beim Herrunterladen."
 echo "[make] Entpacken..."
-tar -xvf make-3.81.tar.bz2
-echo "[make] Kompilieren"
+tar -xvf make-3.81.tar.bz2 &>>${LOGS}/make.log || die "Fehler beim Entpacken.\nSiehe tmp/make.log für Details."
+echo "[make] Konfigurieren"
 cd make-3.81
-./configure --prefix=${TMP}/make/build
-make
+./configure --prefix=${TMP}/make/build &>>${LOGS}/make.log || die "Fehler beim Konfigurieren.\nSiehe tmp/make.log für Details."
+echo "[make] Kompilieren"
+make &>>${LOGS}/make.log || die "Fehler beim Kompilieren.\nSiehe tmp/make.log für Details."
 echo "[make] Installieren."
-make install
-echo "[make] Fertig."
+make install &>>${LOGS}/make.log || die "Fehler beim Installieren.\nSiehe tmp/make.log für Details."
+echo -e "[make] Fertig.\n"
 fi
 
 #
