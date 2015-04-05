@@ -3,18 +3,18 @@ include lutils
 
 DESCRIPTION="CDI-Bibliotheken"
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/CDI"
-SRC_URI="http://git.tyndur.org/?p=tyndur.git;a=snapshot;sf=tgz"
+SRC_URI="http://git.tyndur.org/?p=tyndur.git;a=snapshot;h=HEAD;sf=tgz"
 
 LICENSE="BSD"
 
 BUILD_DEPEND=""
 RUN_DEPEND=""
 
-MY_S="${S}/tyndur/src/modules/cdi/lib"
+MY_S="${S}/tyndur-HEAD*/src/modules/cdi/lib"
 
 src_unpack()
 {
-    cp "${DISTDIR}/?p=tyndur.git;a=snapshot;sf=tgz" ${DISTDIR}/tyndur-master.tar.gz || die "package not found"
+    cp "${DISTDIR}/?p=tyndur.git;a=snapshot;h=HEAD;sf=tgz" ${DISTDIR}/tyndur-master.tar.gz || die "package not found"
     lunpack tyndur-master.tar.gz || die "could not unpack"
 }
 
@@ -25,7 +25,7 @@ src_compile()
     echo "CC = i386-pc-tyndur-gcc" > Makefile
     echo "CFLAGS = -std=gnu99 -c -I../include" >> Makefile
     echo "AR = i386-pc-tyndur-ar" >> Makefile
-    echo "OBJS = \$(patsubst %.c,%.o,\$(subst cdi.c,,\$(wildcard *.c)) \$(wildcard net/*.c) \$(wildcard scsi/*.c))" >> Makefile
+    echo "OBJS = \$(patsubst %.c,%.o,\$(wildcard *.c) \$(wildcard net/*.c) \$(wildcard scsi/*.c) \$(wildcard fs/*.c))" >> Makefile
     echo ".PHONY: all" >> Makefile
     echo "all: libcdi.a" >> Makefile
     echo "libcdi.a: \$(OBJS)" >> Makefile
