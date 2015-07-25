@@ -298,7 +298,7 @@ internal_src_install() {
 internal_pack() {
     cd ${D}
     lstatus "Erstelle Paket..."
-    tar -cf "${PACKSDIR}/${P}.tar" *
+    tar --format=ustar -cf "${PACKSDIR}/${P}.tar" *
 }
 
 
