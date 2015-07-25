@@ -2,7 +2,7 @@ Index: src/ncurses-5.6/ncurses/base/lib_getch.c
 ===================================================================
 --- src.orig/ncurses-5.6/ncurses/base/lib_getch.c
 +++ src/ncurses-5.6/ncurses/base/lib_getch.c
-@@ -169,10 +169,12 @@ fifo_push(EVENTLIST_0th(_nc_eventlist * 
+@@ -169,10 +169,12 @@ fifo_push(EVENTLIST_0th(_nc_eventlist *
  #endif
      {				/* Can block... */
  	unsigned char c2 = 0;
@@ -18,59 +18,3 @@ Index: src/ncurses-5.6/ncurses/base/lib_getch.c
  #ifdef HIDE_EINTR
      /*
       * Under System V curses with non-restarting signals, getch() returns
-Index: src/ncurses-5.6/ncurses/tty/lib_twait.c
-===================================================================
---- src.orig/ncurses-5.6/ncurses/tty/lib_twait.c
-+++ src/ncurses-5.6/ncurses/tty/lib_twait.c
-@@ -48,6 +48,12 @@
- #include <OS.h>
- #endif
- 
-+#ifdef __TYNDUR__
-+#include <stdint.h>
-+#include <sys/time.h>
-+extern uint64_t get_tick_count();
-+#endif
-+
- #if USE_FUNC_POLL
- # if HAVE_SYS_TIME_H
- #  include <sys/time.h>
-@@ -360,6 +366,29 @@ _nc_timed_wait(int mode,
-     }
- #endif
- 
-+#elif defined(__TYNDUR__)
-+    int ch;
-+    uint64_t timeout = 0;
-+    uint64_t time;
-+
-+    if (milliseconds > 0) {
-+        timeout = get_tick_count() + milliseconds * 1000;
-+    }
-+
-+    result = 0;
-+    do {
-+        if ((mode & 1)) {
-+            if (read(SP->_ifd, &ch, 1)) {
-+                ungetc(ch, stdin);
-+                result = 1;
-+            }
-+        }
-+    } while ((timeout > (time = get_tick_count())) && !result);
-+
-+    if (time < timeout) {
-+        milliseconds = (timeout - time) / 1000;
-+    }
-+
- #endif /* USE_FUNC_POLL, etc */
- 
-     returntime = _nc_gettime(FALSE);
-@@ -424,6 +453,8 @@ _nc_timed_wait(int mode,
- 	    }
- #elif defined(__BEOS__)
- 	    result = 1;		/* redundant, but simple */
-+#elif defined(__TYNDUR__)
-+	    result = 1;		/* redundant, but simple */
- #elif HAVE_SELECT
- 	    if ((mode & 2)
- 		&& (fd = SP->_mouse_fd) >= 0
