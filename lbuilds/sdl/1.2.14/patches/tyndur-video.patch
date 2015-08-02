@@ -68,7 +68,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 ===================================================================
 --- /dev/null
 +++ src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
-@@ -0,0 +1,249 @@
+@@ -0,0 +1,252 @@
 +/*
 +    SDL - Simple DirectMedia Layer
 +    Copyright (C) 1997-2009 Sam Lantinga
@@ -105,6 +105,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 +#include <init.h>
 +#include <kbd.h>
 +#include <syscall.h>
++#include <lostio.h>
 +
 +
 +static SDL_keysym* get_keysym(int c)
@@ -240,7 +241,9 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurevents.c
 +     * Und stdin auslesen, sonst landen alle Tastendrücke nach dem Beenden in
 +     * der Shell. Benutzt werden sie nicht.
 +     */
-+    fread(buf, 1, sizeof(buf), stdin);
++    if (IS_LIO2(stdin->res)) {
++        lio_readf(stdin->res, 0, sizeof(buf), buf, LIO_REQ_FILEPOS);
++    }
 +}
 +
 +int TYNDUR_init_events(void)
