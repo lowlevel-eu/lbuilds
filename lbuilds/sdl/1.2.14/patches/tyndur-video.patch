@@ -587,8 +587,8 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +
 +	/* Determine the screen depth (use default 8-bit depth) */
 +	/* we change this during the SDL_SetVideoMode implementation... */
-+	vformat->BitsPerPixel = 24;
-+	vformat->BytesPerPixel = 3;
++	vformat->BitsPerPixel = 32;
++	vformat->BytesPerPixel = 4;
 +
 +    this->hidden->buffer = NULL;
 +    this->hidden->mousedata = fopen("kbc:/mouse/data", "r");
@@ -602,7 +602,7 @@ Index: src/SDL-1.2.14/src/video/tyndur/SDL_tyndurvideo.c
 +    /* Verfügbare Videomodi auslesen */
 +    modelist_len = libvideo_get_modes(0, 0, &modes);
 +
-+    for (bpp = 8; bpp < 32; bpp += 8) {
++    for (bpp = 8; bpp <= 32; bpp += 8) {
 +
 +        /* Modi mit gewünschter Farbtiefe zählen */
 +        num = 0;
