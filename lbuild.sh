@@ -281,6 +281,7 @@ internal_src_install() {
     echo $PV >> ${D}/${R}/packageinfo-${PS}
     echo $PS >> ${D}/${R}/packageinfo-${PS}
     echo "i386" >> ${D}/${R}/packageinfo-${PS}
+    echo $DESCRIPTION >> ${D}/${R}/packageinfo-${PS}
 
     if has_feature "nostrip"; then
         lstatus "Ueberspringe das Strippen der Binaries"
