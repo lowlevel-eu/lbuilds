@@ -19,7 +19,7 @@ cd $lptrepo/
 
 
 for i in *.tar; do
-    SIZE=$(stat -c%s "$i")
+    SIZE=$(stat -Lc%s "$i")
 
     if [[ "$i" =~ ^(.*)-lib-([^-]*)-i386\.tar$ ]]; then
         is_lib=1
