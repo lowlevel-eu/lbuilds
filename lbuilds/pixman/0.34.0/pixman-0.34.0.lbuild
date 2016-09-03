@@ -1,0 +1,37 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/pixman"
+SRC_URI="https://www.cairographics.org/releases/${P}.tar.gz"
+
+LICENSE="MIT"
+
+RUN_DEPEND=""
+BUILD_DEPEND="=libpng-1.4.12 =zlib-1.2.8"
+
+MY_S="${S}/${P}"
+
+src_configure() {
+	cd ${MY_S}
+
+    export PKG_CONFIG_PATH="`tc-libdir`/pkgconfig/"
+	./configure \
+		CC=`tc-cc` \
+		CFLAGS="-nostdinc -I `tc-incdir` -L`tc-libdir`" \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+	lmake || die "make failed"
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake DESTDIR="${D}" install || die "make install failed"
+}

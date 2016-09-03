@@ -3,12 +3,12 @@ include toolchain
 
 DESCRIPTION=""
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/libpng"
-SRC_URI="ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng14/${P}.tar.gz"
+SRC_URI="ftp://ftp.simplesystems.org/pub/libpng/png/src/history/libpng14/${P}.tar.gz"
 
 LICENSE="libpng license"
 
 RUN_DEPEND=""
-BUILD_DEPEND="=zlib-1.2.7"
+BUILD_DEPEND="=zlib-1.2.8"
 
 MY_S="${S}/${P}"
 
