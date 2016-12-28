@@ -394,6 +394,12 @@ case $1 in
         internal_pkg_clean || die "cleaning failed"
         ;;
 
+    update-env)
+        lstatus "Lösche alte Umgebung..."
+        rm -rf ${WORKDIR}/env
+        internal_prepare_env
+        ;;
+
     *)
         show_help
         ;;
