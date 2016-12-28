@@ -83,7 +83,7 @@ Index: src/git-1.6.4/compat/tyndur.h
 ===================================================================
 --- /dev/null
 +++ src/git-1.6.4/compat/tyndur.h
-@@ -0,0 +1,147 @@
+@@ -0,0 +1,142 @@
 +#ifndef COMPAT_TYNDUR_H
 +#define COMPAT_TYNDUR_H
 +
@@ -100,8 +100,6 @@ Index: src/git-1.6.4/compat/tyndur.h
 +#include <unistd.h>
 +#include <errno.h>
 +#include <readline/readline.h>
-+
-+#define ECONNABORTED 2001
 +
 +#define has_dos_drive_prefix(x) _service_absolute(x)
 +#define PATH_SEP ';'
@@ -227,9 +225,6 @@ Index: src/git-1.6.4/compat/tyndur.h
 +    LOG_INFO,
 +};
 +
-+/* netinet/in.h */
-+#define INADDR_ANY 0
-+
 +#endif
 Index: src/git-1.6.4/ident.c
 ===================================================================
@@ -258,7 +253,23 @@ Index: src/git-1.6.4/sha1_file.c
 ===================================================================
 --- src.orig/git-1.6.4/sha1_file.c
 +++ src/git-1.6.4/sha1_file.c
-@@ -736,12 +736,14 @@ static int open_packed_git_1(struct pack
+@@ -85,8 +85,15 @@ int get_sha1_hex(const char *hex, unsign
+ 
+ static inline int offset_1st_component(const char *path)
+ {
++#ifdef TYNDUR
++	if (has_dos_drive_prefix(path)) {
++        int index = strcspn(path, "/") + 1;
++        return index + (path[index] == '/');
++    }
++#else
+ 	if (has_dos_drive_prefix(path))
+ 		return 2 + (path[2] == '/');
++#endif
+ 	return *path == '/';
+ }
+ 
+@@ -736,12 +743,14 @@ static int open_packed_git_1(struct pack
  	/* We leave these file descriptors open with sliding mmap;
  	 * there is no point keeping them open across exec(), though.
  	 */
@@ -320,17 +331,18 @@ Index: src/git-1.6.4/run-command.c
  #include "cache.h"
  #include "run-command.h"
  #include "exec_cmd.h"
-@@ -67,7 +68,39 @@ int start_command(struct child_process *
+@@ -67,7 +68,75 @@ int start_command(struct child_process *
  
  	trace_argv_printf(cmd->argv, "trace: run_command:");
  
 -#ifndef __MINGW32__
 +#if defined(TYNDUR)
 +    {
++        FILE* old_stdin = stdin;
++        FILE* old_stdout = stdout;
++        FILE* old_stderr = stderr;
++
 +        const char* oldcwd = NULL;
-+        char* cmdstr;
-+        char* old_cmd;
-+        int i;
 +
 +        if (cmd->dir) {
 +            oldcwd = getenv("CWD");
@@ -341,16 +353,51 @@ Index: src/git-1.6.4/run-command.c
 +        if (cmd->preexec_cb)
 +            cmd->preexec_cb();
 +
-+        cmdstr = cmd->argv[0];
-+        for (i = 1; cmd->argv[i]; i++) {
-+            old_cmd = cmdstr;
-+            asprintf(&cmdstr, "%s %s", old_cmd, cmd->argv[1]);
-+            if (cmdstr != cmd->argv[0])
-+                free(old_cmd);
++		if (cmd->no_stdin)
++			stdin = NULL;
++		else if (need_in) {
++            stdin = fdopen(fdin[0], "r");
++		} else if (cmd->in) {
++            stdin = fdopen(cmd->in, "r");
++		}
++
++		if (cmd->no_stderr)
++			stderr = NULL;
++		else if (need_err) {
++            stderr = fdopen(fderr[1], "w+");
++		}
++
++		if (cmd->no_stdout)
++			stdout = NULL;
++		else if (cmd->stdout_to_stderr)
++			stdout = stderr;
++		else if (need_out) {
++            stdout = fdopen(fdout[1], "w");
++		} else if (cmd->out > 1) {
++            stdout = fdopen(cmd->out, "w");
++		}
++
++        if (cmd->git_cmd) {
++		    cmd->argv = prepare_git_cmd(cmd->argv);
 +        }
-+        if (cmdstr != cmd->argv[0])
-+            free(old_cmd);
-+        cmd->pid = init_execute(cmdstr);
++
++        cmd->pid = init_execv(cmd->argv[0], cmd->argv);
++
++        stdin = old_stdin;
++        stdout = old_stdout;
++        stderr = old_stderr;
++
++#if 0
++        int i;
++        for (i = 0; cmd->argv[i]; i++) {
++            printf("argv[%d] = '%s'\n", i, cmd->argv[i]);
++        }
++        printf("cmd->pid = %d\n", cmd->pid);
++#endif
++
++        if (cmd->git_cmd) {
++            free(cmd->argv);
++        }
 +
 +        if (oldcwd && chdir(oldcwd)) {
 +            die_errno("exec '%s': cd back to '%s' failed", cmd->argv[0],
@@ -361,6 +408,59 @@ Index: src/git-1.6.4/run-command.c
  	fflush(NULL);
  	cmd->pid = fork();
  	if (!cmd->pid) {
+@@ -292,11 +361,16 @@ int run_command_v_opt_cd_env(const char
+ 	return run_command(&cmd);
+ }
+ 
+-#ifdef __MINGW32__
+-static __stdcall unsigned run_thread(void *data)
++#if defined(__MINGW32__) || defined(TYNDUR)
++static
++#ifndef TYNDUR
++__stdcall
++#endif
++unsigned run_thread(void *data)
+ {
+ 	struct async *async = data;
+-	return async->proc(async->fd_for_proc, async->data);
++	async->ret = async->proc(async->fd_for_proc, async->data);
++    return async->ret;
+ }
+ #endif
+ 
+@@ -308,7 +382,16 @@ int start_async(struct async *async)
+ 		return error("cannot create pipe: %s", strerror(errno));
+ 	async->out = pipe_out[0];
+ 
+-#ifndef __MINGW32__
++#ifdef TYNDUR
++    async->ret = -EINPROGRESS;
++	async->fd_for_proc = pipe_out[1];
++	async->tid = create_thread(run_thread, async);
++	if (async->tid < 0) {
++		error("cannot create thread: %s", strerror(-async->tid));
++		close_pair(pipe_out);
++		return -1;
++	}
++#elif !defined(__MINGW32__)
+ 	/* Flush stdio before fork() to avoid cloning buffers */
+ 	fflush(NULL);
+ 
+@@ -337,7 +420,13 @@ int start_async(struct async *async)
+ 
+ int finish_async(struct async *async)
+ {
+-#ifndef __MINGW32__
++#ifdef TYNDUR
++    int ret;
++    while (async->ret == -EINPROGRESS) {
++        yield();
++    }
++    ret = async->ret;
++#elif !defined(__MINGW32__)
+ 	int ret = 0;
+ 
+ 	if (wait_or_whine(async->pid))
 Index: src/git-1.6.4/daemon.c
 ===================================================================
 --- src.orig/git-1.6.4/daemon.c
@@ -543,3 +643,20 @@ Index: src/git-1.6.4/editor.c
  
  	if (strcmp(editor, ":")) {
  		size_t len = strlen(editor);
+Index: src/git-1.6.4/run-command.h
+===================================================================
+--- src.orig/git-1.6.4/run-command.h
++++ src/git-1.6.4/run-command.h
+@@ -79,7 +79,11 @@ struct async {
+ 	int (*proc)(int fd, void *data);
+ 	void *data;
+ 	int out;	/* caller reads from here and closes it */
+-#ifndef __MINGW32__
++#ifdef TYNDUR
++    int tid;
++	int fd_for_proc;
++    int ret;
++#elif !defined(__MINGW32__)
+ 	pid_t pid;
+ #else
+ 	HANDLE tid;
