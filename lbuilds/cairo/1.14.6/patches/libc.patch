@@ -1,0 +1,97 @@
+Index: src/cairo-1.14.6/src/cairoint.h
+===================================================================
+--- src.orig/cairo-1.14.6/src/cairoint.h
++++ src/cairo-1.14.6/src/cairoint.h
+@@ -46,6 +46,29 @@
+ #ifndef _CAIROINT_H_
+ #define _CAIROINT_H_
+ 
++#include <math.h>
++static inline double hypot(double x, double y)
++{
++    return sqrt(x*x + y*y);
++}
++
++#define DBL_EPSILON __DBL_EPSILON__
++#define frexp __builtin_frexp
++#define modf __builtin_modf
++
++typedef struct {
++    long quot;
++    long rem;
++} ldiv_t;
++
++static inline ldiv_t ldiv(long n, long d)
++{
++    return (ldiv_t) {
++        .quot = n / d,
++        .rem = n % d,
++    };
++}
++
+ #if HAVE_CONFIG_H
+ #include "config.h"
+ #endif
+Index: src/cairo-1.14.6/test/cairo-test-runner.c
+===================================================================
+--- src.orig/cairo-1.14.6/test/cairo-test-runner.c
++++ src/cairo-1.14.6/test/cairo-test-runner.c
+@@ -190,6 +190,7 @@ _cairo_test_wait (pid_t pid)
+ 	return CAIRO_TEST_CRASHED;
+ 
+     if (WIFSIGNALED (exitcode)) {
++#if 0
+ 	switch (WTERMSIG (exitcode)) {
+ 	case SIGINT:
+ #if HAVE_RAISE
+@@ -199,6 +200,9 @@ _cairo_test_wait (pid_t pid)
+ 	default:
+ 	    return CAIRO_TEST_CRASHED;
+ 	}
++#else
++    return CAIRO_TEST_CRASHED;
++#endif
+     }
+ 
+     return WEXITSTATUS (exitcode);
+Index: src/cairo-1.14.6/boilerplate/cairo-boilerplate.c
+===================================================================
+--- src.orig/cairo-1.14.6/boilerplate/cairo-boilerplate.c
++++ src/cairo-1.14.6/boilerplate/cairo-boilerplate.c
+@@ -947,9 +947,9 @@ cairo_boilerplate_open_any2ppm (const ch
+ POPEN:
+ #endif
+ 
+-    *close_cb = pclose;
++    *close_cb = NULL; //pclose;
+     sprintf (command, "%s %s %d", any2ppm, filename, page);
+-    return popen (command, "rb");
++    return -1; //popen (command, "rb");
+ }
+ 
+ static cairo_bool_t
+Index: src/cairo-1.14.6/test/cairo-test.h
+===================================================================
+--- src.orig/cairo-1.14.6/test/cairo-test.h
++++ src/cairo-1.14.6/test/cairo-test.h
+@@ -28,6 +28,20 @@
+ 
+ #include "cairo-boilerplate.h"
+ 
++#define DBL_EPSILON __DBL_EPSILON__
++typedef struct {
++    int quot;
++    int rem;
++} div_t;
++
++static inline div_t div(int n, int d)
++{
++    return (div_t) {
++        .quot = n / d,
++        .rem = n % d,
++    };
++}
++
+ #include <stdarg.h>
+ 
+ CAIRO_BEGIN_DECLS

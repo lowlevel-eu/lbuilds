@@ -18,7 +18,8 @@ src_configure() {
     export PKG_CONFIG_PATH="`tc-libdir`/pkgconfig/"
 	./configure \
 		CC=`tc-cc` \
-		CFLAGS="-nostdinc -I `tc-incdir` -L`tc-libdir`" \
+		CFLAGS="-nostdinc -I `tc-incdir` -L`tc-libdir` -DPIXMAN_NO_TLS" \
+		ac_cv_tls="none" \
 		--build=`tc-build` \
 		--target=`tc-host` \
 		--host=`tc-host` \

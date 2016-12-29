@@ -1,0 +1,42 @@
+include lutils
+include toolchain
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/cairo"
+SRC_URI="https://www.cairographics.org/releases/${P}.tar.xz"
+
+LICENSE="LGPL"
+
+RUN_DEPEND=""
+BUILD_DEPEND="=pixman-0.34.0 =libpng-1.4.12 =zlib-1.2.8 =freetype-2.4.1"
+
+MY_S="${S}/${P}"
+
+src_configure() {
+	cd ${MY_S}
+
+    export PKG_CONFIG_PATH="`tc-libdir`/pkgconfig/"
+    export PKG_CONFIG_SYSROOT="$ENVDIR/"
+    CFLAGS="-DCAIRO_NO_MUTEX=1 -nostdinc -I `tc-incdir` -I `tc-incdir`/pixman-1 -I `tc-incdir`/freetype2 -L`tc-libdir`" \
+	./configure \
+		CC=`tc-cc` \
+		--build=`tc-build` \
+		--target=`tc-host` \
+		--host=`tc-host` \
+		--prefix="${R}" \
+        --disable-fc \
+        --disable-gobject \
+        --disable-xlib \
+        --disable-xcb \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+	lmake || die "make failed"
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake DESTDIR="${D}" install || die "make install failed"
+}

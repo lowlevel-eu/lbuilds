@@ -1,0 +1,13 @@
+Index: src/cairo-1.14.6/build/config.sub
+===================================================================
+--- src.orig/cairo-1.14.6/build/config.sub
++++ src/cairo-1.14.6/build/config.sub
+@@ -1374,7 +1374,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* | -tyndur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
