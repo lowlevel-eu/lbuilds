@@ -11,3 +11,17 @@ Index: src/bochs-2.4.2/config.sub
  	# Remember, each alternative MUST END IN *, to match a version number.
  		;;
  	-qnx*)
+Index: src/bochs-2.4.2/configure
+===================================================================
+--- src.orig/bochs-2.4.2/configure
++++ src/bochs-2.4.2/configure
+@@ -24228,7 +24228,8 @@ if test "$with_sdl" = yes; then
+   SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_SDL)"
+   # GUI_*FLAGS are added to the compilation of every bochs file, not just
+   # the files in gui/*.cc.
+-  SDL_CFLAGS=`sdl-config --cflags`
++  #SDL_CFLAGS=`sdl-config --cflags`
++  SDL_CFLAGS=
+   GUI_CFLAGS="$GUI_CFLAGS $SDL_CFLAGS"
+   GUI_CXXFLAGS="$GUI_CXXFLAGS $SDL_CFLAGS"
+   GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_SDL)"
