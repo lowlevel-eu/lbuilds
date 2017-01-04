@@ -1,0 +1,26 @@
+Index: src/libiconv-1.14/build-aux/config.sub
+===================================================================
+--- src.orig/libiconv-1.14/build-aux/config.sub
++++ src/libiconv-1.14/build-aux/config.sub
+@@ -1282,7 +1282,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -tyndur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+Index: src/libiconv-1.14/libcharset/build-aux/config.sub
+===================================================================
+--- src.orig/libiconv-1.14/libcharset/build-aux/config.sub
++++ src/libiconv-1.14/libcharset/build-aux/config.sub
+@@ -1214,7 +1214,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos*)
++	      | -skyos* | -haiku* | -rdos* | -tyndur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)

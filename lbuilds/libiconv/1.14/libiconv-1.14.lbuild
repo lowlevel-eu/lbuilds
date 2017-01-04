@@ -1,0 +1,35 @@
+include toolchain
+include lutils
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/libiconv"
+SRC_URI="http://ftp.gnu.org/pub/gnu/libiconv/${P}.tar.gz"
+PS="lib"
+
+LICENSE="LGPL-2"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/${P}/"
+
+src_configure() {
+	cd ${MY_S}
+
+	CC=`tc-cc` prefix="${D}${R}" ./configure \
+		--build=`tc-build` \
+		--target=`tc-host` \
+        --host=`tc-host` \
+		--prefix="${R}" \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+	lmake || die "make failed"
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake install prefix="${D}${R}" || die "make install failed"
+}
