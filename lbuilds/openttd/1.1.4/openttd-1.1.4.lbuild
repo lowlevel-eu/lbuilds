@@ -3,29 +3,31 @@ include toolchain
 
 DESCRIPTION=""
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/OpenTTD"
-SRC_URI="http://binaries.openttd.org/releases/1.1.4/${P}-source.tar.gz"
+SRC_URI="http://binaries.openttd.org/releases/1.1.4/${P}-source.tar.gz http://bundles.openttdcoop.org/opengfx/releases/0.4.3/opengfx-0.4.3.zip"
 
 LICENSE="LGPL-2"
 
 RUN_DEPEND=""
-BUILD_DEPEND="=sdl-1.2.14 =sdl-image-1.2.10 =sdl-mixer-1.2.11 =zlib-1.2.5 =libstdc++-4.2.2 =libpng-1.4.4 =freetype-2.4.1"
+BUILD_DEPEND="=sdl-1.2.14 =sdl-image-1.2.10 =sdl-mixer-1.2.11 =zlib-1.2.5 =libstdc++-4.2.2 =libpng-1.4.4 =freetype-2.4.1 =liblzma-5.2.3"
 
 MY_S="${S}/${P}"
 
 src_configure() {
 	cd ${MY_S}
 
+    export PKG_CONFIG_PATH="`tc-libdir`/pkgconfig/"
+    export PKG_CONFIG_SYSROOT="$ENVDIR/"
 	./configure \
 		CC=`tc-cc` \
 		CXXFLAGS="-nostdinc -I `tc-incdir` -I `tc-incdir`/c++/4.2.2 -I `tc-incdir`/c++/4.2.2/i386-pc-tyndur -I `tc-incdir`/SDL -L`tc-libdir` -I `tc-incdir`/freetype2" \
         LIBS="-lpng -lz" \
 		--host=`tc-host` \
 		--prefix-dir="${R}" \
-        --without-lzma \
         --without-liblzo2 \
         --without-fontconfig \
         --disable-network \
         --without-threads \
+        --without-icu \
 		|| die "configure failed"
 }
 
@@ -40,5 +42,10 @@ src_install() {
 	cd ${MY_S}
 
 	lmake -j1 INSTALL_DIR="${D}" install || die "make install failed"
+
+    mkdir -p "${D}/${R}/bin/"
     mv "${D}/${R}/games/openttd" "${D}/${R}/bin/openttd"
+    rmdir "${D}/${R}/games/"
+
+    cp -r "${S}/opengfx-0.4.3" "${D}/${R}/share/games/openttd/data"
 }
