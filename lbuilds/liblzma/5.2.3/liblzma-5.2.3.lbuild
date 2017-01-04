@@ -1,0 +1,43 @@
+include toolchain
+include lutils
+
+DESCRIPTION=""
+HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/liblzma"
+SRC_URI="http://tukaani.org/xz/xz-${PV}.tar.xz"
+PS="lib"
+
+LICENSE="Public Domain"
+
+BUILD_DEPEND=""
+RUN_DEPEND=""
+
+MY_S="${S}/xz-${PV}/"
+
+src_configure() {
+	cd ${MY_S}
+
+	CC=`tc-cc` prefix="${D}${R}" ./configure \
+		--build=`tc-build` \
+		--target=`tc-host` \
+        --host=`tc-host` \
+        --disable-threads \
+        --disable-xz \
+        --disable-xzdec \
+        --disable-lzmadec \
+        --disable-lzmainfo \
+        --disable-lzma-linksy \
+        --disable-scripts \
+        --disable-doc \
+		--prefix="${R}" \
+		|| die "configure failed"
+}
+
+src_compile() {
+	cd ${MY_S}
+	lmake || die "make failed"
+}
+
+src_install() {
+	cd ${MY_S}
+	lmake install prefix="${D}${R}" || die "make install failed"
+}

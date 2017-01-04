@@ -1,0 +1,13 @@
+Index: src/xz-5.2.3/build-aux/config.sub
+===================================================================
+--- src.orig/xz-5.2.3/build-aux/config.sub
++++ src/xz-5.2.3/build-aux/config.sub
+@@ -1392,7 +1392,7 @@ case $os in
+ 	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+-	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
++	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* | -tyndur* \
+ 	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* | -tirtos*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
