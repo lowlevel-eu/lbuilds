@@ -44,6 +44,8 @@ ar rs ${ENV}/lib/libc.a `find ${LOST_SRC}/src/lib -name '*.o'` `find ${LOST_SRC}
 ar rs ${ENV}/lib/libm.a  ${LOST_SRC}/src/modules/lib/stdlibc/math/*.o
 ln -s -f ${ENV}/lib/libc.a ${ENV}/lib/libg.a
 
+cp ${LOST_SRC}/src/modules/lib/library.so ${ENV}/lib/libc.so
+
 # Pascal-Kram nur kopieren wenn er auch kompiliert wurde
 if [ -f ${LOST_SRC}/src/modules/pas/lib/prt0.o ]; then
     cp ${LOST_SRC}/src/modules/pas/lib/prt0.o ${ENV}/pascal/units
