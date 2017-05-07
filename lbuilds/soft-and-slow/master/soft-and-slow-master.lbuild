@@ -2,8 +2,9 @@ include toolchain
 include lutils
 
 DESCRIPTION="OpenGL-Software-Rasterizer"
-HOMEPAGE="http://gitorious.org/asx-games/soft-and-slow"
-SRC_URI="http://gitorious.org/asx-games/soft-and-slow/archive-tarball/master"
+HOMEPAGE="https://github.com/XanClic/soft-and-slow"
+SRC_URI="https://github.com/XanClic/soft-and-slow/archive/master.tar.gz"
+DONT_CACHE_SRC=true
 
 LICENSE="GPLv2"
 
@@ -14,14 +15,7 @@ MY_S="${S}/${P}"
 
 src_unpack()
 {
-    if [ "$(head -c 11 ${DISTDIR}/master)" == "The archive" ]; then
-        rm ${DISTDIR}/master
-        die "Try loading the archive again."
-    fi
-    pwd
-    cp ${DISTDIR}/master ${DISTDIR}/master.tar.gz || die "package not found"
     lunpack master.tar.gz || die "could not unpack"
-    mv asx-games-soft-and-slow ${MY_S}
 }
 
 src_compile()

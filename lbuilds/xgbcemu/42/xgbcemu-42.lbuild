@@ -2,8 +2,9 @@ include toolchain
 include lutils
 
 DESCRIPTION="GBC-Emulator"
-HOMEPAGE="http://gitorious.org/xgbcemu"
-SRC_URI="http://gitorious.org/xgbcemu/xgbcemu/archive-tarball/master"
+HOMEPAGE="https://github.com/XanClic/xgbcemu"
+SRC_URI="https://github.com/XanClic/xgbcemu/archive/master.tar.gz"
+DONT_CACHE_SRC=true
 
 LICENSE="GPLv2"
 
@@ -14,13 +15,8 @@ MY_S="${S}/${P}"
 
 src_unpack()
 {
-    if [ "$(head -c 11 ${DISTDIR}/master)" == "The archive" ]; then
-        rm ${DISTDIR}/master
-        die "Try loading the archive again."
-    fi
-    cp ${DISTDIR}/master ${DISTDIR}/master.tar.gz || die "package not found"
     lunpack master.tar.gz || die "could not unpack"
-    mv xgbcemu-xgbcemu ${MY_S}
+    mv xgbcemu-master ${MY_S}
 }
 
 src_compile()
