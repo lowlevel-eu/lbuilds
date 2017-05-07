@@ -3,7 +3,7 @@ include toolchain
 
 DESCRIPTION=""
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Ctris"
-SRC_URI="http://hackl.dhs.org/data/download/download.php?file=ctris-0.42.tar.bz2"
+SRC_URI="https://github.com/dominikhackl/ctris/archive/v0.42.tar.gz"
 
 LICENSE="GPL-2"
 

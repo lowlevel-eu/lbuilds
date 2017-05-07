@@ -3,7 +3,7 @@ include toolchain
 
 DESCRIPTION="Your basic line editor"
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/ED"
-SRC_URI="http://ftp.gnu.org/gnu/ed/ed-0.9.tar.bz2"
+SRC_URI="http://ftp.acc.umu.se/mirror/gnu.org/savannah/ed/ed-0.9.tar.bz2"
 
 LICENSE="GPL-2"
 IUSE=""

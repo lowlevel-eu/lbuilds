@@ -3,7 +3,7 @@ include toolchain
 
 DESCRIPTION=""
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Supertux"
-SRC_URI="http://download.berlios.de/supertux/${P}.tar.bz2"
+SRC_URI="https://github.com/SuperTux/supertux/releases/download/v${PV}/${P}.tar.bz2"
 
 LICENSE="LGPL-2"
 

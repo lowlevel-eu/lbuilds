@@ -3,7 +3,7 @@ include toolchain
 
 DESCRIPTION=""
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Lynx"
-SRC_URI="http://lynx.isc.org/lynx2.8.6/lynx2.8.6.tar.bz2"
+SRC_URI="http://invisible-mirror.net/archives/lynx/tarballs/lynx2.8.6rel.5.tar.bz2"
 
 LICENSE="GPL"
 
@@ -13,7 +13,7 @@ BUILD_DEPEND="=ncurses-5.6 =zlib-1.2.8 =gettext-0.17"
 MY_S="${S}/${PN}2-8-6"
 
 src_unpack() {
-	lunpack ${PN}${PV}.tar.bz2
+	lunpack lynx2.8.6rel.5.tar.bz2
 	cd ${MY_S}
 
     ln -s ${F} patches

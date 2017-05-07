@@ -3,7 +3,7 @@ include toolchain
 
 DESCRIPTION="bsd-games"
 HOMEPAGE="http://lowlevel.brainsware.org/wiki/index.php/LOST/Pakete/Bsd-games"
-SRC_URI="ftp://metalab.unc.edu/pub/Linux/games/${P}.tar.gz"
+SRC_URI="http://ftp.uni-erlangen.de/mirrors/debian/pool/main/b/bsdgames/bsdgames_2.17.orig.tar.gz"
 
 
 LICENSE="BSD"
@@ -14,7 +14,7 @@ RUN_DEPEND=""
 MY_S="${S}/${P}"
 
 src_unpack() {
-	lunpack ${P}.tar.gz
+	lunpack bsdgames_2.17.orig.tar.gz
 	cd ${MY_S}
 
     ln -s ${F} patches
