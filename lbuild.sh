@@ -179,7 +179,7 @@ internal_pkg_clean() {
 # Alle Dateien fuer ein Paket herunterladen
 internal_pkg_fetch_files() {
     local u
-    lstatus "Lade Dateien herunter:"
+    lstatus "Hole Quelldateien:"
     for u in $SRC_URI; do
         local fn="${DISTDIR}/`basename ${u}`"
         # Wenn die Datei schon existiert, muss sie nicht erneut geladen werden
@@ -189,9 +189,15 @@ internal_pkg_fetch_files() {
 
         lstatus "    ${u}"
 
-        wget -O ${fn} ${u}
-        if [ $? -ne 0 ]; then
-            die "Das Herunterladen ist fehlgeschlagen"
+        if [[ "${u}" == *"://"* ]]; then
+            wget -O ${fn} ${u}
+            if [ $? -ne 0 ]; then
+                die "Das Herunterladen ist fehlgeschlagen"
+            fi
+        else
+            if ! cp "${F}/${u}" "${fn}"; then
+                die "Kopieren der Quelldatei ist fehlgeschlagen"
+            fi
         fi
     done
     return 0
