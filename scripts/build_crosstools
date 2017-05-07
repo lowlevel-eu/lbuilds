@@ -13,7 +13,7 @@ NEEDS_MPC_MAJOR=0
 NEEDS_MPC_MINOR=8
 NEEDS_MPC_PATCHLEVEL=1
 GMP_VERSION=5.0.1
-MPFR_VERSION=3.0.1
+MPFR_VERSION=3.1.5
 MPC_VERSION=0.8.2
 FPC_VERSION=2.4.0
 FASM_VERSION=1.69.31
@@ -95,6 +95,7 @@ if [ $gcc_state != 0 ]; then
   [ "$should_die" == "n" ] || die "Fehler: MPFR-Bibliothek in Version >= ${NEEDS_MPFR_MAJOR}.${NEEDS_MPFR_MINOR}.${NEEDS_MPFR_PATCHLEVEL} (inklusive -dev Paket) benötigt";
 
   BUILD_MPFR=1
+  GCC_CONFIGURE_PARAMS+="--with-mpfr-include=${TMP}/cross-gcc/gcc-${GCC_VERSION}/mpfr/src --with-mpfr-lib=${TMP}/cross-gcc/build/mpfr/src/.libs"
 fi
 
 # Überprüfen ob MPC in richtiger Version installiert
