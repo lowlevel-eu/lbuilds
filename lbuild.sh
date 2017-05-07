@@ -182,8 +182,8 @@ internal_pkg_fetch_files() {
     lstatus "Lade Dateien herunter:"
     for u in $SRC_URI; do
         local fn="${DISTDIR}/`basename ${u}`"
-        # Wenn die Datei schon exisitert, muss sie nicht erneut geladen werden
-        if [ -f "${fn}" ]; then
+        # Wenn die Datei schon existiert, muss sie nicht erneut geladen werden
+        if [ "$DONT_CACHE_SRC" != "true" -a -f "${fn}" ]; then
             continue
         fi
 
