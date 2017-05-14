@@ -1,6 +1,8 @@
---- src.orig/diffutils-3.0/src/diff.c	2010-04-15 21:53:08.000000000 +0200
-+++ src/diffutils-3.0/src/diff.c	2011-06-29 20:00:15.507375267 +0200
-@@ -633,7 +633,7 @@
+Index: src/diffutils-3.0/src/diff.c
+===================================================================
+--- src.orig/diffutils-3.0/src/diff.c
++++ src/diffutils-3.0/src/diff.c
+@@ -633,7 +633,7 @@ main (int argc, char **argv)
  	specify_style (OUTPUT_NORMAL);
      }
  
@@ -9,7 +11,7 @@
      {
  #if (defined STAT_TIMESPEC || defined STAT_TIMESPEC_NS \
       || defined HAVE_STRUCT_STAT_ST_SPARE1)
-@@ -642,7 +642,7 @@
+@@ -642,7 +642,7 @@ main (int argc, char **argv)
        time_format = "%Y-%m-%d %H:%M:%S %z";
  #endif
      }
@@ -18,9 +20,11 @@
      {
        /* See POSIX 1003.1-2001 for this format.  */
        time_format = "%a %b %e %T %Y";
---- src.orig/diffutils-3.0/src/sdiff.c	2010-04-15 14:58:08.000000000 +0200
-+++ src/diffutils-3.0/src/sdiff.c	2011-06-29 20:02:01.767375217 +0200
-@@ -1225,12 +1225,12 @@
+Index: src/diffutils-3.0/src/sdiff.c
+===================================================================
+--- src.orig/diffutils-3.0/src/sdiff.c
++++ src/diffutils-3.0/src/sdiff.c
+@@ -1225,12 +1225,12 @@ temporary_file (void)
    sprintf (buf, "%s/sdiffXXXXXX", dir);
    sigemptyset (&blocked);
    sigaddset (&blocked, SIGINT);
@@ -35,9 +39,11 @@
    errno = e;
    return fd;
  }
---- src.orig/diffutils-3.0/src/util.c	2010-04-15 21:53:08.000000000 +0200
-+++ src/diffutils-3.0/src/util.c	2011-06-29 20:02:53.287375194 +0200
-@@ -192,6 +192,7 @@
+Index: src/diffutils-3.0/src/util.c
+===================================================================
+--- src.orig/diffutils-3.0/src/util.c
++++ src/diffutils-3.0/src/util.c
+@@ -192,6 +192,7 @@ begin_output (void)
  
        /* Make OUTFILE a pipe to a subsidiary `pr'.  */
        {
@@ -45,7 +51,7 @@
  #if HAVE_WORKING_FORK || HAVE_WORKING_VFORK
  	int pipes[2];
  
-@@ -236,6 +237,7 @@
+@@ -236,6 +237,7 @@ begin_output (void)
  	  pfatal_with_name (command);
  	free (command);
  #endif
@@ -53,3 +59,16 @@
        }
      }
    else
+Index: src/diffutils-3.0/lib/fcntl.c
+===================================================================
+--- src.orig/diffutils-3.0/lib/fcntl.c
++++ src/diffutils-3.0/lib/fcntl.c
+@@ -183,7 +183,7 @@ rpl_fcntl (int fd, int action, /* arg */
+       {
+         int target = va_arg (arg, int);
+         /* Detect invalid target; needed for cygwin 1.5.x.  */
+-        if (target < 0 || getdtablesize () <= target)
++        if (target < 0)
+           errno = EINVAL;
+         else
+           {

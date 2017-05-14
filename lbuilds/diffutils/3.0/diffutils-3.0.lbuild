@@ -12,7 +12,7 @@ RUN_DEPEND=""
 
 MY_S="${S}/${P}"
 
-src_compile() {
+src_configure() {
 	cd ${MY_S}
 	./configure \
 		--build=`tc-build` \
@@ -20,8 +20,11 @@ src_compile() {
 		--prefix=${R} \
 		|| die "configure failed"
 
+}
+
+src_compile() {
+	cd ${MY_S}
 	lmake || die "make failed"
-	cd ..
 }
 
 src_install() {
