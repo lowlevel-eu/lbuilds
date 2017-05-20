@@ -8,7 +8,7 @@ SRC_URI="https://github.com/SuperTux/supertux/releases/download/v${PV}/${P}.tar.
 LICENSE="LGPL-2"
 
 RUN_DEPEND=""
-BUILD_DEPEND="=sdl-1.2.14 =sdl-image-1.2.10 =sdl-mixer-1.2.11 =zlib-1.2.5 =libstdc++-4.2.2 =libpng-1.4.4 =libjpeg-8b"
+BUILD_DEPEND="=sdl-1.2.14 =sdl-image-1.2.10 =sdl-mixer-1.2.11 =zlib-1.2.8 =libstdc++-4.5.2 =libpng-1.4.12 =libjpeg-8b"
 
 MY_S="${S}/${P}"
 
@@ -17,7 +17,7 @@ src_configure() {
 
 	./configure \
 		CC=`tc-cc` \
-		CXXFLAGS="-nostdinc -I `tc-incdir` -I `tc-incdir`/c++/4.2.2 -I `tc-incdir`/c++/4.2.2/i386-pc-tyndur -I `tc-incdir`/SDL -L`tc-libdir`" \
+		CXXFLAGS="-nostdinc -I `tc-incdir` -I `tc-incdir`/c++/4.5.2 -I `tc-incdir`/c++/4.5.2/i386-pc-tyndur -I `tc-incdir`/SDL -L`tc-libdir`" \
         LIBS="-lpng -lz -ljpeg" \
 		--host=`tc-host` \
 		--prefix="${R}" \

@@ -8,7 +8,7 @@ SRC_URI="http://sourceforge.net/projects/bochs/files/bochs/2.4.2/${P}.tar.gz"
 LICENSE="GPL-2"
 
 RUN_DEPEND=""
-BUILD_DEPEND="=ncurses-5.6 =libstdc++-4.2.2 =sdl-1.2.14"
+BUILD_DEPEND="=ncurses-5.6 =libstdc++-4.5.2 =sdl-1.2.14"
 
 MY_S="${S}/${P}"
 

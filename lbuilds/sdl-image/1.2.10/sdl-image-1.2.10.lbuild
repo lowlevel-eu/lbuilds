@@ -8,7 +8,7 @@ SRC_URI="http://www.libsdl.org/projects/SDL_image/release/SDL_image-${PV}.tar.gz
 LICENSE="LGPL-2"
 
 RUN_DEPEND=""
-BUILD_DEPEND="=sdl-1.2.14 =libpng-1.4.12 =zlib-1.2.7 =libjpeg-8b"
+BUILD_DEPEND="=sdl-1.2.14 =libpng-1.4.12 =zlib-1.2.8 =libjpeg-8b"
 
 MY_S="${S}/SDL_image-${PV}"
 
