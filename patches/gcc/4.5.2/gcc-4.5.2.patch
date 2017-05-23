@@ -461,3 +461,29 @@ diff -urN ../gcc-4.5.2/libgcc/config.host ../gcc-4.5.2/libgcc/config.host.new
  i[34567]86-*-linux* | i[34567]86-*-kfreebsd*-gnu | i[34567]86-*-knetbsd*-gnu | i[34567]86-*-gnu*)
  	extra_parts="$extra_parts crtprec32.o crtprec64.o crtprec80.o crtfastmath.o"
  	tmake_file="${tmake_file} i386/t-crtpc i386/t-crtfm"
+diff --git ../gcc-4.5.2/gcc/cp/cfns.gperf ../gcc-4.5.2/gcc/cp/cfns.gperf
+--- ../gcc-4.5.2/gcc/cp/cfns.gperf
++++ ./gcc/cp/cfns.gperf
+@@ -22,6 +22,9 @@  __inline
+ static unsigned int hash (const char *, unsigned int);
+ #ifdef __GNUC__
+ __inline
++#ifdef __GNUC_STDC_INLINE__
++__attribute__ ((__gnu_inline__))
++#endif
+ #endif
+ const char * libc_name_p (const char *, unsigned int);
+ %}
+diff --git ../gcc-4.5.2/gcc/cp/cfns.h ../gcc-4.5.2/gcc/cp/cfns.h
+--- ../gcc-4.5.2/gcc/cp/cfns.h
++++ ./gcc/cp/cfns.h
+@@ -53,6 +53,9 @@  __inline
+ static unsigned int hash (const char *, unsigned int);
+ #ifdef __GNUC__
+ __inline
++#ifdef __GNUC_STDC_INLINE__
++__attribute__ ((__gnu_inline__))
++#endif
+ #endif
+ const char * libc_name_p (const char *, unsigned int);
+ /* maximum key range = 391, duplicates = 0 */
