@@ -4,7 +4,7 @@ Index: src/ncurses-5.6/misc/terminfo.src
 ===================================================================
 --- src.orig/ncurses-5.6/misc/terminfo.src
 +++ src/ncurses-5.6/misc/terminfo.src
-@@ -19585,6 +19585,46 @@ tyndur|TYNDUR Terminal(allmost vt100),
+@@ -19591,6 +19591,46 @@ tyndur|TYNDUR Terminal(allmost vt100),
  	use=ecma+color,
  
  
