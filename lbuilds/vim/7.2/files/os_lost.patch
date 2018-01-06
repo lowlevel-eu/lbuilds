@@ -7,7 +7,7 @@ Index: vim72/src/os_lost.c
 ===================================================================
 --- /dev/null
 +++ vim72/src/os_lost.c
-@@ -0,0 +1,293 @@
+@@ -0,0 +1,294 @@
 +/* vi:set ts=8 sts=4 sw=4 noexpandtab:
 + *
 + * VIM - Vi IMproved	by Bram Moolenaar
@@ -255,7 +255,8 @@ Index: vim72/src/os_lost.c
 +    long	wtime;	    /* don't use "time", MIPS cannot handle it */
 +    int		tb_change_cnt;
 +{
-+    int c;
++    lio_stream_t fd = file_get_stream(stdin);
++    int c, ret;
 +    uint64_t timeout;
 +    int n = 0;
 +
@@ -266,8 +267,8 @@ Index: vim72/src/os_lost.c
 +    }
 +
 +    do {
-+	c = fgetc(stdin);
-+	if (c && c != EOF) {
++	ret = lio_readf(fd, 0, 1, &c, LIO_REQ_FILEPOS);
++	if (ret > 0) {
 +	    n++;
 +	    *buf = (char_u) c;
 +	    buf++;
@@ -305,7 +306,7 @@ Index: vim72/src/os_lost.h
 ===================================================================
 --- /dev/null
 +++ vim72/src/os_lost.h
-@@ -0,0 +1,48 @@
+@@ -0,0 +1,50 @@
 +/* vi:set ts=8 sts=4 sw=4:
 + *
 + * VIM - Vi IMproved	by Bram Moolenaar
@@ -315,11 +316,13 @@ Index: vim72/src/os_lost.h
 + * See README.txt for an overview of the Vim source code.
 + */
 +
-+#include "vim.h"
-+
 +#include <stdlib.h>
++#include <string.h>
 +#include <sys/stat.h>
++#include <sys/types.h>
 +#include <fcntl.h>
++
++#include "vim.h"
 +
 +#define HAVE_PUTENV
 +
@@ -362,7 +365,7 @@ Index: vim72/src/vim.h
  # define __ARGS(x)  x
  #endif
  
-+#ifdef __LOST__
++#ifdef __TYNDUR__
 +# include "os_lost.h"
 +# define __ARGS(x)  x
 +#endif
@@ -380,11 +383,11 @@ Index: vim72/src/term.c
  
 +
 +
-+# if defined(__LOST__)
++# if defined(__TYNDUR__)
 +/*
 + * LOST terminal, default for tyndur
 + */
-+    {(int)KS_NAME,	"lost"},
++    {(int)KS_NAME,	"tyndur"},
 +    {(int)KS_CE,	"\033[K"},
 +    {(int)KS_CL,	"\033[H\033[2J"},
 +    {(int)KS_CD,	"\033J"},
@@ -425,7 +428,7 @@ Index: vim72/src/term.c
  # endif
  
 -# if defined(DEBUG) || defined(ALL_BUILTIN_TCAPS)
-+# if defined(DEBUG) || defined(ALL_BUILTIN_TCAPS) || defined(__LOST__)
++# if defined(DEBUG) || defined(ALL_BUILTIN_TCAPS) || defined(__TYNDUR__)
  /*
   * for debugging
   */
@@ -433,7 +436,7 @@ Index: vim72/src/term.c
  # define DEFAULT_TERM	(char_u *)"beos-ansi"
  #endif
  
-+#ifdef __LOST__
++#ifdef __TYNDUR__
 +# undef DEFAULT_TERM
 +# define DEFAULT_TERM	(char_u *)"ansi"
 +#endif
@@ -449,7 +452,7 @@ Index: vim72/src/misc1.c
  	    }
  	    else
  		++beep_count;
-+#elif __LOST__
++#elif __TYNDUR__
 +            /* Kein Gepiepse unter tyndur */
  #else
  	    out_char(BELL);

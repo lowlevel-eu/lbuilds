@@ -8,7 +8,7 @@ Index: vim72/src/Make_lost.mak
 --- /dev/null
 +++ vim72/src/Make_lost.mak
 @@ -0,0 +1,65 @@
-+CC = i386-pc-lost-gcc
++CC = i386-pc-tyndur-gcc
 +CFLAGS = -I proto -DFEAT_TINY
 +
 +OUTDIR = lostout
