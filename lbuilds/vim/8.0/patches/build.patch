@@ -1,0 +1,90 @@
+Index: src/vim80/src/if_cscope.c
+===================================================================
+--- src.orig/vim80/src/if_cscope.c
++++ src/vim80/src/if_cscope.c
+@@ -963,7 +963,7 @@ err_closing:
+ 	    PERROR(_("cs_create_connection setpgid failed"));
+ #  endif
+ # endif
+-	if (execl("/bin/sh", "sh", "-c", cmd, (char *)NULL) == -1)
++	if (1 /*execl("/bin/sh", "sh", "-c", cmd, (char *)NULL) == -1*/)
+ 	    PERROR(_("cs_create_connection exec failed"));
+ 
+ 	exit(127);
+Index: src/vim80/src/json.c
+===================================================================
+--- src.orig/vim80/src/json.c
++++ src/vim80/src/json.c
+@@ -316,8 +316,10 @@ json_encode_item(garray_T *gap, typval_T
+ # if defined(HAVE_MATH_H)
+ 	    if (isnan(val->vval.v_float))
+ 		ga_concat(gap, (char_u *)"NaN");
++#ifndef __TYNDUR__
+ 	    else if (isinf(val->vval.v_float))
+ 		ga_concat(gap, (char_u *)"Infinity");
++#endif
+ 	    else
+ # endif
+ 	    {
+Index: src/vim80/src/message.c
+===================================================================
+--- src.orig/vim80/src/message.c
++++ src/vim80/src/message.c
+@@ -4943,6 +4943,7 @@ vim_vsnprintf(
+ 			    str_arg_l = 3;
+ 			    zero_padding = 0;
+ 			}
++#ifndef __TYNDUR__
+ 			else if (isinf(f))
+ 			{
+ 			    STRCPY(tmp, infinity_str(f > 0.0, fmt_spec,
+@@ -4950,6 +4951,7 @@ vim_vsnprintf(
+ 			    str_arg_l = STRLEN(tmp);
+ 			    zero_padding = 0;
+ 			}
++#endif
+ 			else
+                         {
+ 			    /* Regular float number */
+Index: src/vim80/src/misc1.c
+===================================================================
+--- src.orig/vim80/src/misc1.c
++++ src/vim80/src/misc1.c
+@@ -4491,7 +4491,7 @@ get_env_name(
+     expand_T	*xp UNUSED,
+     int		idx)
+ {
+-# if defined(AMIGA) || defined(__MRC__) || defined(__SC__)
++# if defined(AMIGA) || defined(__MRC__) || defined(__SC__) || defined(__TYNDUR__)
+     /*
+      * No environ[] on the Amiga and on the Mac (using MPW).
+      */
+Index: src/vim80/src/memfile.c
+===================================================================
+--- src.orig/vim80/src/memfile.c
++++ src/vim80/src/memfile.c
+@@ -613,7 +613,7 @@ mf_sync(memfile_T *mfp, int flags)
+ 	    /* OpenNT is strictly POSIX (Benzinger) */
+ 	    /* Tandem/Himalaya NSK-OSS doesn't have sync() */
+ 	    /* No sync() on Stratus VOS */
+-# if defined(__OPENNT) || defined(__TANDEM) || defined(__VOS__)
++# if defined(__OPENNT) || defined(__TANDEM) || defined(__VOS__) || defined(__TYNDUR__)
+ 	    fflush(NULL);
+ # else
+ 	    sync();
+Index: src/vim80/src/vim.h
+===================================================================
+--- src.orig/vim80/src/vim.h
++++ src/vim80/src/vim.h
+@@ -9,6 +9,11 @@
+ #ifndef VIM__H
+ # define VIM__H
+ 
++#ifdef __TYNDUR__
++/* Konflikt mit der libc... */
++#define list_insert vim_list_insert
++#endif
++
+ /* use fastcall for Borland, when compiling for Win32 */
+ #if defined(__BORLANDC__) && defined(WIN32) && !defined(DEBUG)
+ #if defined(FEAT_PERL) || \
